@@ -8,6 +8,8 @@ Settings::Settings(QObject *parent) : QObject(parent)
     m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
     //QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
     //Коментарий
+    // Коментарий 2
+
 }
 
 void Settings::saveSettings()
