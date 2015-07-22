@@ -7,6 +7,7 @@ Settings::Settings(QObject *parent) : QObject(parent)
     qDebug() << "App path : " << qApp->applicationDirPath(); // возвращает путь к папке с исполняемым файлом
     m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
     //QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+    //Коментарий
 }
 
 void Settings::saveSettings()
