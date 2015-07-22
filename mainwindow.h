@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "settings.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -17,6 +19,11 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    ///
+    /// \brief settings конфигурация переменных параметров из ini-файла
+    ///
+    Settings settings;
+
 };
 
 #endif // MAINWINDOW_H
