@@ -24,6 +24,16 @@ private:
     ///
     Settings settings;
 
+private slots:
+    void pressbutton();
+    // слоты вызываются при клике на радиокнопки выбора устройстваы
+    void click_radioButton_Simulator();
+    void click_radioButton_Battery_9ER20P_20();
+    void click_radioButton_Battery_9ER20P_20_v2();
+    void click_radioButton_Battery_9ER14PS_24();
+    void click_radioButton_Battery_9ER14PS_24_v2();
+    void click_radioButton_Battery_9ER20P_28();
+    void click_radioButton_Battery_9ER14P_24();
 };
 
 #endif // MAINWINDOW_H

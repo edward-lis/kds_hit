@@ -14,9 +14,28 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    settings.cpp
+    settings.cpp \
+    battery.cpp
 
 HEADERS  += mainwindow.h \
-    settings.h
+    settings.h \
+    battery.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    batterydata.ui \
+    closedcircuitbattery.ui \
+    closedcircuitgroup.ui \
+    closedcircuitgroup20.ui \
+    closedcircuitgroup24.ui \
+    closedcircuitgroup28.ui \
+    comportwidget.ui \
+    depassivation.ui \
+    dialogchoosedevice.ui \
+    formcomport.ui \
+    insulationresistance.ui \
+    opencircuitbattery.ui \
+    opencircuitgroup.ui \
+    opencircuitgroup20.ui \
+    opencircuitgroup24.ui \
+    opencircuitgroup28.ui \
+    thermometer.ui
