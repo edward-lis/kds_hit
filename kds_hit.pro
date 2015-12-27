@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport printsupport
 
 TARGET = kds_hit
 TEMPLATE = app
@@ -15,11 +15,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    battery.cpp
+    battery.cpp \
+    comportwidget.cpp \
+    kds.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
-    battery.h
+    battery.h \
+    comportwidget.h \
+    kds.h
 
 FORMS    += mainwindow.ui \
     batterydata.ui \

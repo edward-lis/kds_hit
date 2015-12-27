@@ -1,15 +1,33 @@
 /* таки писать на двух языках или нет? */
 // точки измерения параметров имитатора батареи - уточнить в ини-файле
-// при старте заблокировать выбор батареи
+// при старте заблокировать выбор батареи. добавить в кдс ф-ию инициализации батареи.
 // сколько измерений изоляции УСХТИЛБ ? что значит поочерёдно?
+
+
+// Описание:
+// В ини-файле параметры конкретных батарей.
+// В зависимости от типа батареи - разный интерфейс в части кол-ва цепей и точек измерения параметров
+// Связь по последовательному порту происходит через объект Kds. Который, в свою очередь, использует объект comportwidget.
+// При нахождении в режиме главного окна периодически посылается пинг. При переключении в какой-нибудь режим диагностики пинг в главном окне отключается.
+// После первого пинга после отсутствия связи коробочка возвращает свой номер, который надо себе запомнить.
 
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QCloseEvent>
+#include <QDebug>
+#include <QMessageBox>
+#include <QStringList>
+#include <QTimer>
+#include <QByteArray>
+#include <QFileDialog>
+#include <QTextDocumentWriter>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "battery.h"
+#include "kds.h"
 
 ///
 /// \brief параметры конкретных типов батарей
@@ -19,12 +37,27 @@ Battery simulator, b_9ER20P_20, b_9ER20P_20_v2, b_9ER14PS_24, b_9ER14PS_24_v2, b
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settings(NULL)
+    settings(NULL),
+    kds(0)
 {
+    ui->setupUi(this);
+
     // загрузить конфигурационные установки и параметры батарей из ini-файла.
     // файл находится в том же каталоге, что и исполняемый.
     settings.loadSettings();
-    ui->setupUi(this);
+
+    // Добавление ярлыка в строку статуса
+    // create objects for the label
+    statusLabel = new QLabel(this);
+    // set text for the label
+    statusLabel->setText("Status Label");
+    ui->statusBar->addPermanentWidget(statusLabel,1);
+
+    initKds(); // первоначальная инициализация объекта КДС
+    // сигнал - передаём данные в объект кдс, который в свою очередь передаст в ком-порт
+    connect(this, SIGNAL(sendSerialData(quint8, QByteArray)), this->kds, SLOT(send_request(quint8, QByteArray)));
+    // по сигналу готовности данных примем их
+    connect(this->kds, SIGNAL(sendSerialReceivedData(quint8, QByteArray)), this, SLOT(getSerialDataReceived(quint8, QByteArray)));
 
     // для отладки уберём
     ui->groupBox_OpenBat->setVisible(false);
@@ -79,6 +112,22 @@ void MainWindow::pressbutton()
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::initKds()
+{
+    if(!this->kds)
+    {
+        this->kds = new Kds();
+    }
+    if(this->kds)
+    {
+/* !!!        this->kds->accum_type = UNDEFINED;
+        //qDebug() << this->kds->accum_type;
+        kds->battery_variant=BT_000;
+        kds->battery_date="________";
+        kds->battery_num="_________";*/
+    }
 }
 
 void MainWindow::click_radioButton_Battery_9ER14PS_24()
@@ -278,3 +327,78 @@ void MainWindow::click_radioButton_Simulator()
     ui->label_IsolationResistance_4->setText(simulator.isolation_resistance_4);
 }
 
+
+//перегруз события закрытия крестиком или Alt-F4
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    event->accept();
+    on_action_Exit_triggered();
+ }
+
+// нажат пункт меню Выход
+void MainWindow::on_action_Exit_triggered()
+{
+    //    delete report;// почему-то без этого при закрытии программки вывалилась ошибка закрытия приложения
+        // emit destroyed(); // отправить сигнал о закрытии (уничтожении) окна. но тогда надо к каждому окну приклеплять сигнал connect(this, SIGNAL(destroyed()), объект-окно, SLOT(close()));
+        // или так:
+        qApp->quit(); // qApp - это глобальный (доступный из любого места приложения) указатель на объект текущего приложения
+        // Слот quit() - определён в QCoreApplication и реализует выход из приложения с возвратом кода 0 (это код успешного завершения)
+        // http://qt-project.org/doc/qt-4.8/qcoreapplication.html#quit
+}
+
+// нажат пункт меню Порт
+void MainWindow::on_action_Port_triggered()
+{
+    if(!(this->comPortWidget))
+    {
+        this->comPortWidget = new ComPortWidget();  // Be sure to destroy you window somewhere
+        // сигнал - передача данных по последовательному порту, открытому в mainwiget.cpp
+        connect(this->kds, SIGNAL(sendSerialData(QByteArray)), this->comPortWidget, SLOT(procSerialDataTransfer(QByteArray)));
+        // по сигналу готовности данных примем их
+        connect(this->comPortWidget, SIGNAL(sendSerialReceivedData(QByteArray)), this->kds, SLOT(getSerialDataReceived(QByteArray)));
+    }
+    if(this->comPortWidget)
+    {
+        this->comPortWidget->show();
+    }
+}
+
+// приём данных из порта (для пинга в режиме ожидания в главном окне)
+void MainWindow::getSerialDataReceived(quint8 operation_code, QByteArray data)
+{
+    QByteArray keyword9("ALARM#"), keyword8("IDLE#OK");
+//    qDebug() << "mainwindow.cpp getSerialDataReceived(): Rx: " << data.toHex();
+    if(ping && (operation_code == 0x01)) // если приняли пинг, то
+    {
+        if(firstping)
+        {
+            sendSerialData(0x08, "IDLE#");
+            //firstping = false;
+            qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): FIRST IDLE SEND: ";
+        }
+        //!!!kds->online = true; // установим флаг онлайна
+        statusLabel->setText(tr("Связь установлена")); // и напишем про это
+    }
+    if(data == keyword9)// alarm
+    {
+        // кажется оно здесь не нужно, проверить!!!: alarm=true;
+        //timeout = false;
+        sendSerialData(0x08, "IDLE#");
+        qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): ALARM: " << data;
+        QMessageBox::critical(this, tr("Батарея неисправна"), tr("Напряжение на корпусе!"));
+        return;
+    }
+    if(data.indexOf(keyword8)>=0) // IDLE#OK стоп режима отработан
+    {
+/*!!!        kds->box_number=data.right(1).toInt();
+        insulResist->box_number=kds->box_number;
+        thermometer->box_number=kds->box_number;
+        openCircuitGroup->box_number=kds->box_number;
+        openCircuitBattery->box_number=kds->box_number;
+        closedCircuitGroup->box_number=kds->box_number;
+        closedCircuitBattery->box_number=kds->box_number;
+        depassivation->box_number=kds->box_number;
+        qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): FIRST IDLE RECEIVED: kds->box_number="<<kds->box_number;*/
+        firstping = false;
+    }
+}
