@@ -19,14 +19,16 @@ SOURCES += main.cpp\
     battery.cpp \
     comportwidget.cpp \
     kds.cpp \
-    uutbbinsulationresistance20.cpp
+    uutbbinsulationresistance20.cpp \
+    opencircuitgroup.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
     battery.h \
     comportwidget.h \
     kds.h \
-    uutbbinsulationresistance20.h
+    uutbbinsulationresistance20.h \
+    opencircuitgroup.h
 
 FORMS    += mainwindow.ui \
     batterydata.ui \
@@ -48,4 +50,5 @@ FORMS    += mainwindow.ui \
     thermometer.ui \
     uutbbinsulationresistance20.ui
 
-DISTFILES +=
+DISTFILES += \
+    kds_hit.ini
