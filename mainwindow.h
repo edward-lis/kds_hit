@@ -43,13 +43,15 @@ private:
     bool ping;          // признак режима пинга в главном окне (окно посылает/принимает пинговые посылки)
     bool firstping;     // признак первого пинга. после первого пинга после отсутствия связи коробочка возвращает свой номер, который надо себе запомнить
 
+    QTimer *timer;      ///< периодический таймер
+
 protected:
     //перегруз для закрытия
     virtual void closeEvent(QCloseEvent *e);
 
 private slots:
     void pressbutton();
-    // слоты вызываются при клике на радиокнопки выбора устройстваы
+    // слоты вызываются при клике на радиокнопки выбора устройства
     void click_radioButton_Simulator();
     void click_radioButton_Battery_9ER20P_20();
     void click_radioButton_Battery_9ER20P_20_v2();
@@ -57,11 +59,12 @@ private slots:
     void click_radioButton_Battery_9ER14PS_24_v2();
     void click_radioButton_Battery_9ER20P_28();
     void click_radioButton_Battery_9ER14P_24();
-    void on_action_Exit_triggered();                   // нажат пункт меню Выход
-    void on_action_Port_triggered();
+    void on_action_Exit_triggered();                        // нажат пункт меню Выход
+    void on_action_Port_triggered();                        ///< нажат пункт меню выбора порта
 
     void getSerialDataReceived(quint8 operation_code, QByteArray data); // ф-я, которая принимает данные из последовательного порта  (для пинга в режиме ожидания в главном окне)
 
+    void procPeriodicTimer(); ///< процедура периодического таймера
 
 signals:
     void sendSerialData(quint8 operation_code, const QByteArray &data); // сигнал передачи данных в последовательный порт.

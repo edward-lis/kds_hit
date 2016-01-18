@@ -17,6 +17,7 @@ public:
 
     QTextCodec *codec;              // кодек для строк для информационного обмена
     unsigned char nmc;              // номер-код проверяемого устройства (батарея, БИП, ...)
+    bool online;                    // КДС на связи, или не на связи
 
 signals:
     void sendSerialData(const QByteArray &data); // сигнал передачи данных в последовательный порт.

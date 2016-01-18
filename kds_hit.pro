@@ -11,19 +11,22 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport printsupport
 TARGET = kds_hit
 TEMPLATE = app
 
+CONFIG   += console
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
     battery.cpp \
     comportwidget.cpp \
-    kds.cpp
+    kds.cpp \
+    uutbbinsulationresistance20.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
     battery.h \
     comportwidget.h \
-    kds.h
+    kds.h \
+    uutbbinsulationresistance20.h
 
 FORMS    += mainwindow.ui \
     batterydata.ui \
@@ -42,4 +45,7 @@ FORMS    += mainwindow.ui \
     opencircuitgroup20.ui \
     opencircuitgroup24.ui \
     opencircuitgroup28.ui \
-    thermometer.ui
+    thermometer.ui \
+    uutbbinsulationresistance20.ui
+
+DISTFILES +=

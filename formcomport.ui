@@ -10,47 +10,40 @@
     <x>0</x>
     <y>0</y>
     <width>203</width>
-    <height>236</height>
+    <height>192</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Port Settings</string>
   </property>
-  <widget class="QLabel" name="portsLabel">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>71</width>
-     <height>31</height>
+     <width>77</width>
+     <height>70</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Available ports</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="portBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>69</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="controlButton">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>90</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Open</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="portsLabel">
+      <property name="text">
+       <string>Available ports</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="portBox"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="controlButton">
+      <property name="text">
+       <string>Open</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

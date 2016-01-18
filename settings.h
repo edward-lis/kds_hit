@@ -12,10 +12,6 @@ class Settings : public QObject
     Q_OBJECT
 public:
     explicit Settings(QObject *parent = 0);
-    /**
-     * @brief loadSettings загрузить конфиг из ini-файла
-     */
-    void loadSettings();
     void saveSettings();
 
     QString testString; // тестовая строка
@@ -28,6 +24,10 @@ private:
 signals:
 
 public slots:
+    /**
+     * @brief loadSettings загрузить конфиг из ini-файла
+     */
+    void loadSettings();
 };
 
 #endif // SETTINGS_H
