@@ -2,11 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QLabel>
-
-#include "settings.h"
-#include "comportwidget.h"
-#include "kds.h"
+#include <QItemDelegate>
+#include <QStandardItemModel>
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+#include <QTime>
 
 namespace Ui {
 class MainWindow;
@@ -22,53 +22,43 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    ///
-    /// \brief settings конфигурация переменных параметров из ini-файла
-    ///
-    Settings settings;
-
-    // Текст в строке статуса
-    QLabel *statusLabel;
-
-    // Окно выбора последовательного порта, и чтения/записи в порт
-    ComPortWidget *comPortWidget;
-    // Объект - текущая проверка батареи
-    Kds *kds;
-
-    // Инициализация объекта КДС
-    void initKds();
-    // Настройка объекта КДС
-    void setupKds();
-
-    bool ping;          // признак режима пинга в главном окне (окно посылает/принимает пинговые посылки)
-    bool firstping;     // признак первого пинга. после первого пинга после отсутствия связи коробочка возвращает свой номер, который надо себе запомнить
-
-    QTimer *timer;      ///< периодический таймер
-
-protected:
-    //перегруз для закрытия
-    virtual void closeEvent(QCloseEvent *e);
-
-private slots:
-    void pressbutton();
-    // слоты вызываются при клике на радиокнопки выбора устройства
-    void click_radioButton_Simulator();
-    void click_radioButton_Battery_9ER20P_20();
-    void click_radioButton_Battery_9ER20P_20_v2();
-    void click_radioButton_Battery_9ER14PS_24();
-    void click_radioButton_Battery_9ER14PS_24_v2();
-    void click_radioButton_Battery_9ER20P_28();
-    void click_radioButton_Battery_9ER14P_24();
-    void on_action_Exit_triggered();                        // нажат пункт меню Выход
-    void on_action_Port_triggered();                        ///< нажат пункт меню выбора порта
-
-    void getSerialDataReceived(quint8 operation_code, QByteArray data); // ф-я, которая принимает данные из последовательного порта  (для пинга в режиме ожидания в главном окне)
-
-    void procPeriodicTimer(); ///< процедура периодического таймера
-
-signals:
-    void sendSerialData(quint8 operation_code, const QByteArray &data); // сигнал передачи данных в последовательный порт.
-
+    int iBatteryCurrentIndex;
+    int iDiagnosticModeCurrentIndex;
+    int iProgressBarAllSteps;
+    QString color;
+    QSerialPort *com;
+    void fillPortsInfo();
+    float paramVoltageOnTheHousing1;
+    float paramVoltageOnTheHousing2;
+    float paramInsulationResistance1;
+    float paramInsulationResistance2;
+    float paramInsulationResistance3;
+    float paramInsulationResistance4;
+    //float paramClosedCircuitVoltage;
+    //float paramClosedCircuitVoltage;
+    float paramClosedCircuitVoltage;
+public slots:
+    void ResetCheck();
+    void handleSelectionChangedBattery(int index);
+    void handleSelectionChangedDiagnosticMode(int index);
+    void CheckBatteryVoltageOnTheHousing(int index);
+    void CheckBatteryInsulationResistance(int index);
+    void CheckBatteryOpenCircuitVoltageGroup(int index);
+    void CheckBatteryClosedCircuitVoltageGroup(int index);
+    void CheckBatteryClosedCircuitVoltage(int index);
+    void CheckBatteryInsulationResistanceMeasuringBoardUUTBB(int index);
+    void CheckBatteryOpenCircuitVoltagePowerSupply(int index);
+    void CheckBatteryClosedCircuitVoltagePowerSupply(int index);
+    void CheckBattery();
+    void Log(QString message, QString color);
+    void setEnabled(bool flag);
+    void delay(int millisecondsToWait);
+    void progressBarSet(int iVal);
+    void progressBarSetMaximum();
+    void openCOMPort();
+    void closeCOMPort();
+    void writeData();
+    void readData();
 };
 
 #endif // MAINWINDOW_H

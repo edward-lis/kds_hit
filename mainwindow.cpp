@@ -1,152 +1,24 @@
-// точки измерения параметров имитатора батареи - уточнить в ини-файле
-// при старте заблокировать выбор батареи. добавить в кдс ф-ию инициализации батареи.
-
-// сколько измерений изоляции УСХТИЛБ ? что значит поочерёдно?
-//..!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//в последовательности проверок в приложении В отсутствует Напряжение разомкнутой цепи батареи (НРЦ) – UБНРЦ;
-
-//  Если значение НЗЦ батареи более 30,0 В, то проверка продолжается в автоматическом режиме. - чо это значит в случае, когда это последняя проверка?
-
-// подумать над остановкой автоматической проверки в любой точке циклограммы.
-// сохранение циклограммы, возобновление циклограммы с точки останова.
-// соответственно сохранение/возобовление состояния органов и контролов. отчёт и графики?
-// отчёт формировать на основе списка - лога действий.  объект - события, время, рез-т
-
-
-/*!
- * Описание:
- * В ини-файле параметры конкретных батарей.
- * В зависимости от типа батареи - разный интерфейс в части кол-ва цепей и точек измерения параметров
- * Связь по последовательному порту происходит через объект Kds. Который, в свою очередь, использует объект comportwidget.
- * При нахождении в режиме главного окна периодически посылается пинг. При переключении в какой-нибудь режим диагностики
- * пинг в главном окне отключается.
- * После первого пинга после отсутствия связи коробочка возвращает свой номер, который надо себе запомнить.
- *
- * Ctrl-R - перечитывает конфигурационный файл kds_hit.ini, который находится в том же каталоге, что и kds_hit.exe
- *
- * Глоссарий:
- * УУТББ - Унифицированное Устройство Телеметрии Бортовых Батарей
- * УСХТИЛБ - плата измерительная УУТББ
- *
- *
- *
-*/
-
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QCloseEvent>
-#include <QDebug>
-#include <QMessageBox>
-#include <QStringList>
-#include <QTimer>
-#include <QByteArray>
-#include <QFileDialog>
-#include <QTextDocumentWriter>
-#include <QShortcut>
-#include <QKeySequence>
-#include <QMessageBox>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "battery.h"
-#include "kds.h"
-
-///
-/// \brief параметры конкретных типов батарей
-///
-Battery simulator, b_9ER20P_20, b_9ER20P_20_v2, b_9ER14PS_24, b_9ER14PS_24_v2, b_9ER20P_28, b_9ER14P_24;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    settings(NULL),
-    kds(0)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    // загрузить конфигурационные установки и параметры батарей из ini-файла.
-    // файл находится в том же каталоге, что и исполняемый.
-    settings.loadSettings();
-
-    // по комбинации клавиш Ctrl-R перезагрузить ini-файл настроек settings.loadSettings();
-    QShortcut *reloadSettings = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this);
-    connect(reloadSettings, SIGNAL(activated()), &settings, SLOT(loadSettings()));
-    //reloadSettings->setContext(Qt::ShortcutContext::ApplicationShortcut);
-
-    // Добавление ярлыка в строку статуса
-    // create objects for the label
-    statusLabel = new QLabel(this);
-    // set text for the label
-    statusLabel->setText("Status Label");
-    ui->statusBar->addPermanentWidget(statusLabel,1);
-
-    initKds(); // первоначальная инициализация объекта КДС
-    // сигнал - передаём данные в объект кдс, который в свою очередь передаст в ком-порт
-    connect(this, SIGNAL(sendSerialData(quint8, QByteArray)), this->kds, SLOT(send_request(quint8, QByteArray)));
-    // по сигналу готовности данных примем их
-    connect(this->kds, SIGNAL(sendSerialReceivedData(quint8, QByteArray)), this, SLOT(getSerialDataReceived(quint8, QByteArray)));
-
-    //timer
-    timer = new QTimer(this);
-    timer->setInterval(500); // запуск периодического таймера в полсекунды
-    connect(this->timer, SIGNAL(timeout()), this, SLOT(procPeriodicTimer()));
-    timer->start();
-
-    ping = true;
-    //alarm=false;
-
-    // для отладки уберём (!!!) на главном экране группа показа напряжения разомкнутой цепи батареи
-    //ui->groupBox_OpenBat->setVisible(false);
-    // при выборе имитатора или вторых версий двух батарей - подсветить дополнительные радиокнопки выбора проверок.
-    connect(ui->radioButton_Simulator, SIGNAL(toggled(bool)), ui->radioButton_InsulateUUTB, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Simulator, SIGNAL(toggled(bool)), ui->radioButton_OpenCircuitPowerUnit, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Simulator, SIGNAL(toggled(bool)), ui->radioButton_ClosedCircuitPowerUnit, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER20P_20_v2, SIGNAL(toggled(bool)), ui->radioButton_InsulateUUTB, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER20P_20_v2, SIGNAL(toggled(bool)), ui->radioButton_OpenCircuitPowerUnit, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER20P_20_v2, SIGNAL(toggled(bool)), ui->radioButton_ClosedCircuitPowerUnit, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER14PS_24_v2, SIGNAL(toggled(bool)), ui->radioButton_InsulateUUTB, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER14PS_24_v2, SIGNAL(toggled(bool)), ui->radioButton_OpenCircuitPowerUnit, SLOT(setEnabled(bool)));
-    connect(ui->radioButton_Battery_9ER14PS_24_v2, SIGNAL(toggled(bool)), ui->radioButton_ClosedCircuitPowerUnit, SLOT(setEnabled(bool)));
-
-
-    //спрятать на формате лишние электро-цепи
-    connect(ui->radioButton_Simulator, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Simulator()));
-    connect(ui->radioButton_Battery_9ER20P_20, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER20P_20()));
-    connect(ui->radioButton_Battery_9ER20P_20_v2, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER20P_20_v2()));
-    connect(ui->radioButton_Battery_9ER14PS_24, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER14PS_24()));
-    connect(ui->radioButton_Battery_9ER14PS_24_v2, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER14PS_24_v2()));
-    connect(ui->radioButton_Battery_9ER14P_24, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER14P_24()));
-    connect(ui->radioButton_Battery_9ER20P_28, SIGNAL(clicked(bool)), this, SLOT(click_radioButton_Battery_9ER20P_28()));
-
-    emit ui->radioButton_Simulator->click(); // кликнем радио-кнопкой, чтобы автоматом перерисовался интерфейс
-
-    /*
-    setWindowTitle(tr("Hello world!!!"));
-    setMinimumSize(200, 80);
-
-    QLabel * plb = new QLabel(tr("Test"), this);
-    plb->setGeometry(20, 20, 80, 24);
-
-    QLineEdit * ple = new QLineEdit(this);
-    ple->setGeometry(110, 20, 80, 24);
-
-    QPushButton * ppb = new QPushButton(tr("Ok"), this);
-    ppb->setGeometry(20, 50, 80, 24);
-
-    //=========
-    QPushButton *btn = new QPushButton(this);
-        QVBoxLayout *vbox = new QVBoxLayout(this);
-        vbox->addWidget(btn);
-        connect(btn, SIGNAL(clicked()), this, SLOT(pressbutton()));*/
-}
-// тестовая ф-ия, нахрен не нужна
-void MainWindow::pressbutton()
-{
-    QLineEdit *le = new QLineEdit(this);
-    le->setText("Hello");
-    le->show();
+    iBatteryCurrentIndex = 0;
+    iDiagnosticModeCurrentIndex = 0;
+    ResetCheck();
+    fillPortsInfo();
+    com = new QSerialPort(this);
+    connect(ui->btnCOMPortConnect, SIGNAL(clicked(bool)), this, SLOT(openCOMPort()));
+    connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), this, SLOT(closeCOMPort()));
+    connect(ui->btnCOMPortReadData, SIGNAL(clicked(bool)), this, SLOT(readData()));
+    connect(ui->btnCOMPortSendCommand, SIGNAL(clicked(bool)), this, SLOT(writeData()));
+    connect(ui->btnStartCheck, SIGNAL(clicked()), this, SLOT(CheckBattery()));
+    connect(ui->comboBoxBatteryList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedBattery(int)));
+    connect(ui->comboBoxDiagnosticModeList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedDiagnosticMode(int)));
+    connect(ui->menuReset, SIGNAL(triggered(bool)), this , SLOT(ResetCheck()));
 }
 
 MainWindow::~MainWindow()
@@ -154,693 +26,762 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::initKds()
+/*
+ * Прогресс бар шаг вперед
+ */
+void MainWindow::progressBarSet(int iVal)
 {
-    if(!this->kds)
-    {
-        this->kds = new Kds();
+    ui->progressBar->setValue(ui->progressBar->value()+iVal);
+}
+
+/*
+ * Прогресс бар установка максимума
+ */
+void MainWindow::progressBarSetMaximum()
+{
+    ui->progressBar->setValue(0);
+    iProgressBarAllSteps = 0;
+    switch (iBatteryCurrentIndex) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        Log(tr("max= %1").arg(iProgressBarAllSteps), "def");
+        break;
+    case 2: //9ER20P-20
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 4;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 20;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 60;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 4;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 20;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 60;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    case 4: //9ER20P-28
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 4;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 28;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 84;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    case 5: //9ER14P-24
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 24;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 72;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    case 6: //9ER14PS-24
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 24;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 72;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxInsulationResistance->isChecked())
+            iProgressBarAllSteps += 2;
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 24;
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            iProgressBarAllSteps += 72;
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+            iProgressBarAllSteps += 1;
+        break;
+    default:
+        break;
     }
-    if(this->kds)
+    ui->progressBar->setMaximum(iProgressBarAllSteps);
+}
+
+/*
+ * COM Порт получения списка портов
+ */
+void MainWindow::fillPortsInfo()
+{
+    ui->comboBoxCOMPort->clear();
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
-/* !!!        this->kds->accum_type = UNDEFINED;
-        //qDebug() << this->kds->accum_type;
-        kds->battery_variant=BT_000;
-        kds->battery_date="________";
-        kds->battery_num="_________";*/
+        QStringList list;
+        list << info.portName();
+        ui->comboBoxCOMPort->addItems(list);
     }
 }
 
-void MainWindow::procPeriodicTimer()
+/*
+ * COM Порт установка соединения
+ */
+void MainWindow::openCOMPort()
 {
-    QDateTime dt = QDateTime::currentDateTime();
-    if(ping) // если режим пинга (простоя)
-    {
-        if(!kds->online) // если нет связи, то
-        {
-            //statusLabel->setText(dt.toString("hh:mm:ss"));
-            statusLabel->setText("Нет связи"); // напишем нет связи
-            firstping = true;
+    com->setPortName(ui->comboBoxCOMPort->currentText());
+    com->setBaudRate(QSerialPort::Baud115200);
+    com->setDataBits(QSerialPort::Data8);
+    com->setParity(QSerialPort::NoParity);
+    com->setStopBits(QSerialPort::OneStop);
+    com->setFlowControl(QSerialPort::NoFlowControl);
+    if (com->open(QIODevice::ReadWrite)) {
+        setEnabled(true);
+        Log(tr("[COM Порт] - Соединение установлено на порт %1.").arg(ui->comboBoxCOMPort->currentText()), "green");
+        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+            if (info.portName() == ui->comboBoxCOMPort->currentText()) {
+                Log(tr("[COM Порт] - Описание: %1.").arg(info.description()), "blue");
+            }
         }
-        sendSerialData(0x01, "PING"); // пошлём пинг
-        kds->online = false; // сбросим флаг онлайна
-
-    }
-}
-void MainWindow::click_radioButton_Battery_9ER14PS_24()
-{
-    ui->label_CloseGroup_28->hide();
-    ui->label_CloseGroup_27->hide();
-    ui->label_CloseGroup_26->hide();
-    ui->label_CloseGroup_25->hide();
-    ui->label_CloseGroup_24->show();
-    ui->label_CloseGroup_23->show();
-    ui->label_CloseGroup_22->show();
-    ui->label_CloseGroup_21->show();
-
-    ui->label_OpenGroup_28->hide();
-    ui->label_OpenGroup_27->hide();
-    ui->label_OpenGroup_26->hide();
-    ui->label_OpenGroup_25->hide();
-    ui->label_OpenGroup_24->show();
-    ui->label_OpenGroup_23->show();
-    ui->label_OpenGroup_22->show();
-    ui->label_OpenGroup_21->show();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER14PS_24.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER14PS_24.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER14PS_24.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER14PS_24.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER14PS_24.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER14PS_24.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER14PS_24.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER14PS_24.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER14PS_24.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER14PS_24.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER14PS_24.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER14PS_24.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER14PS_24.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER14PS_24.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER14PS_24.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER14PS_24.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER14PS_24.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER14PS_24.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER14PS_24.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER14PS_24.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER14PS_24.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER14PS_24.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER14PS_24.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER14PS_24.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER14PS_24.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER14PS_24.opencircuitgroup_20);
-    ui->label_OpenGroup_21->setText(b_9ER14PS_24.opencircuitgroup_21);
-    ui->label_OpenGroup_22->setText(b_9ER14PS_24.opencircuitgroup_22);
-    ui->label_OpenGroup_23->setText(b_9ER14PS_24.opencircuitgroup_23);
-    ui->label_OpenGroup_24->setText(b_9ER14PS_24.opencircuitgroup_24);
-
-    ui->label_CloseGroup_1->setText(b_9ER14PS_24.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER14PS_24.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER14PS_24.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER14PS_24.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER14PS_24.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER14PS_24.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER14PS_24.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER14PS_24.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER14PS_24.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER14PS_24.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER14PS_24.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER14PS_24.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER14PS_24.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER14PS_24.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER14PS_24.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER14PS_24.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER14PS_24.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER14PS_24.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER14PS_24.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER14PS_24.opencircuitgroup_20);
-    ui->label_CloseGroup_21->setText(b_9ER14PS_24.opencircuitgroup_21);
-    ui->label_CloseGroup_22->setText(b_9ER14PS_24.opencircuitgroup_22);
-    ui->label_CloseGroup_23->setText(b_9ER14PS_24.opencircuitgroup_23);
-    ui->label_CloseGroup_24->setText(b_9ER14PS_24.opencircuitgroup_24);
-
-    ui->label_CloseBat->setText(b_9ER14PS_24.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER14PS_24.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Battery_9ER14PS_24_v2()
-{
-    ui->label_CloseGroup_28->hide();
-    ui->label_CloseGroup_27->hide();
-    ui->label_CloseGroup_26->hide();
-    ui->label_CloseGroup_25->hide();
-    ui->label_CloseGroup_24->show();
-    ui->label_CloseGroup_23->show();
-    ui->label_CloseGroup_22->show();
-    ui->label_CloseGroup_21->show();
-
-    ui->label_OpenGroup_28->hide();
-    ui->label_OpenGroup_27->hide();
-    ui->label_OpenGroup_26->hide();
-    ui->label_OpenGroup_25->hide();
-    ui->label_OpenGroup_24->show();
-    ui->label_OpenGroup_23->show();
-    ui->label_OpenGroup_22->show();
-    ui->label_OpenGroup_21->show();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER14PS_24_v2.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER14PS_24_v2.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER14PS_24_v2.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER14PS_24_v2.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER14PS_24_v2.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER14PS_24_v2.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER14PS_24_v2.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER14PS_24_v2.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER14PS_24_v2.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER14PS_24_v2.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER14PS_24_v2.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER14PS_24_v2.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER14PS_24_v2.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER14PS_24_v2.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER14PS_24_v2.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER14PS_24_v2.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER14PS_24_v2.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER14PS_24_v2.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER14PS_24_v2.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER14PS_24_v2.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER14PS_24_v2.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER14PS_24_v2.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER14PS_24_v2.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER14PS_24_v2.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER14PS_24_v2.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER14PS_24_v2.opencircuitgroup_20);
-    ui->label_OpenGroup_21->setText(b_9ER14PS_24_v2.opencircuitgroup_21);
-    ui->label_OpenGroup_22->setText(b_9ER14PS_24_v2.opencircuitgroup_22);
-    ui->label_OpenGroup_23->setText(b_9ER14PS_24_v2.opencircuitgroup_23);
-    ui->label_OpenGroup_24->setText(b_9ER14PS_24_v2.opencircuitgroup_24);
-
-    ui->label_CloseGroup_1->setText(b_9ER14PS_24_v2.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER14PS_24_v2.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER14PS_24_v2.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER14PS_24_v2.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER14PS_24_v2.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER14PS_24_v2.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER14PS_24_v2.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER14PS_24_v2.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER14PS_24_v2.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER14PS_24_v2.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER14PS_24_v2.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER14PS_24_v2.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER14PS_24_v2.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER14PS_24_v2.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER14PS_24_v2.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER14PS_24_v2.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER14PS_24_v2.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER14PS_24_v2.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER14PS_24_v2.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER14PS_24_v2.opencircuitgroup_20);
-    ui->label_CloseGroup_21->setText(b_9ER14PS_24_v2.opencircuitgroup_21);
-    ui->label_CloseGroup_22->setText(b_9ER14PS_24_v2.opencircuitgroup_22);
-    ui->label_CloseGroup_23->setText(b_9ER14PS_24_v2.opencircuitgroup_23);
-    ui->label_CloseGroup_24->setText(b_9ER14PS_24_v2.opencircuitgroup_24);
-
-    ui->label_CloseBat->setText(b_9ER14PS_24_v2.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER14PS_24_v2.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Battery_9ER14P_24()
-{
-    ui->label_CloseGroup_28->hide();
-    ui->label_CloseGroup_27->hide();
-    ui->label_CloseGroup_26->hide();
-    ui->label_CloseGroup_25->hide();
-    ui->label_CloseGroup_24->show();
-    ui->label_CloseGroup_23->show();
-    ui->label_CloseGroup_22->show();
-    ui->label_CloseGroup_21->show();
-
-    ui->label_OpenGroup_28->hide();
-    ui->label_OpenGroup_27->hide();
-    ui->label_OpenGroup_26->hide();
-    ui->label_OpenGroup_25->hide();
-    ui->label_OpenGroup_24->show();
-    ui->label_OpenGroup_23->show();
-    ui->label_OpenGroup_22->show();
-    ui->label_OpenGroup_21->show();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER14P_24.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER14P_24.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER14P_24.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER14P_24.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER14P_24.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER14P_24.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER14P_24.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER14P_24.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER14P_24.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER14P_24.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER14P_24.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER14P_24.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER14P_24.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER14P_24.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER14P_24.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER14P_24.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER14P_24.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER14P_24.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER14P_24.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER14P_24.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER14P_24.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER14P_24.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER14P_24.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER14P_24.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER14P_24.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER14P_24.opencircuitgroup_20);
-    ui->label_OpenGroup_21->setText(b_9ER14P_24.opencircuitgroup_21);
-    ui->label_OpenGroup_22->setText(b_9ER14P_24.opencircuitgroup_22);
-    ui->label_OpenGroup_23->setText(b_9ER14P_24.opencircuitgroup_23);
-    ui->label_OpenGroup_24->setText(b_9ER14P_24.opencircuitgroup_24);
-
-    ui->label_CloseGroup_1->setText(b_9ER14P_24.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER14P_24.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER14P_24.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER14P_24.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER14P_24.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER14P_24.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER14P_24.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER14P_24.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER14P_24.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER14P_24.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER14P_24.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER14P_24.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER14P_24.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER14P_24.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER14P_24.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER14P_24.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER14P_24.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER14P_24.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER14P_24.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER14P_24.opencircuitgroup_20);
-    ui->label_CloseGroup_21->setText(b_9ER14P_24.opencircuitgroup_21);
-    ui->label_CloseGroup_22->setText(b_9ER14P_24.opencircuitgroup_22);
-    ui->label_CloseGroup_23->setText(b_9ER14P_24.opencircuitgroup_23);
-    ui->label_CloseGroup_24->setText(b_9ER14P_24.opencircuitgroup_24);
-
-    ui->label_CloseBat->setText(b_9ER14P_24.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER14P_24.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Battery_9ER20P_20()
-{
-    ui->label_CloseGroup_28->hide();
-    ui->label_CloseGroup_27->hide();
-    ui->label_CloseGroup_26->hide();
-    ui->label_CloseGroup_25->hide();
-    ui->label_CloseGroup_24->hide();
-    ui->label_CloseGroup_23->hide();
-    ui->label_CloseGroup_22->hide();
-    ui->label_CloseGroup_21->hide();
-
-    ui->label_OpenGroup_28->hide();
-    ui->label_OpenGroup_27->hide();
-    ui->label_OpenGroup_26->hide();
-    ui->label_OpenGroup_25->hide();
-    ui->label_OpenGroup_24->hide();
-    ui->label_OpenGroup_23->hide();
-    ui->label_OpenGroup_22->hide();
-    ui->label_OpenGroup_21->hide();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER20P_20.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER20P_20.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER20P_20.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER20P_20.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER20P_20.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER20P_20.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER20P_20.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER20P_20.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER20P_20.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER20P_20.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER20P_20.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER20P_20.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER20P_20.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER20P_20.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER20P_20.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER20P_20.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER20P_20.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER20P_20.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER20P_20.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER20P_20.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER20P_20.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER20P_20.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER20P_20.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER20P_20.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER20P_20.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER20P_20.opencircuitgroup_20);
-
-    ui->label_CloseGroup_1->setText(b_9ER20P_20.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER20P_20.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER20P_20.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER20P_20.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER20P_20.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER20P_20.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER20P_20.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER20P_20.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER20P_20.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER20P_20.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER20P_20.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER20P_20.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER20P_20.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER20P_20.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER20P_20.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER20P_20.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER20P_20.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER20P_20.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER20P_20.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER20P_20.opencircuitgroup_20);
-
-    ui->label_CloseBat->setText(b_9ER20P_20.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER20P_20.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Battery_9ER20P_20_v2()
-{
-    ui->label_CloseGroup_28->hide();
-    ui->label_CloseGroup_27->hide();
-    ui->label_CloseGroup_26->hide();
-    ui->label_CloseGroup_25->hide();
-    ui->label_CloseGroup_24->hide();
-    ui->label_CloseGroup_23->hide();
-    ui->label_CloseGroup_22->hide();
-    ui->label_CloseGroup_21->hide();
-
-    ui->label_OpenGroup_28->hide();
-    ui->label_OpenGroup_27->hide();
-    ui->label_OpenGroup_26->hide();
-    ui->label_OpenGroup_25->hide();
-    ui->label_OpenGroup_24->hide();
-    ui->label_OpenGroup_23->hide();
-    ui->label_OpenGroup_22->hide();
-    ui->label_OpenGroup_21->hide();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER20P_20_v2.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER20P_20_v2.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER20P_20_v2.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER20P_20_v2.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER20P_20_v2.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER20P_20_v2.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER20P_20_v2.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER20P_20_v2.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER20P_20_v2.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER20P_20_v2.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER20P_20_v2.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER20P_20_v2.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER20P_20_v2.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER20P_20_v2.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER20P_20_v2.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER20P_20_v2.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER20P_20_v2.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER20P_20_v2.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER20P_20_v2.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER20P_20_v2.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER20P_20_v2.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER20P_20_v2.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER20P_20_v2.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER20P_20_v2.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER20P_20_v2.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER20P_20_v2.opencircuitgroup_20);
-
-    ui->label_CloseGroup_1->setText(b_9ER20P_20_v2.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER20P_20_v2.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER20P_20_v2.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER20P_20_v2.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER20P_20_v2.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER20P_20_v2.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER20P_20_v2.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER20P_20_v2.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER20P_20_v2.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER20P_20_v2.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER20P_20_v2.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER20P_20_v2.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER20P_20_v2.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER20P_20_v2.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER20P_20_v2.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER20P_20_v2.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER20P_20_v2.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER20P_20_v2.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER20P_20_v2.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER20P_20_v2.opencircuitgroup_20);
-
-    ui->label_CloseBat->setText(b_9ER20P_20_v2.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER20P_20_v2.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Battery_9ER20P_28()
-{
-    ui->label_CloseGroup_28->show();
-    ui->label_CloseGroup_27->show();
-    ui->label_CloseGroup_26->show();
-    ui->label_CloseGroup_25->show();
-    ui->label_CloseGroup_24->show();
-    ui->label_CloseGroup_23->show();
-    ui->label_CloseGroup_22->show();
-    ui->label_CloseGroup_21->show();
-
-    ui->label_OpenGroup_28->show();
-    ui->label_OpenGroup_27->show();
-    ui->label_OpenGroup_26->show();
-    ui->label_OpenGroup_25->show();
-    ui->label_OpenGroup_24->show();
-    ui->label_OpenGroup_23->show();
-    ui->label_OpenGroup_22->show();
-    ui->label_OpenGroup_21->show();
-
-    ui->label_CorpusVoltage_1->setText(b_9ER20P_28.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(b_9ER20P_28.str_voltage_corpus_2);
-    ui->label_IsolationResistance_1->setText(b_9ER20P_28.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(b_9ER20P_28.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(b_9ER20P_28.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(b_9ER20P_28.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(b_9ER20P_28.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(b_9ER20P_28.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(b_9ER20P_28.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(b_9ER20P_28.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(b_9ER20P_28.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(b_9ER20P_28.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(b_9ER20P_28.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(b_9ER20P_28.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(b_9ER20P_28.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(b_9ER20P_28.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(b_9ER20P_28.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(b_9ER20P_28.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(b_9ER20P_28.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(b_9ER20P_28.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(b_9ER20P_28.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(b_9ER20P_28.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(b_9ER20P_28.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(b_9ER20P_28.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(b_9ER20P_28.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(b_9ER20P_28.opencircuitgroup_20);
-    ui->label_OpenGroup_21->setText(b_9ER20P_28.opencircuitgroup_21);
-    ui->label_OpenGroup_22->setText(b_9ER20P_28.opencircuitgroup_22);
-    ui->label_OpenGroup_23->setText(b_9ER20P_28.opencircuitgroup_23);
-    ui->label_OpenGroup_24->setText(b_9ER20P_28.opencircuitgroup_24);
-    ui->label_OpenGroup_25->setText(b_9ER20P_28.opencircuitgroup_25);
-    ui->label_OpenGroup_26->setText(b_9ER20P_28.opencircuitgroup_26);
-    ui->label_OpenGroup_27->setText(b_9ER20P_28.opencircuitgroup_27);
-    ui->label_OpenGroup_28->setText(b_9ER20P_28.opencircuitgroup_28);
-
-    ui->label_CloseGroup_1->setText(b_9ER20P_28.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(b_9ER20P_28.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(b_9ER20P_28.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(b_9ER20P_28.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(b_9ER20P_28.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(b_9ER20P_28.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(b_9ER20P_28.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(b_9ER20P_28.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(b_9ER20P_28.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(b_9ER20P_28.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(b_9ER20P_28.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(b_9ER20P_28.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(b_9ER20P_28.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(b_9ER20P_28.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(b_9ER20P_28.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(b_9ER20P_28.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(b_9ER20P_28.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(b_9ER20P_28.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(b_9ER20P_28.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(b_9ER20P_28.opencircuitgroup_20);
-    ui->label_CloseGroup_21->setText(b_9ER20P_28.opencircuitgroup_21);
-    ui->label_CloseGroup_22->setText(b_9ER20P_28.opencircuitgroup_22);
-    ui->label_CloseGroup_23->setText(b_9ER20P_28.opencircuitgroup_23);
-    ui->label_CloseGroup_24->setText(b_9ER20P_28.opencircuitgroup_24);
-    ui->label_CloseGroup_25->setText(b_9ER20P_28.opencircuitgroup_25);
-    ui->label_CloseGroup_26->setText(b_9ER20P_28.opencircuitgroup_26);
-    ui->label_CloseGroup_27->setText(b_9ER20P_28.opencircuitgroup_27);
-    ui->label_CloseGroup_28->setText(b_9ER20P_28.opencircuitgroup_28);
-
-    ui->label_CloseBat->setText(b_9ER20P_28.str_closecircuitbattery);
-    ui->label_OpenBat->setText(b_9ER20P_28.str_closecircuitbattery); // строка та же
-}
-
-void MainWindow::click_radioButton_Simulator()
-{
-    ui->label_CloseGroup_28->show();
-    ui->label_CloseGroup_27->show();
-    ui->label_CloseGroup_26->show();
-    ui->label_CloseGroup_25->show();
-    ui->label_CloseGroup_24->show();
-    ui->label_CloseGroup_23->show();
-    ui->label_CloseGroup_22->show();
-    ui->label_CloseGroup_21->show();
-
-    ui->label_OpenGroup_28->show();
-    ui->label_OpenGroup_27->show();
-    ui->label_OpenGroup_26->show();
-    ui->label_OpenGroup_25->show();
-    ui->label_OpenGroup_24->show();
-    ui->label_OpenGroup_23->show();
-    ui->label_OpenGroup_22->show();
-    ui->label_OpenGroup_21->show();
-
-    ui->label_CorpusVoltage_1->setText(simulator.str_voltage_corpus_1);
-    ui->label_CorpusVoltage_2->setText(simulator.str_voltage_corpus_2);
-
-    ui->label_IsolationResistance_1->setText(simulator.str_isolation_resistance_1);
-    ui->label_IsolationResistance_2->setText(simulator.str_isolation_resistance_2);
-    ui->label_IsolationResistance_3->setText(simulator.str_isolation_resistance_3);
-    ui->label_IsolationResistance_4->setText(simulator.str_isolation_resistance_4);
-
-    ui->label_OpenGroup_1->setText(simulator.opencircuitgroup_1);
-    ui->label_OpenGroup_2->setText(simulator.opencircuitgroup_2);
-    ui->label_OpenGroup_3->setText(simulator.opencircuitgroup_3);
-    ui->label_OpenGroup_4->setText(simulator.opencircuitgroup_4);
-    ui->label_OpenGroup_5->setText(simulator.opencircuitgroup_5);
-    ui->label_OpenGroup_6->setText(simulator.opencircuitgroup_6);
-    ui->label_OpenGroup_7->setText(simulator.opencircuitgroup_7);
-    ui->label_OpenGroup_8->setText(simulator.opencircuitgroup_8);
-    ui->label_OpenGroup_9->setText(simulator.opencircuitgroup_9);
-    ui->label_OpenGroup_10->setText(simulator.opencircuitgroup_10);
-    ui->label_OpenGroup_11->setText(simulator.opencircuitgroup_11);
-    ui->label_OpenGroup_12->setText(simulator.opencircuitgroup_12);
-    ui->label_OpenGroup_13->setText(simulator.opencircuitgroup_13);
-    ui->label_OpenGroup_14->setText(simulator.opencircuitgroup_14);
-    ui->label_OpenGroup_15->setText(simulator.opencircuitgroup_15);
-    ui->label_OpenGroup_16->setText(simulator.opencircuitgroup_16);
-    ui->label_OpenGroup_17->setText(simulator.opencircuitgroup_17);
-    ui->label_OpenGroup_18->setText(simulator.opencircuitgroup_18);
-    ui->label_OpenGroup_19->setText(simulator.opencircuitgroup_19);
-    ui->label_OpenGroup_20->setText(simulator.opencircuitgroup_20);
-    ui->label_OpenGroup_21->setText(simulator.opencircuitgroup_21);
-    ui->label_OpenGroup_22->setText(simulator.opencircuitgroup_22);
-    ui->label_OpenGroup_23->setText(simulator.opencircuitgroup_23);
-    ui->label_OpenGroup_24->setText(simulator.opencircuitgroup_24);
-    ui->label_OpenGroup_25->setText(simulator.opencircuitgroup_25);
-    ui->label_OpenGroup_26->setText(simulator.opencircuitgroup_26);
-    ui->label_OpenGroup_27->setText(simulator.opencircuitgroup_27);
-    ui->label_OpenGroup_28->setText(simulator.opencircuitgroup_28);
-
-    ui->label_CloseGroup_1->setText(simulator.opencircuitgroup_1);
-    ui->label_CloseGroup_2->setText(simulator.opencircuitgroup_2);
-    ui->label_CloseGroup_3->setText(simulator.opencircuitgroup_3);
-    ui->label_CloseGroup_4->setText(simulator.opencircuitgroup_4);
-    ui->label_CloseGroup_5->setText(simulator.opencircuitgroup_5);
-    ui->label_CloseGroup_6->setText(simulator.opencircuitgroup_6);
-    ui->label_CloseGroup_7->setText(simulator.opencircuitgroup_7);
-    ui->label_CloseGroup_8->setText(simulator.opencircuitgroup_8);
-    ui->label_CloseGroup_9->setText(simulator.opencircuitgroup_9);
-    ui->label_CloseGroup_10->setText(simulator.opencircuitgroup_10);
-    ui->label_CloseGroup_11->setText(simulator.opencircuitgroup_11);
-    ui->label_CloseGroup_12->setText(simulator.opencircuitgroup_12);
-    ui->label_CloseGroup_13->setText(simulator.opencircuitgroup_13);
-    ui->label_CloseGroup_14->setText(simulator.opencircuitgroup_14);
-    ui->label_CloseGroup_15->setText(simulator.opencircuitgroup_15);
-    ui->label_CloseGroup_16->setText(simulator.opencircuitgroup_16);
-    ui->label_CloseGroup_17->setText(simulator.opencircuitgroup_17);
-    ui->label_CloseGroup_18->setText(simulator.opencircuitgroup_18);
-    ui->label_CloseGroup_19->setText(simulator.opencircuitgroup_19);
-    ui->label_CloseGroup_20->setText(simulator.opencircuitgroup_20);
-    ui->label_CloseGroup_21->setText(simulator.opencircuitgroup_21);
-    ui->label_CloseGroup_22->setText(simulator.opencircuitgroup_22);
-    ui->label_CloseGroup_23->setText(simulator.opencircuitgroup_23);
-    ui->label_CloseGroup_24->setText(simulator.opencircuitgroup_24);
-    ui->label_CloseGroup_25->setText(simulator.opencircuitgroup_25);
-    ui->label_CloseGroup_26->setText(simulator.opencircuitgroup_26);
-    ui->label_CloseGroup_27->setText(simulator.opencircuitgroup_27);
-    ui->label_CloseGroup_28->setText(simulator.opencircuitgroup_28);
-
-    ui->label_CloseBat->setText(simulator.str_closecircuitbattery);
-    ui->label_OpenBat->setText(simulator.str_closecircuitbattery); // строка та же
-}
-
-
-//перегруз события закрытия крестиком или Alt-F4
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    qDebug()<<"closeEvent";
-    //event->accept(); by default?
-    event->ignore();
-    on_action_Exit_triggered();
- }
-
-// нажат пункт меню Выход
-void MainWindow::on_action_Exit_triggered()
-{
-    qDebug()<<"on_action_Exit_triggered";
-    // если отчёт не сформирован, то все данные будут утеряны. !!! сообщить в окошке.  завести логическую переменную - отчёт не формировался после какой-нить проверки.
-
-    int ret=QMessageBox::question(this, "Завершение работы программы", "Выйти из программы?", tr("Да"), tr("Нет"));// QMessageBox::Ok, QMessageBox::Cancel);
-    if(ret == 0) // да
-    {
-
-    //    delete report;// почему-то без этого при закрытии программки вывалилась ошибка закрытия приложения
-        // emit destroyed(); // отправить сигнал о закрытии (уничтожении) окна. но тогда надо к каждому окну приклеплять сигнал connect(this, SIGNAL(destroyed()), объект-окно, SLOT(close()));
-        // или так:
-        qApp->quit(); // qApp - это глобальный (доступный из любого места приложения) указатель на объект текущего приложения
-        // Слот quit() - определён в QCoreApplication и реализует выход из приложения с возвратом кода 0 (это код успешного завершения)
-        // http://qt-project.org/doc/qt-4.8/qcoreapplication.html#quit
-    }
-    if(ret == 1) // нет
-    {
-        qDebug()<<"continue work";
-    }
-
-}
-
-// нажат пункт меню Порт
-void MainWindow::on_action_Port_triggered()
-{
-    if(!(this->comPortWidget))
-    {
-        this->comPortWidget = new ComPortWidget();  // Be sure to destroy you window somewhere
-        // сигнал - передача данных по последовательному порту, открытому в mainwiget.cpp
-        connect(this->kds, SIGNAL(sendSerialData(QByteArray)), this->comPortWidget, SLOT(procSerialDataTransfer(QByteArray)));
-        // по сигналу готовности данных примем их
-        connect(this->comPortWidget, SIGNAL(sendSerialReceivedData(QByteArray)), this->kds, SLOT(getSerialDataReceived(QByteArray)));
-    }
-    if(this->comPortWidget)
-    {
-        this->comPortWidget->show();
+    } else {
+        Log("[COM Порт] - Ошибка устройства: "+com->errorString(), "red");
     }
 }
 
-// приём данных из порта (для пинга в режиме ожидания в главном окне)
-void MainWindow::getSerialDataReceived(quint8 operation_code, QByteArray data)
+/*
+ * COM Порт запись данных
+ */
+void MainWindow::writeData()
 {
-    QByteArray keyword9("ALARM#"), keyword8("IDLE#OK");
-//    qDebug() << "mainwindow.cpp getSerialDataReceived(): Rx: " << data.toHex();
-    if(ping && (operation_code == 0x01)) // если приняли пинг, то
-    {
-        if(firstping)
-        {
-            sendSerialData(0x08, "IDLE#");
-            //firstping = false;
-            qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): FIRST IDLE SEND: ";
+    QByteArray data;
+    data.append(ui->lineEditCOMPortCommand->text());
+    com->write(data);
+    Log("[COM Порт] - Отправка: "+ui->lineEditCOMPortCommand->text(), "green");
+}
+
+/*
+ * COM Порт чтение данных
+ */
+void MainWindow::readData()
+{
+    QByteArray data = com->readAll();
+    Log("[COM Порт] - Получение: "+QString(data), "blue");
+}
+
+/*
+ * COM Порт отключение
+ */
+void MainWindow::closeCOMPort()
+{
+    if (com->isOpen())
+        com->close();
+    setEnabled(false);
+    Log("[COM Порт] - Соединение разъединено.", "red");
+}
+
+/*
+ * Включение отключение элементов
+ */
+void MainWindow::setEnabled(bool flag)
+{
+    if(com->isOpen()) {
+        ui->btnCOMPortDisconnect->setEnabled(true);
+        ui->btnCOMPortConnect->setEnabled(false);
+        ui->comboBoxCOMPort->setEnabled(false);
+    } else {
+        ui->btnCOMPortDisconnect->setEnabled(false);
+        ui->btnCOMPortConnect->setEnabled(true);
+        ui->comboBoxCOMPort->setEnabled(true);
+    }
+
+    ui->comboBoxBatteryList->setEnabled(flag);
+    if(iBatteryCurrentIndex > 0) {
+        ui->dateEditBatteryBuild->setEnabled(flag);
+        ui->lineEditBatteryNumber->setEnabled(flag);
+        ui->comboBoxDiagnosticModeList->setEnabled(flag);
+        if(iDiagnosticModeCurrentIndex > 0) {
+            ui->checkBoxVoltageOnTheHousing->setEnabled(flag);
+            ui->checkBoxInsulationResistance->setEnabled(flag);
+            ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(flag);
+            ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(flag);
+            ui->checkBoxClosedCircuitVoltage->setEnabled(flag);
+            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(flag);
+            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(flag);
+            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(flag);
         }
-        //!!!kds->online = true; // установим флаг онлайна
-        statusLabel->setText(tr("Связь установлена")); // и напишем про это
+        ui->btnStartCheck->setEnabled(flag);
     }
-    if(data == keyword9)// alarm
+}
+
+/*
+ * Сброс параметров проверки
+ */
+void MainWindow::ResetCheck()
+{
+    ui->labelVoltageOnTheHousing1->clear();
+    ui->labelVoltageOnTheHousing2->clear();
+    ui->labelInsulationResistance1->clear();
+    ui->labelInsulationResistance2->clear();
+    ui->labelInsulationResistance3->clear();
+    ui->labelInsulationResistance4->clear();
+    ui->labelClosedCircuitVoltage->clear();
+}
+
+/*
+ * Выбор батареи
+ */
+void MainWindow::handleSelectionChangedBattery(int index)
+{
+    if (index > 0) {
+        ui->btnStartCheck->setEnabled(true);
+        ui->dateEditBatteryBuild->setEnabled(true);
+        ui->lineEditBatteryNumber->setEnabled(true);
+        ui->comboBoxDiagnosticModeList->setEnabled(true);
+        if (index == 1 or index == 3 or index == 7) {
+            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->show();
+            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->show();
+            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->show();
+        } else {
+            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->hide();
+            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->hide();
+            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->hide();
+        }
+    } else {
+        ui->btnStartCheck->setEnabled(false);
+        ui->dateEditBatteryBuild->setEnabled(false);
+        ui->lineEditBatteryNumber->setEnabled(false);
+        ui->comboBoxDiagnosticModeList->setEditable(false);
+    }
+
+    iBatteryCurrentIndex = QString::number(index).toInt();
+}
+
+/*
+ * Выбор режима диагностики
+ */
+void MainWindow::handleSelectionChangedDiagnosticMode(int index)
+{
+    if (index > 0) {
+        ui->checkBoxVoltageOnTheHousing->setEnabled(true);
+        ui->checkBoxInsulationResistance->setEnabled(true);
+        ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(true);
+        ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(true);
+        ui->checkBoxClosedCircuitVoltage->setEnabled(true);
+        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(true);
+        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(true);
+        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(true);
+    } else {
+        ui->checkBoxVoltageOnTheHousing->setChecked(true);
+        ui->checkBoxVoltageOnTheHousing->setEnabled(false);
+        ui->checkBoxInsulationResistance->setChecked(true);
+        ui->checkBoxInsulationResistance->setEnabled(false);
+        ui->checkBoxBatteryOpenCircuitVoltageGroup->setChecked(true);
+        ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(false);
+        ui->checkBoxBatteryClosedCircuitVoltageGroup->setChecked(true);
+        ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(false);
+        ui->checkBoxClosedCircuitVoltage->setChecked(true);
+        ui->checkBoxClosedCircuitVoltage->setEnabled(false);
+        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setChecked(true);
+        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(false);
+        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setChecked(true);
+        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(false);
+        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setChecked(true);
+        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(false);
+    }
+    iDiagnosticModeCurrentIndex = QString::number(index).toInt();
+}
+
+/*
+ * Запись событий в журнал
+ */
+void MainWindow::Log(QString message, QString color)
+{
+    QTime time = QTime::currentTime();
+    QString text = time.toString("hh:mm:ss.zzz") + " ";
+    text = (color == "green" or color == "red" or color == "blue") ? text + "<font color=\""+color+"\">"+message+"</font>" : text + message;
+    ui->EventLog->appendHtml(tr("%1").arg(text));
+}
+
+/*
+ * Общая проверка батареи
+ */
+void MainWindow::CheckBattery()
+{
+    Log("Начало проверки батареи: \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" дата производства \"<b>"+ui->dateEditBatteryBuild->text()+"\"</b> номер батареи \"<b>"+ui->lineEditBatteryNumber->text()+"</b>\".", "def");
+    setEnabled(false);
+    ui->btnStopCheck->setEnabled(true);
+    ui->btnCOMPortDisconnect->setEnabled(false);
+    progressBarSetMaximum();
+    if (ui->checkBoxVoltageOnTheHousing->isChecked())
+        CheckBatteryVoltageOnTheHousing(QString::number(iBatteryCurrentIndex).toInt());
+    if (ui->checkBoxInsulationResistance->isChecked())
+        CheckBatteryInsulationResistance(QString::number(iBatteryCurrentIndex).toInt());
+    if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+        CheckBatteryOpenCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
+    if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+        CheckBatteryClosedCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
+    if (ui->checkBoxClosedCircuitVoltage->isChecked())
+        CheckBatteryClosedCircuitVoltage(QString::number(iBatteryCurrentIndex).toInt());
+    if (iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 3 or iBatteryCurrentIndex == 7) {
+        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+            CheckBatteryInsulationResistanceMeasuringBoardUUTBB(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+            CheckBatteryOpenCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+            CheckBatteryClosedCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
+    }
+    Log("Проверка батареи \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" завершена.", "def");
+    setEnabled(true);
+    ui->btnStopCheck->setEnabled(false);
+    ui->btnBuildReport->setEnabled(true);
+    Log(tr("[Отладка] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "red");
+}
+
+/*
+ * Задержка в милисекундах
+ */
+void MainWindow::delay( int millisecondsToWait )
+{
+    QTime dieTime = QTime::currentTime().addMSecs( millisecondsToWait );
+    while( QTime::currentTime() < dieTime )
     {
-        // кажется оно здесь не нужно, проверить!!!: alarm=true;
-        //timeout = false;
-        sendSerialData(0x08, "IDLE#");
-        qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): ALARM: " << data;
-        QMessageBox::critical(this, tr("Батарея неисправна"), tr("Напряжение на корпусе!"));
-        return;
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
     }
-    if(data.indexOf(keyword8)>=0) // IDLE#OK стоп режима отработан
-    {
-/*!!!        kds->box_number=data.right(1).toInt();
-        insulResist->box_number=kds->box_number;
-        thermometer->box_number=kds->box_number;
-        openCircuitGroup->box_number=kds->box_number;
-        openCircuitBattery->box_number=kds->box_number;
-        closedCircuitGroup->box_number=kds->box_number;
-        closedCircuitBattery->box_number=kds->box_number;
-        depassivation->box_number=kds->box_number;
-        qDebug() << "\n\n MainWindow.cpp getSerialDataReceived(): FIRST IDLE RECEIVED: kds->box_number="<<kds->box_number;*/
-        firstping = false;
+}
+
+/*
+ * Напряжение на корпусе батареи
+ */
+void MainWindow::CheckBatteryVoltageOnTheHousing(int index)
+{
+    Log(" --- Напряжение на корпусе батареи.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2: //9ER20P-20
+
+        //если меньше 1В то не останавливаемся, больше 1В останавливаемся
+        delay(1000);
+        paramVoltageOnTheHousing1 = 0.9;
+        if (paramVoltageOnTheHousing1 < 1) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelVoltageOnTheHousing1->setText("1) "+QString::number(paramVoltageOnTheHousing1));
+        Log("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(paramVoltageOnTheHousing1)+"</b>", color);
+        progressBarSet(1);
+
+        delay(1000);
+        paramVoltageOnTheHousing2 = 1.1;
+        if (paramVoltageOnTheHousing2 < 1) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelVoltageOnTheHousing2->setText("2) "+QString::number(paramVoltageOnTheHousing2));
+        Log("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(paramVoltageOnTheHousing2)+"</b>", color);
+        progressBarSet(1);
+
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 4: //9ER20P-28
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 5: //9ER14P-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 6: //9ER14PS-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    default:
+        break;
     }
+    //ui->checkBoxVoltageOnTheHousing->setEnabled(false);
+}
+
+/*
+ * Сопротивление изоляции батареи
+ */
+void MainWindow::CheckBatteryInsulationResistance(int index)
+{
+    Log(" --- Сопротивление изоляции батареи.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2: //9ER20P-20
+
+        //более 20МОм не останавливаемся, меньше останавливаемся
+        delay(1000);
+        paramInsulationResistance1 = 20.3;
+        if (paramInsulationResistance1 >= 20) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelInsulationResistance1->setText("1) "+QString::number(paramInsulationResistance1));
+        Log("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(paramInsulationResistance1)+"</b>", color);
+        progressBarSet(1);
+
+        delay(1000);
+        paramInsulationResistance2 = 19.8;
+        if (paramInsulationResistance2 >= 20) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelInsulationResistance2->setText("2) "+QString::number(paramInsulationResistance2));
+        Log("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(paramInsulationResistance2)+"</b>", color);
+        progressBarSet(1);
+
+        delay(1000);
+        paramInsulationResistance3 = 13.2;
+        if (paramInsulationResistance3 >= 20) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelInsulationResistance3->setText("3) "+QString::number(paramInsulationResistance3));
+        Log("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>"+QString::number(paramInsulationResistance3)+"</b>", color);
+        progressBarSet(1);
+
+        delay(1000);
+        paramInsulationResistance4 = 14.4;
+        if (paramInsulationResistance4 >= 20) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelInsulationResistance4->setText("4) "+QString::number(paramInsulationResistance4));
+        Log("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>"+QString::number(paramInsulationResistance4)+"</b>", color);
+        progressBarSet(1);
+
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(4);
+        break;
+    case 4: //9ER20P-28
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(4);
+        break;
+    case 5: //9ER14P-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 6: //9ER14PS-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(2);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxInsulationResistance->setEnabled(false);
+}
+
+/*
+ * Напряжение разомкнутой цепи группы
+ */
+void MainWindow::CheckBatteryOpenCircuitVoltageGroup(int index)
+{
+    Log(" --- Напряжение разомкнутой цепи группы.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2: //9ER20P-20
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(20);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(20);
+        break;
+    case 4: //9ER20P-28
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(28);
+        break;
+    case 5: //9ER14P-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(24);
+        break;
+    case 6: //9ER14PS-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(24);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(24);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(false);
+}
+
+/*
+ * Напряжение замкнутой цепи группы
+ */
+void MainWindow::CheckBatteryClosedCircuitVoltageGroup(int index)
+{
+    Log(" --- Напряжение замкнутой цепи группы.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2: //9ER20P-20
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(60);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(60);
+        break;
+    case 4: //9ER20P-28
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(84);
+        break;
+    case 5: //9ER14P-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(72);
+        break;
+    case 6: //9ER14PS-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(72);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(72);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(false);
+}
+
+/*
+ * Напряжение замкнутой цепи батареи
+ */
+void MainWindow::CheckBatteryClosedCircuitVoltage(int index)
+{
+    Log(" --- Напряжение замкнутой цепи батареи.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2: //9ER20P-20
+        //более 30.0В не останавливаемся, меньше останавливаемся
+        delay(1000);
+        paramClosedCircuitVoltage = 29.8;
+        if (paramClosedCircuitVoltage >= 30) {
+            color = "green";
+        } else {
+            color = "red";
+        }
+        ui->labelClosedCircuitVoltage->setText(QString::number(paramClosedCircuitVoltage));
+        Log("между контактом 1 соединителя Х1 «1+» и контактом 1 соединителя Х3 «3-» = <b>"+QString::number(paramClosedCircuitVoltage)+"</b>", color);
+        progressBarSet(1);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 4: //9ER20P-28
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 5: //9ER14P-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 6: //9ER14PS-24
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxClosedCircuitVoltage->setEnabled(false);
+}
+
+/*
+ * Сопротивление изоляции платы измерительной УУТББ
+ */
+void MainWindow::CheckBatteryInsulationResistanceMeasuringBoardUUTBB(int index)
+{
+    Log(" --- Сопротивление изоляции платы измерительной УУТББ.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(false);
+}
+
+/*
+ * Напряжение разомкнутой цепи блока питания
+ */
+void MainWindow::CheckBatteryOpenCircuitVoltagePowerSupply(int index)
+{
+    Log(" --- Напряжение разомкнутой цепи блока питания.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(false);
+}
+
+/*
+ * Напряжение замкнутой цепи блока питания
+ */
+void MainWindow::CheckBatteryClosedCircuitVoltagePowerSupply(int index)
+{
+    Log(" --- Напряжение замкнутой цепи блока питания.", "blue");
+    switch (index) {
+    case 1: //Самодиагностика с помощью имитатора батареи
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 3: //9ER20P-20 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 7: //9ER14PS-24 (УУТББ)
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    default:
+        break;
+    }
+    //ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(false);
 }
