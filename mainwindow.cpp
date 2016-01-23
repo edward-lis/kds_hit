@@ -26,6 +26,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/*
+ * Проверка проверяемых параметров
+ */
 void MainWindow::paramCheck()
 {
     iParamsNumberChecked = 0;
