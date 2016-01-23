@@ -26,6 +26,74 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::paramCheck()
+{
+    iParamsNumberChecked = 0;
+    paramMsg = "";
+    if (ui->checkBoxVoltageOnTheHousing->isChecked())
+        iParamsNumberChecked = 1;
+    if (ui->checkBoxInsulationResistance->isChecked())
+        iParamsNumberChecked = 2;
+    if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+        iParamsNumberChecked = 3;
+    if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+        iParamsNumberChecked = 4;
+    if (ui->checkBoxClosedCircuitVoltage->isChecked())
+        iParamsNumberChecked = 5;
+    if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+        iParamsNumberChecked = 6;
+    if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+        iParamsNumberChecked = 7;
+    if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+        iParamsNumberChecked = 8;
+
+    if (iParamsNumberChecked > 0) {
+        for (int i = 0; 0 < iParamsNumberChecked; iParamsNumberChecked--) {
+            switch (i++) {
+            case 1:
+                if (!ui->checkBoxVoltageOnTheHousing->isChecked())
+                    paramMsg += " - Напряжение на корпусе\n";
+                break;
+            case 2:
+                if (!ui->checkBoxInsulationResistance->isChecked())
+                    paramMsg += " - Сопротивление изоляции\n";
+                break;
+            case 3:
+                if (!ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+                    paramMsg += " - Напряжение разомкнутой цепи группы\n";
+                break;
+            case 4:
+                if (!ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+                    paramMsg += " - Напряжение замкнутой цепи группы\n";
+                break;
+            case 5:
+                if (!ui->checkBoxClosedCircuitVoltage->isChecked())
+                    paramMsg += " - Напряжение замкнутой цепи батареи\n";
+                break;
+            case 6:
+                if (!ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+                    paramMsg += " - Сопротивление изоляции платы измерительной УУТББ\n";
+                break;
+            case 7:
+                if (!ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+                    paramMsg += " - Напряжение разомкнутой цепи блока питания\n";
+                break;
+            case 8:
+                if (!ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+                    paramMsg += " - Напряжение замкнутой цепи блока питания";
+                break;
+            default:
+                break;
+            }
+        }
+        if (paramMsg.length() > 0) {
+            iStartCheck = QMessageBox::question(this, "Внимание", "Вы уверны что хотите пропустить следующие этапы проверки?\n"+paramMsg, tr("Да"), tr("Нет"));
+        }
+    } else {
+        iStartCheck = QMessageBox::information(this, "Внимание", "Вы должны выбрать проверяемый параметр.");
+    }
+}
+
 /*
  * Прогресс бар шаг вперед
  */
@@ -59,7 +127,6 @@ void MainWindow::progressBarSetMaximum()
             iProgressBarAllSteps += 1;
         if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
             iProgressBarAllSteps += 1;
-        Log(tr("max= %1").arg(iProgressBarAllSteps), "def");
         break;
     case 2: //9ER20P-20
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
@@ -348,34 +415,37 @@ void MainWindow::Log(QString message, QString color)
  */
 void MainWindow::CheckBattery()
 {
-    Log("Начало проверки батареи: \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" дата производства \"<b>"+ui->dateEditBatteryBuild->text()+"\"</b> номер батареи \"<b>"+ui->lineEditBatteryNumber->text()+"</b>\".", "def");
-    setEnabled(false);
-    ui->btnStopCheck->setEnabled(true);
-    ui->btnCOMPortDisconnect->setEnabled(false);
-    progressBarSetMaximum();
-    if (ui->checkBoxVoltageOnTheHousing->isChecked())
-        CheckBatteryVoltageOnTheHousing(QString::number(iBatteryCurrentIndex).toInt());
-    if (ui->checkBoxInsulationResistance->isChecked())
-        CheckBatteryInsulationResistance(QString::number(iBatteryCurrentIndex).toInt());
-    if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-        CheckBatteryOpenCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
-    if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-        CheckBatteryClosedCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
-    if (ui->checkBoxClosedCircuitVoltage->isChecked())
-        CheckBatteryClosedCircuitVoltage(QString::number(iBatteryCurrentIndex).toInt());
-    if (iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 3 or iBatteryCurrentIndex == 7) {
-        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            CheckBatteryInsulationResistanceMeasuringBoardUUTBB(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            CheckBatteryOpenCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            CheckBatteryClosedCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
+    paramCheck();
+    if (iStartCheck == 0) {
+        Log("Начало проверки батареи: \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" дата производства \"<b>"+ui->dateEditBatteryBuild->text()+"\"</b> номер батареи \"<b>"+ui->lineEditBatteryNumber->text()+"</b>\".", "def");
+        setEnabled(false);
+        ui->btnStopCheck->setEnabled(true);
+        ui->btnCOMPortDisconnect->setEnabled(false);
+        progressBarSetMaximum();
+        if (ui->checkBoxVoltageOnTheHousing->isChecked())
+            CheckBatteryVoltageOnTheHousing(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxInsulationResistance->isChecked())
+            CheckBatteryInsulationResistance(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
+            CheckBatteryOpenCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
+            CheckBatteryClosedCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
+        if (ui->checkBoxClosedCircuitVoltage->isChecked())
+            CheckBatteryClosedCircuitVoltage(QString::number(iBatteryCurrentIndex).toInt());
+        if (iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 3 or iBatteryCurrentIndex == 7) {
+            if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
+                CheckBatteryInsulationResistanceMeasuringBoardUUTBB(QString::number(iBatteryCurrentIndex).toInt());
+            if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
+                CheckBatteryOpenCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
+            if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
+                CheckBatteryClosedCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
+        }
+        Log("Проверка батареи \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" завершена.", "def");
+        setEnabled(true);
+        ui->btnStopCheck->setEnabled(false);
+        ui->btnBuildReport->setEnabled(true);
+        Log(tr("[Отладка] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "red");
     }
-    Log("Проверка батареи \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" завершена.", "def");
-    setEnabled(true);
-    ui->btnStopCheck->setEnabled(false);
-    ui->btnBuildReport->setEnabled(true);
-    Log(tr("[Отладка] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "red");
 }
 
 /*

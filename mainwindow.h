@@ -7,6 +7,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QTime>
+#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -22,10 +23,13 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    int iStartCheck;
     int iBatteryCurrentIndex;
     int iDiagnosticModeCurrentIndex;
     int iProgressBarAllSteps;
+    int iParamsNumberChecked;
     QString color;
+    QString paramMsg;
     QSerialPort *com;
     void fillPortsInfo();
     float paramVoltageOnTheHousing1;
@@ -39,6 +43,7 @@ private:
     float paramClosedCircuitVoltage;
 public slots:
     void ResetCheck();
+    void paramCheck();
     void handleSelectionChangedBattery(int index);
     void handleSelectionChangedDiagnosticMode(int index);
     void CheckBatteryVoltageOnTheHousing(int index);
