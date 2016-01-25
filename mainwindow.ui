@@ -691,7 +691,7 @@
       </widget>
       <widget class="QWidget" name="tab_17">
        <attribute name="title">
-        <string>Напряжение разомкнутой цепи группы</string>
+        <string>Напряжение замкнутой цепи группы</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab_18">
