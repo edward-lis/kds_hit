@@ -6,19 +6,79 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    iBatteryCurrentIndex = 0;
-    iDiagnosticModeCurrentIndex = 0;
-    ResetCheck();
-    fillPortsInfo();
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->groupBoxCheckParams->setDisabled(true);
+    ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
+    ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
+    ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
+    ui->rbOpenCircuitVoltagePowerSupply->hide();
+    ui->btnOpenCircuitVoltagePowerSupply->hide();
+    ui->btnOpenCircuitVoltagePowerSupply_2->hide();
+    ui->rbClosedCircuitVoltagePowerSupply->hide();
+    ui->btnClosedCircuitVoltagePowerSupply->hide();
+    ui->btnClosedCircuitVoltagePowerSupply_2->hide();
+
+    for (int i = 1; i < 9; i++) {
+        ui->tabWidget->removeTab(1);
+    }
+
+    //bStop = false;
+    bPause = false;
+    bCheckCompleteVoltageOnTheHousing = false;
+    bCheckCompleteInsulationResistance = false;
+    bCheckCompleteOpenCircuitVoltageGroup = false;
+    bCheckCompleteClosedCircuitVoltageGroup = false;
+    bCheckCompleteClosedCircuitVoltageBattery = false;
+    bCheckCompleteInsulationResistanceMeasuringBoardUUTBB = false;
+    bCheckCompleteOpenCircuitVoltagePowerSupply = false;
+    bCheckCompleteClosedCircuitVoltagePowerSupply = false;
+    iBatteryIndex = 0;
+    iStep = 0;
+    iAllSteps = 0;
+    iStepVoltageOnTheHousing = 1;
+    iStepInsulationResistance = 1;
+    iStepOpenCircuitVoltageGroup = 1;
+
+    //ResetCheck();
+    getCOMPorts();
     com = new QSerialPort(this);
     connect(ui->btnCOMPortConnect, SIGNAL(clicked(bool)), this, SLOT(openCOMPort()));
     connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), this, SLOT(closeCOMPort()));
-    connect(ui->btnCOMPortReadData, SIGNAL(clicked(bool)), this, SLOT(readData()));
-    connect(ui->btnCOMPortSendCommand, SIGNAL(clicked(bool)), this, SLOT(writeData()));
-    connect(ui->btnStartCheck, SIGNAL(clicked()), this, SLOT(CheckBattery()));
+    connect(ui->cbIsUUTBB, SIGNAL(toggled(bool)), this, SLOT(isUUTBB()));
     connect(ui->comboBoxBatteryList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedBattery(int)));
-    connect(ui->comboBoxDiagnosticModeList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedDiagnosticMode(int)));
-    connect(ui->menuReset, SIGNAL(triggered(bool)), this , SLOT(ResetCheck()));
+    connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->groupBoxCheckParams, SLOT(setDisabled(bool)));
+    connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
+    connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->rbVoltageOnTheHousing, SLOT(setEnabled(bool)));
+    //connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->btnPauseAutoModeDiagnostic, SLOT(setDisabled(bool)));
+    connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->btnVoltageOnTheHousing, SLOT(setEnabled(bool)));
+    connect(ui->rbInsulationResistance, SIGNAL(toggled(bool)), ui->btnInsulationResistance, SLOT(setEnabled(bool)));
+    connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
+    connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
+    connect(ui->rbClosedCircuitVoltageBattery, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageBattery, SLOT(setEnabled(bool)));
+    connect(ui->rbInsulationResistanceMeasuringBoardUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceMeasuringBoardUUTBB, SLOT(setEnabled(bool)));
+    connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
+    connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
+    //connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(int)), this, SLOT(checkVoltageOnTheHousing(iBatteryIndex, iStepVoltageOnTheHousing)));
+    connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
+    connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
+    connect(ui->btnOpenCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
+    connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
+    connect(ui->btnClosedCircuitVoltageBattery, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
+    connect(ui->btnInsulationResistanceMeasuringBoardUUTBB, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
+    connect(ui->btnOpenCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
+    connect(ui->btnClosedCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
+    connect(ui->btnVoltageOnTheHousing_2, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
+    connect(ui->btnInsulationResistance_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
+    connect(ui->btnOpenCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
+    connect(ui->btnClosedCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
+    connect(ui->btnClosedCircuitVoltageBattery_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
+    connect(ui->btnInsulationResistanceMeasuringBoardUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
+    connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
+    connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
+    connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));
+    connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
+    connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -27,9 +87,48 @@ MainWindow::~MainWindow()
 }
 
 /*
+ * УУТББ дополнительные параметры проверки
+ */
+void MainWindow::setPause() {
+    //bPause = ((QPushButton*)sender())->isChecked() ? true : false;
+    bPause = true;
+    ((QPushButton*)sender())->setEnabled(false);
+    ui->btnStartAutoModeDiagnostic->setEnabled(true);
+}
+
+
+/*
+ * УУТББ дополнительные параметры проверки
+ */
+void MainWindow::isUUTBB()
+{
+    if (ui->cbIsUUTBB->isChecked()) {
+        ui->rbInsulationResistanceMeasuringBoardUUTBB->show();
+        ui->btnInsulationResistanceMeasuringBoardUUTBB->show();
+        ui->btnInsulationResistanceMeasuringBoardUUTBB_2->show();
+        ui->rbOpenCircuitVoltagePowerSupply->show();
+        ui->btnOpenCircuitVoltagePowerSupply->show();
+        ui->btnOpenCircuitVoltagePowerSupply_2->show();
+        ui->rbClosedCircuitVoltagePowerSupply->show();
+        ui->btnClosedCircuitVoltagePowerSupply->show();
+        ui->btnClosedCircuitVoltagePowerSupply_2->show();
+    } else {
+        ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
+        ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
+        ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
+        ui->rbOpenCircuitVoltagePowerSupply->hide();
+        ui->btnOpenCircuitVoltagePowerSupply->hide();
+        ui->btnOpenCircuitVoltagePowerSupply_2->hide();
+        ui->rbClosedCircuitVoltagePowerSupply->hide();
+        ui->btnClosedCircuitVoltagePowerSupply->hide();
+        ui->btnClosedCircuitVoltagePowerSupply_2->hide();
+    }
+}
+
+/*
  * Проверка проверяемых параметров
  */
-void MainWindow::paramCheck()
+/*void MainWindow::paramCheck()
 {
     iParamsNumberChecked = 0;
     paramMsg = "";
@@ -49,7 +148,6 @@ void MainWindow::paramCheck()
         iParamsNumberChecked = 7;
     if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
         iParamsNumberChecked = 8;
-
     if (iParamsNumberChecked > 0) {
         for (int i = 0; 0 < iParamsNumberChecked; iParamsNumberChecked--) {
             switch (i++) {
@@ -89,13 +187,13 @@ void MainWindow::paramCheck()
                 break;
             }
         }
-        if (paramMsg.length() > 0) {
+        if (paramMsg.length() > 0)
             iStartCheck = QMessageBox::question(this, "Внимание", "Вы уверны что хотите пропустить следующие этапы проверки?\n"+paramMsg, tr("Да"), tr("Нет"));
-        }
     } else {
         iStartCheck = QMessageBox::information(this, "Внимание", "Вы должны выбрать проверяемый параметр.");
     }
-}
+    Log(tr("[ОТЛАДКА] iParamsNumberChecked=%1").arg(iParamsNumberChecked), "blue");
+}*/
 
 /*
  * Прогресс бар шаг вперед
@@ -108,123 +206,123 @@ void MainWindow::progressBarSet(int iVal)
 /*
  * Прогресс бар установка максимума
  */
-void MainWindow::progressBarSetMaximum()
+/*void MainWindow::progressBarSetMaximum()
 {
     ui->progressBar->setValue(0);
-    iProgressBarAllSteps = 0;
+    iAllSteps = 0;
     switch (iBatteryCurrentIndex) {
     case 1: //Самодиагностика с помощью имитатора батареи
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 2: //9ER20P-20
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 4;
+            iAllSteps += 4;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 20;
+            iAllSteps += 20;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 60;
+            iAllSteps += 60;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 3: //9ER20P-20 (УУТББ)
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 4;
+            iAllSteps += 4;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 20;
+            iAllSteps += 20;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 60;
+            iAllSteps += 60;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 4: //9ER20P-28
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 4;
+            iAllSteps += 4;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 28;
+            iAllSteps += 28;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 84;
+            iAllSteps += 84;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 5: //9ER14P-24
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 24;
+            iAllSteps += 24;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 72;
+            iAllSteps += 72;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 6: //9ER14PS-24
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 24;
+            iAllSteps += 24;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 72;
+            iAllSteps += 72;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     case 7: //9ER14PS-24 (УУТББ)
         if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxInsulationResistance->isChecked())
-            iProgressBarAllSteps += 2;
+            iAllSteps += 2;
         if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 24;
+            iAllSteps += 24;
         if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iProgressBarAllSteps += 72;
+            iAllSteps += 72;
         if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iProgressBarAllSteps += 1;
+            iAllSteps += 1;
         break;
     default:
         break;
     }
-    ui->progressBar->setMaximum(iProgressBarAllSteps);
-}
+    ui->progressBar->setMaximum(iAllSteps);
+}*/
 
 /*
  * COM Порт получения списка портов
  */
-void MainWindow::fillPortsInfo()
+void MainWindow::getCOMPorts()
 {
     ui->comboBoxCOMPort->clear();
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
@@ -247,36 +345,41 @@ void MainWindow::openCOMPort()
     com->setStopBits(QSerialPort::OneStop);
     com->setFlowControl(QSerialPort::NoFlowControl);
     if (com->open(QIODevice::ReadWrite)) {
-        setEnabled(true);
         Log(tr("[COM Порт] - Соединение установлено на порт %1.").arg(ui->comboBoxCOMPort->currentText()), "green");
         foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
             if (info.portName() == ui->comboBoxCOMPort->currentText()) {
                 Log(tr("[COM Порт] - Описание: %1.").arg(info.description()), "blue");
             }
         }
+        ui->btnCOMPortConnect->setEnabled(false);
+        ui->btnCOMPortDisconnect->setEnabled(true);
+        ui->comboBoxCOMPort->setEnabled(true);
+        ui->groupBoxDiagnosticDevice->setEnabled(true);
+        ui->groupBoxDiagnosticMode->setEnabled(true);
+        ui->groupBoxCheckParams->setEnabled(true);
     } else {
-        Log("[COM Порт] - Ошибка устройства: "+com->errorString(), "red");
+        Log(tr("[COM Порт] - Ошибка устройства: %1.").arg(com->errorString()), "red");
     }
 }
 
 /*
  * COM Порт запись данных
  */
-void MainWindow::writeData()
+void MainWindow::writeCOMPortData()
 {
     QByteArray data;
-    data.append(ui->lineEditCOMPortCommand->text());
+    //data.append(ui->lineEditCOMPortCommand->text());
     com->write(data);
-    Log("[COM Порт] - Отправка: "+ui->lineEditCOMPortCommand->text(), "green");
+    //Log(tr("[COM Порт] - Отправка: %1").arg(ui->lineEditCOMPortCommand->text()), "green");
 }
 
 /*
  * COM Порт чтение данных
  */
-void MainWindow::readData()
+void MainWindow::readCOMPortData()
 {
     QByteArray data = com->readAll();
-    Log("[COM Порт] - Получение: "+QString(data), "blue");
+    Log(tr("[COM Порт] - Получение: %1").arg(QString(data)), "blue");
 }
 
 /*
@@ -284,16 +387,23 @@ void MainWindow::readData()
  */
 void MainWindow::closeCOMPort()
 {
-    if (com->isOpen())
+    if (com->isOpen()) {
         com->close();
-    setEnabled(false);
+        ui->btnCOMPortDisconnect->setEnabled(false);
+        ui->btnCOMPortConnect->setEnabled(true);
+        ui->comboBoxCOMPort->setEnabled(true);
+        ui->groupBoxDiagnosticDevice->setEnabled(false);
+        ui->groupBoxDiagnosticMode->setEnabled(false);
+        ui->groupBoxCheckParams->setEnabled(false);
+        ui->btnStartAutoModeDiagnostic->setEnabled(false);
+    }
     Log("[COM Порт] - Соединение разъединено.", "red");
 }
 
 /*
  * Включение отключение элементов
  */
-void MainWindow::setEnabled(bool flag)
+/*void MainWindow::setEnabled(bool flag)
 {
     if(com->isOpen()) {
         ui->btnCOMPortDisconnect->setEnabled(true);
@@ -306,150 +416,25 @@ void MainWindow::setEnabled(bool flag)
     }
 
     ui->comboBoxBatteryList->setEnabled(flag);
-    if(iBatteryCurrentIndex > 0) {
-        ui->dateEditBatteryBuild->setEnabled(flag);
-        ui->lineEditBatteryNumber->setEnabled(flag);
-        ui->comboBoxDiagnosticModeList->setEnabled(flag);
-        if(iDiagnosticModeCurrentIndex > 0) {
-            ui->checkBoxVoltageOnTheHousing->setEnabled(flag);
-            ui->checkBoxInsulationResistance->setEnabled(flag);
-            ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(flag);
-            ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(flag);
-            ui->checkBoxClosedCircuitVoltage->setEnabled(flag);
-            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(flag);
-            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(flag);
-            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(flag);
-        }
-        ui->btnStartCheck->setEnabled(flag);
-    }
-}
-
-/*
- * Сброс параметров проверки
- */
-void MainWindow::ResetCheck()
-{
-    ui->labelVoltageOnTheHousing1->clear();
-    ui->labelVoltageOnTheHousing2->clear();
-    ui->labelInsulationResistance1->clear();
-    ui->labelInsulationResistance2->clear();
-    ui->labelInsulationResistance3->clear();
-    ui->labelInsulationResistance4->clear();
-    ui->labelClosedCircuitVoltage->clear();
-}
-
-/*
- * Выбор батареи
- */
-void MainWindow::handleSelectionChangedBattery(int index)
-{
-    if (index > 0) {
-        ui->btnStartCheck->setEnabled(true);
-        ui->dateEditBatteryBuild->setEnabled(true);
-        ui->lineEditBatteryNumber->setEnabled(true);
-        ui->comboBoxDiagnosticModeList->setEnabled(true);
-        if (index == 1 or index == 3 or index == 7) {
-            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->show();
-            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->show();
-            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->show();
-        } else {
-            ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->hide();
-            ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->hide();
-            ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->hide();
-        }
+    ui->btnCheckConnectedBattery->setEnabled(flag);
+    ui->dateEditBatteryBuild->setEnabled(flag);
+    ui->lineEditBatteryNumber->setEnabled(flag);
+    //ui->rbModeDiagnosticAuto->setEnabled(flag);
+    //ui->rbModeDiagnosticManual->setEnabled(flag);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+    //ui->groupBoxCheckParams->setEnabled(flag);
+    if (ui->rbModeDiagnosticManual->isChecked()) {
+        ui->rbVoltageOnTheHousing->setEnabled(flag);
+        ui->btnVoltageOnTheHousing->setEnabled(flag);
     } else {
-        ui->btnStartCheck->setEnabled(false);
-        ui->dateEditBatteryBuild->setEnabled(false);
-        ui->lineEditBatteryNumber->setEnabled(false);
-        ui->comboBoxDiagnosticModeList->setEditable(false);
+        ui->rbVoltageOnTheHousing->setEnabled(!flag);
+        ui->btnVoltageOnTheHousing->setEnabled(!flag);
     }
-
-    iBatteryCurrentIndex = QString::number(index).toInt();
-}
-
-/*
- * Выбор режима диагностики
- */
-void MainWindow::handleSelectionChangedDiagnosticMode(int index)
-{
-    if (index > 0) {
-        ui->checkBoxVoltageOnTheHousing->setEnabled(true);
-        ui->checkBoxInsulationResistance->setEnabled(true);
-        ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(true);
-        ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(true);
-        ui->checkBoxClosedCircuitVoltage->setEnabled(true);
-        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(true);
-        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(true);
-        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(true);
-    } else {
-        ui->checkBoxVoltageOnTheHousing->setChecked(true);
-        ui->checkBoxVoltageOnTheHousing->setEnabled(false);
-        ui->checkBoxInsulationResistance->setChecked(true);
-        ui->checkBoxInsulationResistance->setEnabled(false);
-        ui->checkBoxBatteryOpenCircuitVoltageGroup->setChecked(true);
-        ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(false);
-        ui->checkBoxBatteryClosedCircuitVoltageGroup->setChecked(true);
-        ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(false);
-        ui->checkBoxClosedCircuitVoltage->setChecked(true);
-        ui->checkBoxClosedCircuitVoltage->setEnabled(false);
-        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setChecked(true);
-        ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(false);
-        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setChecked(true);
-        ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(false);
-        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setChecked(true);
-        ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(false);
+    if(iBatteryCurrentIndex == 0 or iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 4 ) {
+        ui->checkBoxUUTBB->setEnabled(flag);
     }
-    iDiagnosticModeCurrentIndex = QString::number(index).toInt();
-}
-
-/*
- * Запись событий в журнал
- */
-void MainWindow::Log(QString message, QString color)
-{
-    QTime time = QTime::currentTime();
-    QString text = time.toString("hh:mm:ss.zzz") + " ";
-    text = (color == "green" or color == "red" or color == "blue") ? text + "<font color=\""+color+"\">"+message+"</font>" : text + message;
-    ui->EventLog->appendHtml(tr("%1").arg(text));
-}
-
-/*
- * Общая проверка батареи
- */
-void MainWindow::CheckBattery()
-{
-    paramCheck();
-    if (iStartCheck == 0) {
-        Log("Начало проверки батареи: \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" дата производства \"<b>"+ui->dateEditBatteryBuild->text()+"\"</b> номер батареи \"<b>"+ui->lineEditBatteryNumber->text()+"</b>\".", "def");
-        setEnabled(false);
-        ui->btnStopCheck->setEnabled(true);
-        ui->btnCOMPortDisconnect->setEnabled(false);
-        progressBarSetMaximum();
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            CheckBatteryVoltageOnTheHousing(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxInsulationResistance->isChecked())
-            CheckBatteryInsulationResistance(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            CheckBatteryOpenCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            CheckBatteryClosedCircuitVoltageGroup(QString::number(iBatteryCurrentIndex).toInt());
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            CheckBatteryClosedCircuitVoltage(QString::number(iBatteryCurrentIndex).toInt());
-        if (iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 3 or iBatteryCurrentIndex == 7) {
-            if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-                CheckBatteryInsulationResistanceMeasuringBoardUUTBB(QString::number(iBatteryCurrentIndex).toInt());
-            if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-                CheckBatteryOpenCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
-            if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-                CheckBatteryClosedCircuitVoltagePowerSupply(QString::number(iBatteryCurrentIndex).toInt());
-        }
-        Log("Проверка батареи \"<b>"+ui->comboBoxBatteryList->currentText()+"</b>\" завершена.", "def");
-        setEnabled(true);
-        ui->btnStopCheck->setEnabled(false);
-        ui->btnBuildReport->setEnabled(true);
-        Log(tr("[Отладка] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "red");
-    }
-}
+    ui->btnStartCheckAll->setEnabled(flag);
+}*/
 
 /*
  * Задержка в милисекундах
@@ -464,307 +449,530 @@ void MainWindow::delay( int millisecondsToWait )
 }
 
 /*
- * Напряжение на корпусе батареи
+ * Сброс параметров проверки
  */
-void MainWindow::CheckBatteryVoltageOnTheHousing(int index)
+void MainWindow::resetCheck()
 {
-    Log(" --- Напряжение на корпусе батареи.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(1);
-        break;
-    case 2: //9ER20P-20
-
-        //если меньше 1В то не останавливаемся, больше 1В останавливаемся
-        delay(1000);
-        paramVoltageOnTheHousing1 = 0.9;
-        if (paramVoltageOnTheHousing1 < 1) {
-            color = "green";
-        } else {
-            color = "red";
-        }
-        ui->labelVoltageOnTheHousing1->setText("1) "+QString::number(paramVoltageOnTheHousing1));
-        Log("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(paramVoltageOnTheHousing1)+"</b>", color);
-        progressBarSet(1);
-
-        delay(1000);
-        paramVoltageOnTheHousing2 = 1.1;
-        if (paramVoltageOnTheHousing2 < 1) {
-            color = "green";
-        } else {
-            color = "red";
-        }
-        ui->labelVoltageOnTheHousing2->setText("2) "+QString::number(paramVoltageOnTheHousing2));
-        Log("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(paramVoltageOnTheHousing2)+"</b>", color);
-        progressBarSet(1);
-
-        break;
-    case 3: //9ER20P-20 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 4: //9ER20P-28
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 5: //9ER14P-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 6: //9ER14PS-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    default:
-        break;
-    }
-    //ui->checkBoxVoltageOnTheHousing->setEnabled(false);
+    iStep = 0;
+    iAllSteps = 0;
+    ui->labelVoltageOnTheHousing1->clear();
+    ui->labelVoltageOnTheHousing2->clear();
+    ui->labelInsulationResistance1->clear();
+    ui->labelInsulationResistance2->clear();
+    ui->labelInsulationResistance3->clear();
+    ui->labelInsulationResistance4->clear();
+    ui->labelClosedCircuitVoltage->clear();
 }
 
 /*
- * Сопротивление изоляции батареи
+ * Выбор батареи
  */
-void MainWindow::CheckBatteryInsulationResistance(int index)
+void MainWindow::handleSelectionChangedBattery(int index)
 {
-    Log(" --- Сопротивление изоляции батареи.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(1);
-        break;
-    case 2: //9ER20P-20
+    if (index == 0 or index == 1 or index == 4) {
+        ui->cbIsUUTBB->setEnabled(true);
+    } else {
+        ui->cbIsUUTBB->setEnabled(false);
+        ui->cbIsUUTBB->setChecked(false);
 
-        //более 20МОм не останавливаемся, меньше останавливаемся
-        delay(1000);
-        paramInsulationResistance1 = 20.3;
-        if (paramInsulationResistance1 >= 20) {
-            color = "green";
-        } else {
-            color = "red";
+    }
+
+    iBatteryIndex = QString::number(index).toInt();
+}
+
+/*
+ * Запись событий в журнал
+ */
+void MainWindow::Log(QString message, QString color)
+{
+    QTime time = QTime::currentTime();
+    QString text = time.toString("hh:mm:ss.zzz") + " ";
+    text = (color == "green" or color == "red" or color == "blue") ? text + "<font color=\""+color+"\">"+message+"</font>" : text + message;
+    ui->EventLog->appendHtml(tr("%1").arg(text));
+}
+
+/*
+ * Напряжение на корпусе батареи
+ */
+/*void MainWindow::checkVoltageOnTheHousing()
+{
+    //ui->progressBar->setValue(0);
+    //ui->progressBar->setMaximum(2);
+    Log(tr("Начало проверки - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    checkBattery(iBatteryIndex, 1, 2);
+    Log(tr("Завершение проверки - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    ui->rbInsulationResistance->setEnabled(true);
+}*/
+
+/*
+ * Напряжение на корпусе батареи
+ */
+/*void MainWindow::checkInsulationResistance()
+{
+    Log(tr("Начало проверки - %1").arg(ui->rbInsulationResistance->text()), "blue");
+    checkBattery(iBatteryIndex, 3, 6);
+    Log(tr("Завершение проверки - %1").arg(ui->rbInsulationResistance->text()), "blue");
+    ui->rbOpenCircuitVoltageGroup->setEnabled(true);
+}*/
+
+/*
+ * Автоматический режим диагностики
+ */
+void MainWindow::checkAutoModeDiagnostic()
+{
+    bPause = false;
+    ui->btnStartAutoModeDiagnostic->setEnabled(false);
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->btnPauseAutoModeDiagnostic->setEnabled(true);
+    ui->btnBuildReport->setEnabled(false);
+    if(!bCheckCompleteVoltageOnTheHousing)
+        checkVoltageOnTheHousing();
+    if(!bCheckCompleteInsulationResistance)
+        checkInsulationResistance();
+    if(!bCheckCompleteOpenCircuitVoltageGroup)
+        checkOpenCircuitVoltageGroup();
+    if(!bCheckCompleteClosedCircuitVoltageGroup)
+        checkClosedCircuitVoltageGroup();
+    if(!bCheckCompleteClosedCircuitVoltageBattery)
+        checkClosedCircuitVoltageBattery();
+    if (ui->cbIsUUTBB->isChecked()) {
+        if(!bCheckCompleteClosedCircuitVoltageBattery)
+            checkInsulationResistanceMeasuringBoardUUTBB();
+        if(!bCheckCompleteOpenCircuitVoltagePowerSupply)
+            checkOpenCircuitVoltagePowerSupply();
+        if(!bCheckCompleteClosedCircuitVoltagePowerSupply)
+            checkClosedCircuitVoltagePowerSupply();
+    }
+    //ui->btnStopCheck->setEnabled(false);
+    //ui->btnBuildReport->setEnabled(true);
+    if (bPause) { Log("ПАУЗА.", "red"); return; }
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+    ui->btnPauseAutoModeDiagnostic->setEnabled(false);
+    ui->btnBuildReport->setEnabled(true);
+    Log("Проверка завершена - Автоматический режим", "blue");
+    Log(tr("[ОТЛАДКА] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "blue");
+}
+
+/*
+ * Напряжение на корпусе батареи
+ */
+void MainWindow::checkVoltageOnTheHousing()
+{
+    if (((QPushButton*)sender())->objectName() == "btnVoltageOnTheHousing") {
+        iStepVoltageOnTheHousing = 1;
+        bPause = false;
+        ui->btnVoltageOnTheHousing_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnVoltageOnTheHousing_2")
+        bPause = false;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        ui->progressBar->setValue(iStepVoltageOnTheHousing-1);
+        ui->progressBar->setMaximum(2);
+        while (iStepVoltageOnTheHousing <= 2) {
+            //if (bPause) { Log("паузаVoltageOnTheHousing", "red"); return; }
+            if (bPause) return;
+            switch (iStepVoltageOnTheHousing) {
+            case 1://1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+»
+                //если меньше 1В то не останавливаемся идем дальше, больше 1В спрашиваем продолжить или нет
+                delay(1000);
+                paramVoltageOnTheHousing1 = qrand()%2; //число полученное с COM-порта
+                color = (paramVoltageOnTheHousing1 > 1) ? "red" : "green";
+                ui->labelVoltageOnTheHousing1->setText("1) "+QString::number(paramVoltageOnTheHousing1));
+                Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramVoltageOnTheHousing1)), color);
+                progressBarSet(1);
+                iStepVoltageOnTheHousing++;
+                if ((paramVoltageOnTheHousing1 > 1) and QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramVoltageOnTheHousing1), tr("Да"), tr("Нет"))) {
+                    return;
+                }
+                //iStepVoltageOnTheHousing++;
+                break;
+            case 2://2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-»
+                delay(1000);
+                paramVoltageOnTheHousing2 = qrand()%2;; //число полученное с COM-порта
+                color = (paramVoltageOnTheHousing2 > 1) ? "red" : "green";
+                ui->labelVoltageOnTheHousing2->setText("2) "+QString::number(paramVoltageOnTheHousing2));
+                Log(tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramVoltageOnTheHousing2)), color);
+                progressBarSet(1);
+                iStepVoltageOnTheHousing++;
+                if ((paramVoltageOnTheHousing2 > 1) and QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramVoltageOnTheHousing2), tr("Да"), tr("Нет"))) {
+                    return;
+                }
+                break;
+            default:
+                break;
+            }
         }
-        ui->labelInsulationResistance1->setText("1) "+QString::number(paramInsulationResistance1));
-        Log("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(paramInsulationResistance1)+"</b>", color);
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteVoltageOnTheHousing = true;
+        break;
+    case 1:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
         progressBarSet(1);
-
+        break;
+    case 2:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
         delay(1000);
-        paramInsulationResistance2 = 19.8;
-        if (paramInsulationResistance2 >= 20) {
-            color = "green";
-        } else {
-            color = "red";
-        }
-        ui->labelInsulationResistance2->setText("2) "+QString::number(paramInsulationResistance2));
-        Log("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(paramInsulationResistance2)+"</b>", color);
         progressBarSet(1);
-
+        break;
+    case 3:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
         delay(1000);
-        paramInsulationResistance3 = 13.2;
-        if (paramInsulationResistance3 >= 20) {
-            color = "green";
-        } else {
-            color = "red";
-        }
-        ui->labelInsulationResistance3->setText("3) "+QString::number(paramInsulationResistance3));
-        Log("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>"+QString::number(paramInsulationResistance3)+"</b>", color);
         progressBarSet(1);
-
-        delay(1000);
-        paramInsulationResistance4 = 14.4;
-        if (paramInsulationResistance4 >= 20) {
-            color = "green";
-        } else {
-            color = "red";
-        }
-        ui->labelInsulationResistance4->setText("4) "+QString::number(paramInsulationResistance4));
-        Log("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>"+QString::number(paramInsulationResistance4)+"</b>", color);
-        progressBarSet(1);
-
-        break;
-    case 3: //9ER20P-20 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(4);
-        break;
-    case 4: //9ER20P-28
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(4);
-        break;
-    case 5: //9ER14P-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 6: //9ER14PS-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(2);
         break;
     default:
         break;
     }
-    //ui->checkBoxInsulationResistance->setEnabled(false);
+    Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    iStepVoltageOnTheHousing = 1;
+    ui->rbInsulationResistance->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+}
+
+/*
+ * Сопротивление изоляции
+ */
+void MainWindow::checkInsulationResistance()
+{
+    if (((QPushButton*)sender())->objectName() == "btnInsulationResistance") {
+        iStepInsulationResistance = 1;
+        bPause = false;
+        ui->btnInsulationResistance_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnInsulationResistance_2")
+        bPause = false;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        ui->progressBar->setValue(iStepInsulationResistance-1);
+        ui->progressBar->setMaximum(4);
+        while (iStepInsulationResistance <= 4) {
+            if (bPause) return;
+            switch (iStepInsulationResistance) {
+            case 1://1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+»
+                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+                delay(1000);
+                paramInsulationResistance1 = qrand()%25; //число полученное с COM-порта
+                color = (paramInsulationResistance1 < 20) ? "red" : "green";
+                ui->labelInsulationResistance1->setText("1) "+QString::number(paramInsulationResistance1));
+                Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                iStepInsulationResistance++;
+                if (paramInsulationResistance1 < 20) {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->rbInsulationResistance->setChecked(true);
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance1), tr("Да"), tr("Нет"))) {
+                        ui->btnInsulationResistance_2->setEnabled(true);
+                        bPause = true;
+                        return;
+                    }
+                }
+                break;
+            case 2://2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-»
+                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+                delay(1000);
+                paramInsulationResistance2 = qrand()%25; //число полученное с COM-порта
+                color = (paramInsulationResistance2 < 20) ? "red" : "green";
+                ui->labelInsulationResistance2->setText("2) "+QString::number(paramInsulationResistance2));
+                Log(tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramInsulationResistance2)), color);
+                progressBarSet(1);
+                iStepInsulationResistance++;
+                if (paramInsulationResistance2 < 20) {
+                        ui->rbModeDiagnosticManual->setChecked(true);
+                        ui->rbModeDiagnosticAuto->setEnabled(false);
+                        ui->rbInsulationResistance->setChecked(true);
+                        if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance2), tr("Да"), tr("Нет"))) {
+                            ui->btnInsulationResistance_2->setEnabled(true);
+                            bPause = true;
+                            return;
+                        }
+                }
+                break;
+            case 3://3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+»
+                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+                delay(1000);
+                paramInsulationResistance3 = qrand()%25; //число полученное с COM-порта
+                color = (paramInsulationResistance3 < 20) ? "red" : "green";
+                ui->labelInsulationResistance3->setText("3) "+QString::number(paramInsulationResistance3));
+                Log(tr("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance3)), color);
+                progressBarSet(1);
+                iStepInsulationResistance++;
+                if (paramInsulationResistance3 < 20) {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->rbInsulationResistance->setChecked(true);
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance3), tr("Да"), tr("Нет"))) {
+                        ui->btnInsulationResistance_2->setEnabled(true);
+                        bPause = true;
+                        return;
+                    }
+                }
+                break;
+            case 4://4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-»
+                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+                delay(1000);
+                paramInsulationResistance4 = qrand()%25; //число полученное с COM-порта
+                color = (paramInsulationResistance4 < 20) ? "red" : "green";
+                ui->labelInsulationResistance4->setText("3) "+QString::number(paramInsulationResistance4));
+                Log(tr("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramInsulationResistance4)), color);
+                progressBarSet(1);
+                iStepInsulationResistance++;
+                if (paramInsulationResistance4 < 20) {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->rbInsulationResistance->setChecked(true);
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance4), tr("Да"), tr("Нет"))) {
+                        ui->btnInsulationResistance_2->setEnabled(true);
+                        bPause = true;
+                        return;
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        ui->btnInsulationResistance_2->setEnabled(false);
+        if (ui->rbModeDiagnosticAuto->isChecked())
+             bCheckCompleteInsulationResistance = true;
+        break;
+    case 1:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 2:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    case 3:
+        if (bPause) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        progressBarSet(1);
+        break;
+    default:
+        break;
+    }
+    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistance->text()), "blue");
+    iStepInsulationResistance = 1;
+    ui->rbOpenCircuitVoltageGroup->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Напряжение разомкнутой цепи группы
  */
-void MainWindow::CheckBatteryOpenCircuitVoltageGroup(int index)
+void MainWindow::checkOpenCircuitVoltageGroup()
 {
-    Log(" --- Напряжение разомкнутой цепи группы.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
+    if (((QPushButton*)sender())->objectName() == "btnOpenCircuitVoltageGroup") {
+        iStepOpenCircuitVoltageGroup = 1;
+        bPause = false;
+        ui->btnOpenCircuitVoltageGroup_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnOpenCircuitVoltageGroup_2")
+        bPause = false;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        ui->progressBar->setValue(iStepOpenCircuitVoltageGroup-1);
+        ui->progressBar->setMaximum(20);
+        while (iStepOpenCircuitVoltageGroup <= 20) {
+            if (bPause) return;
+            switch (iStepOpenCircuitVoltageGroup) {
+            default:
+                delay(1000);
+                paramOpenCircuitVoltageGroup1 = qrand()%40+10; //число полученное с COM-порта
+                color = (paramOpenCircuitVoltageGroup1 < 32.3) ? "red" : "green";
+                Log(tr("%1) Между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepOpenCircuitVoltageGroup).arg(paramOpenCircuitVoltageGroup1), color);
+                progressBarSet(1);
+                iStepOpenCircuitVoltageGroup++;
+                if (paramOpenCircuitVoltageGroup1 < 32.3) {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->rbOpenCircuitVoltageGroup->setChecked(true);
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%1) Между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b> \nпродолжить?").arg(iStepOpenCircuitVoltageGroup).arg(paramOpenCircuitVoltageGroup1), tr("Да"), tr("Нет"))) {
+                        ui->btnOpenCircuitVoltageGroup_2->setEnabled(true);
+                        bPause = true;
+                        return;
+                    }
+                }
+                break;
+            }
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteClosedCircuitVoltageGroup = true;
+        break;
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 2: //9ER20P-20
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
-        progressBarSet(20);
+        progressBarSet(1);
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
-        progressBarSet(20);
-        break;
-    case 4: //9ER20P-28
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(28);
-        break;
-    case 5: //9ER14P-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(24);
-        break;
-    case 6: //9ER14PS-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(24);
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(24);
+        progressBarSet(1);
         break;
     default:
         break;
     }
-    //ui->checkBoxBatteryOpenCircuitVoltageGroup->setEnabled(false);
+
+    Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
+    iStepOpenCircuitVoltageGroup = 1;
+    ui->rbClosedCircuitVoltageGroup->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Напряжение замкнутой цепи группы
  */
-void MainWindow::CheckBatteryClosedCircuitVoltageGroup(int index)
+void MainWindow::checkClosedCircuitVoltageGroup()
 {
-    Log(" --- Напряжение замкнутой цепи группы.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
+    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        while (iStepClosedCircuitVoltageGroup <= 1) {
+            if (bPause) return;
+            switch (iStepClosedCircuitVoltageGroup) {
+            case 1:
+                delay(1000);
+                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                break;
+            default:
+                break;
+            }
+            iStepClosedCircuitVoltageGroup++;
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteClosedCircuitVoltageGroup = true;
+        break;
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 2: //9ER20P-20
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
-        progressBarSet(60);
+        progressBarSet(1);
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
-        progressBarSet(60);
-        break;
-    case 4: //9ER20P-28
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(84);
-        break;
-    case 5: //9ER14P-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(72);
-        break;
-    case 6: //9ER14PS-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(72);
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(72);
+        progressBarSet(1);
         break;
     default:
         break;
     }
-    //ui->checkBoxBatteryClosedCircuitVoltageGroup->setEnabled(false);
+    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
+    iStepClosedCircuitVoltageGroup = 1;
+    ui->rbClosedCircuitVoltageBattery->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Напряжение замкнутой цепи батареи
  */
-void MainWindow::CheckBatteryClosedCircuitVoltage(int index)
+void MainWindow::checkClosedCircuitVoltageBattery()
 {
-    Log(" --- Напряжение замкнутой цепи батареи.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(1);
-        break;
-    case 2: //9ER20P-20
-        //более 30.0В не останавливаемся, меньше останавливаемся
-        delay(1000);
-        paramClosedCircuitVoltage = 29.8;
-        if (paramClosedCircuitVoltage >= 30) {
-            color = "green";
-        } else {
-            color = "red";
+    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        while (iStepClosedCircuitVoltageBattery <= 1) {
+            if (bPause) return;
+            switch (iStepClosedCircuitVoltageBattery) {
+            case 1:
+                delay(1000);
+                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                break;
+            default:
+                break;
+            }
+            iStepClosedCircuitVoltageBattery++;
         }
-        ui->labelClosedCircuitVoltage->setText(QString::number(paramClosedCircuitVoltage));
-        Log("между контактом 1 соединителя Х1 «1+» и контактом 1 соединителя Х3 «3-» = <b>"+QString::number(paramClosedCircuitVoltage)+"</b>", color);
-        progressBarSet(1);
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteClosedCircuitVoltageBattery = true;
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 4: //9ER20P-28
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 5: //9ER14P-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(1);
-        break;
-    case 6: //9ER14PS-24
-        Log("Действия проверки.", "green");
-        delay(1000);
-        progressBarSet(1);
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
@@ -772,27 +980,59 @@ void MainWindow::CheckBatteryClosedCircuitVoltage(int index)
     default:
         break;
     }
-    //ui->checkBoxClosedCircuitVoltage->setEnabled(false);
+    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
+    iStepClosedCircuitVoltageBattery = 1;
+    ui->rbInsulationResistanceMeasuringBoardUUTBB->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Сопротивление изоляции платы измерительной УУТББ
  */
-void MainWindow::CheckBatteryInsulationResistanceMeasuringBoardUUTBB(int index)
+void MainWindow::checkInsulationResistanceMeasuringBoardUUTBB()
 {
-    Log(" --- Сопротивление изоляции платы измерительной УУТББ.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
+    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabInsulationResistanceMeasuringBoardUUTBB, ui->rbInsulationResistanceMeasuringBoardUUTBB->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        while (iStepInsulationResistanceMeasuringBoardUUTBB <= 1) {
+            if (bPause) return;
+            switch (iStepInsulationResistanceMeasuringBoardUUTBB) {
+            case 1:
+                delay(1000);
+                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                break;
+            default:
+                break;
+            }
+            iStepInsulationResistanceMeasuringBoardUUTBB++;
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteInsulationResistanceMeasuringBoardUUTBB = true;
+        break;
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 7: //9ER14PS-24 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
@@ -800,27 +1040,60 @@ void MainWindow::CheckBatteryInsulationResistanceMeasuringBoardUUTBB(int index)
     default:
         break;
     }
-    //ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->setEnabled(false);
+
+    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()), "blue");
+    iStepInsulationResistanceMeasuringBoardUUTBB = 1;
+    ui->rbOpenCircuitVoltagePowerSupply->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Напряжение разомкнутой цепи блока питания
  */
-void MainWindow::CheckBatteryOpenCircuitVoltagePowerSupply(int index)
+void MainWindow::checkOpenCircuitVoltagePowerSupply()
 {
-    Log(" --- Напряжение разомкнутой цепи блока питания.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
+    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        while (iStepOpenCircuitVoltagePowerSupply <= 1) {
+            if (bPause) return;
+            switch (iStepOpenCircuitVoltagePowerSupply) {
+            case 1:
+                delay(1000);
+                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                break;
+            default:
+                break;
+            }
+            iStepOpenCircuitVoltagePowerSupply++;
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteOpenCircuitVoltagePowerSupply = true;
+        break;
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 7: //9ER14PS-24 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
@@ -828,33 +1101,69 @@ void MainWindow::CheckBatteryOpenCircuitVoltagePowerSupply(int index)
     default:
         break;
     }
-    //ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->setEnabled(false);
+    Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");
+    iStepOpenCircuitVoltagePowerSupply = 1;
+    ui->rbClosedCircuitVoltagePowerSupply->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 /*
  * Напряжение замкнутой цепи блока питания
  */
-void MainWindow::CheckBatteryClosedCircuitVoltagePowerSupply(int index)
+void MainWindow::checkClosedCircuitVoltagePowerSupply()
 {
-    Log(" --- Напряжение замкнутой цепи блока питания.", "blue");
-    switch (index) {
-    case 1: //Самодиагностика с помощью имитатора батареи
+    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        while (iStepClosedCircuitVoltagePowerSupply <= 1) {
+            if (bPause) return;
+            switch (iStepClosedCircuitVoltagePowerSupply) {
+            case 1:
+                delay(1000);
+                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
+                progressBarSet(1);
+                break;
+            default:
+                break;
+            }
+            iStepClosedCircuitVoltagePowerSupply++;
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteClosedCircuitVoltagePowerSupply = true;
+        break;
+    case 1:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 3: //9ER20P-20 (УУТББ)
+    case 2:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
-    case 7: //9ER14PS-24 (УУТББ)
+    case 3:
+        if (bPause) return;
         Log("Действия проверки.", "green");
         delay(1000);
         progressBarSet(1);
         break;
     default:
         break;
-    }
-    //ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->setEnabled(false);
+    } 
+    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
+    iStepClosedCircuitVoltagePowerSupply = 1;
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
