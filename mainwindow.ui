@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1069</width>
-    <height>531</height>
+    <height>612</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -110,7 +110,7 @@
       <x>490</x>
       <y>0</y>
       <width>571</width>
-      <height>501</height>
+      <height>591</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -129,7 +129,7 @@
         <x>0</x>
         <y>0</y>
         <width>561</width>
-        <height>441</height>
+        <height>531</height>
        </rect>
       </property>
       <property name="undoRedoEnabled">
@@ -146,7 +146,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>450</y>
+        <y>540</y>
         <width>561</width>
         <height>21</height>
        </rect>
@@ -170,7 +170,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>VoltageOnTheHousing2</string>
+       <string>paramVoltageOnTheHousing2</string>
       </property>
       <property name="wordWrap">
        <bool>false</bool>
@@ -186,7 +186,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>VoltageOnTheHousing1</string>
+       <string>paramVoltageOnTheHousing1</string>
       </property>
       <property name="wordWrap">
        <bool>false</bool>
@@ -207,7 +207,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>InsulationResistance4</string>
+       <string>paramInsulationResistance4</string>
       </property>
      </widget>
      <widget class="QLabel" name="labelInsulationResistance1">
@@ -220,7 +220,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>InsulationResistance1</string>
+       <string>paramInsulationResistance1</string>
       </property>
      </widget>
      <widget class="QLabel" name="labelInsulationResistance2">
@@ -233,7 +233,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>InsulationResistance2</string>
+       <string>paramInsulationResistance2</string>
       </property>
      </widget>
      <widget class="QLabel" name="labelInsulationResistance3">
@@ -246,7 +246,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>InsulationResistance3</string>
+       <string>paramInsulationResistance3</string>
       </property>
      </widget>
     </widget>
@@ -254,17 +254,745 @@
      <attribute name="title">
       <string>Напряжение разомкнутой цепи группы</string>
      </attribute>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup1">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup2</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup3</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup4</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup5">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup5</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup6">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup6</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup7">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>130</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup7</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup8">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>150</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup8</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup9">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>170</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup9</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup10">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>190</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup10</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup11">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>210</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup11</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup12">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup12</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup13">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>250</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup13</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup14">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>270</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup14</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup15">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>290</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup15</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup16">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>310</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup16</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup17">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>330</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup17</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup18">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>350</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup18</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup19">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>370</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup19</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup20">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>390</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup20</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup21">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>410</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup21</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup22">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>430</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup22</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup24">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>470</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup24</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup25">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>490</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup25</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup26">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>510</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup26</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup27">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>530</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup27</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup28">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>550</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup28</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelOpenCircuitVoltageGroup23">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>450</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramOpenCircuitVoltageGroup23</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabClosedCircuitVoltageGroup">
      <attribute name="title">
       <string>Напряжение замкнутой цепи группы</string>
      </attribute>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup25">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>490</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup25</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup11">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>210</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup11</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup16">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>310</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup16</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup18">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>350</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup18</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup6">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup6</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup3</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup7">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>130</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup7</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup27">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>530</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup27</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup22">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>430</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup22</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup10">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>190</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup10</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup4</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup1">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup28">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>550</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup28</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup13">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>250</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup13</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup8">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>150</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup8</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup26">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>510</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup26</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup17">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>330</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup17</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup20">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>390</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup20</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup12">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>230</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup12</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup21">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>410</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup21</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup9">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>170</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup9</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup14">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>270</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup14</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup23">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>450</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup23</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup5">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>90</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup5</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup15">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>290</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup15</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup19">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>370</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup19</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup24">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>470</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup24</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelClosedCircuitVoltageGroup2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>paramClosedCircuitVoltageGroup2</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabClosedCircuitVoltageBattery">
      <attribute name="title">
       <string>Напряжение замкнутой цепи батареи</string>
      </attribute>
-     <widget class="QLabel" name="labelClosedCircuitVoltage">
+     <widget class="QLabel" name="labelClosedCircuitVoltageBattery">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -274,7 +1002,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>ClosedCircuitVoltage</string>
+       <string>paramClosedCircuitVoltageBattery</string>
       </property>
      </widget>
     </widget>
@@ -300,10 +1028,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>470</y>
-      <width>91</width>
-      <height>31</height>
+      <width>151</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -316,10 +1044,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>170</x>
       <y>470</y>
-      <width>91</width>
-      <height>31</height>
+      <width>151</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -332,10 +1060,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>470</y>
-      <width>161</width>
-      <height>31</height>
+      <x>10</x>
+      <y>540</y>
+      <width>471</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -936,10 +1664,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>330</x>
       <y>470</y>
-      <width>91</width>
-      <height>31</height>
+      <width>151</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">

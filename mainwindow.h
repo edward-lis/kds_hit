@@ -31,13 +31,14 @@ private:
     int iStepInsulationResistance;
     int iStepOpenCircuitVoltageGroup;
     int iStepClosedCircuitVoltageGroup;
+    int iStepDepassivation;
     int iStepClosedCircuitVoltageBattery;
     int iStepInsulationResistanceMeasuringBoardUUTBB;
     int iStepOpenCircuitVoltagePowerSupply;
     int iStepClosedCircuitVoltagePowerSupply;
-    //int iDiagnosticModeCurrentIndex;
     int iParamsNumberChecked;
-    QString color;
+    QVector<int> imDepassivation;
+    QString str;
     QString paramMsg;
     QSerialPort *com;
     //bool bStop;
@@ -52,16 +53,7 @@ private:
     bool bCheckCompleteClosedCircuitVoltagePowerSupply;
     void getCOMPorts();
 
-    float paramVoltageOnTheHousing1;
-    float paramVoltageOnTheHousing2;
-    float paramInsulationResistance1;
-    float paramInsulationResistance2;
-    float paramInsulationResistance3;
-    float paramInsulationResistance4;
-    float paramOpenCircuitVoltageGroup1;
-    //float paramClosedCircuitVoltage;
-    //float paramClosedCircuitVoltage;
-    float paramClosedCircuitVoltage;
+    float param;
 public slots:
     void openCOMPort();
     void closeCOMPort();
@@ -85,6 +77,7 @@ public slots:
     void checkOpenCircuitVoltageGroup();
     void checkClosedCircuitVoltageGroup();
     void checkClosedCircuitVoltageBattery();
+    void checkDepassivation();
     void checkInsulationResistanceMeasuringBoardUUTBB();
     void checkOpenCircuitVoltagePowerSupply();
     void checkClosedCircuitVoltagePowerSupply();

@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageBattery, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageBattery, SLOT(setEnabled(bool)));
+    connect(ui->rbDepassivation, SIGNAL(toggled(bool)), ui->btnDepassivation, SLOT(setEnabled(bool)));
     connect(ui->rbInsulationResistanceMeasuringBoardUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceMeasuringBoardUUTBB, SLOT(setEnabled(bool)));
     connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
@@ -64,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
     connect(ui->btnOpenCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
+    connect(ui->btnDepassivation, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
     connect(ui->btnClosedCircuitVoltageBattery, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
     connect(ui->btnInsulationResistanceMeasuringBoardUUTBB, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
     connect(ui->btnOpenCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
@@ -73,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnOpenCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageBattery_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
+    connect(ui->btnDepassivation_2, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
     connect(ui->btnInsulationResistanceMeasuringBoardUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
     connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
     connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
@@ -455,13 +458,7 @@ void MainWindow::resetCheck()
 {
     iStep = 0;
     iAllSteps = 0;
-    ui->labelVoltageOnTheHousing1->clear();
-    ui->labelVoltageOnTheHousing2->clear();
-    ui->labelInsulationResistance1->clear();
-    ui->labelInsulationResistance2->clear();
-    ui->labelInsulationResistance3->clear();
-    ui->labelInsulationResistance4->clear();
-    ui->labelClosedCircuitVoltage->clear();
+    //QLabel * label = findChild<QLabel*>("label*");
 }
 
 /*
@@ -491,29 +488,6 @@ void MainWindow::Log(QString message, QString color)
     ui->EventLog->appendHtml(tr("%1").arg(text));
 }
 
-/*
- * Напряжение на корпусе батареи
- */
-/*void MainWindow::checkVoltageOnTheHousing()
-{
-    //ui->progressBar->setValue(0);
-    //ui->progressBar->setMaximum(2);
-    Log(tr("Начало проверки - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-    checkBattery(iBatteryIndex, 1, 2);
-    Log(tr("Завершение проверки - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-    ui->rbInsulationResistance->setEnabled(true);
-}*/
-
-/*
- * Напряжение на корпусе батареи
- */
-/*void MainWindow::checkInsulationResistance()
-{
-    Log(tr("Начало проверки - %1").arg(ui->rbInsulationResistance->text()), "blue");
-    checkBattery(iBatteryIndex, 3, 6);
-    Log(tr("Завершение проверки - %1").arg(ui->rbInsulationResistance->text()), "blue");
-    ui->rbOpenCircuitVoltageGroup->setEnabled(true);
-}*/
 
 /*
  * Автоматический режим диагностики
@@ -581,37 +555,36 @@ void MainWindow::checkVoltageOnTheHousing()
         ui->progressBar->setValue(iStepVoltageOnTheHousing-1);
         ui->progressBar->setMaximum(2);
         while (iStepVoltageOnTheHousing <= 2) {
-            //if (bPause) { Log("паузаVoltageOnTheHousing", "red"); return; }
             if (bPause) return;
             switch (iStepVoltageOnTheHousing) {
-            case 1://1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+»
-                //если меньше 1В то не останавливаемся идем дальше, больше 1В спрашиваем продолжить или нет
+            case 1:
                 delay(1000);
-                paramVoltageOnTheHousing1 = qrand()%2; //число полученное с COM-порта
-                color = (paramVoltageOnTheHousing1 > 1) ? "red" : "green";
-                ui->labelVoltageOnTheHousing1->setText("1) "+QString::number(paramVoltageOnTheHousing1));
-                Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramVoltageOnTheHousing1)), color);
-                progressBarSet(1);
-                iStepVoltageOnTheHousing++;
-                if ((paramVoltageOnTheHousing1 > 1) and QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramVoltageOnTheHousing1), tr("Да"), tr("Нет"))) {
-                    return;
-                }
-                //iStepVoltageOnTheHousing++;
+                param = qrand()%3; //число полученное с COM-порта
+                str = "1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(param)+"</b>";
                 break;
-            case 2://2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-»
+            case 2:
                 delay(1000);
-                paramVoltageOnTheHousing2 = qrand()%2;; //число полученное с COM-порта
-                color = (paramVoltageOnTheHousing2 > 1) ? "red" : "green";
-                ui->labelVoltageOnTheHousing2->setText("2) "+QString::number(paramVoltageOnTheHousing2));
-                Log(tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramVoltageOnTheHousing2)), color);
-                progressBarSet(1);
-                iStepVoltageOnTheHousing++;
-                if ((paramVoltageOnTheHousing2 > 1) and QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramVoltageOnTheHousing2), tr("Да"), tr("Нет"))) {
-                    return;
-                }
+                param = qrand()%3;; //число полученное с COM-порта
+                str = "2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(param)+"</b>";
                 break;
             default:
+                return;
                 break;
+            }
+
+            QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%1").arg(iStepVoltageOnTheHousing));
+            label->setText(tr("%1) %2").arg(iStepVoltageOnTheHousing).arg(QString::number(param)));
+            Log(str, (param > 1) ? "red" : "green");
+            progressBarSet(1);
+            iStepVoltageOnTheHousing++;
+            if (param > 1) {
+                ui->rbModeDiagnosticManual->setChecked(true);
+                ui->rbModeDiagnosticAuto->setEnabled(false);
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    ui->btnVoltageOnTheHousing_2->setEnabled(true);
+                    bPause = true;
+                    return;
+                }
             }
         }
         if (ui->rbModeDiagnosticAuto->isChecked())
@@ -672,88 +645,45 @@ void MainWindow::checkInsulationResistance()
         while (iStepInsulationResistance <= 4) {
             if (bPause) return;
             switch (iStepInsulationResistance) {
-            case 1://1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+»
-                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+            case 1:
                 delay(1000);
-                paramInsulationResistance1 = qrand()%25; //число полученное с COM-порта
-                color = (paramInsulationResistance1 < 20) ? "red" : "green";
-                ui->labelInsulationResistance1->setText("1) "+QString::number(paramInsulationResistance1));
-                Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
-                progressBarSet(1);
-                iStepInsulationResistance++;
-                if (paramInsulationResistance1 < 20) {
-                    ui->rbModeDiagnosticManual->setChecked(true);
-                    ui->rbModeDiagnosticAuto->setEnabled(false);
-                    ui->rbInsulationResistance->setChecked(true);
-                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance1), tr("Да"), tr("Нет"))) {
-                        ui->btnInsulationResistance_2->setEnabled(true);
-                        bPause = true;
-                        return;
-                    }
-                }
+                param = qrand()%25; //число полученное с COM-порта
+                str = "1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>"+QString::number(param)+"</b>";
                 break;
-            case 2://2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-»
-                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+            case 2:
                 delay(1000);
-                paramInsulationResistance2 = qrand()%25; //число полученное с COM-порта
-                color = (paramInsulationResistance2 < 20) ? "red" : "green";
-                ui->labelInsulationResistance2->setText("2) "+QString::number(paramInsulationResistance2));
-                Log(tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramInsulationResistance2)), color);
-                progressBarSet(1);
-                iStepInsulationResistance++;
-                if (paramInsulationResistance2 < 20) {
-                        ui->rbModeDiagnosticManual->setChecked(true);
-                        ui->rbModeDiagnosticAuto->setEnabled(false);
-                        ui->rbInsulationResistance->setChecked(true);
-                        if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance2), tr("Да"), tr("Нет"))) {
-                            ui->btnInsulationResistance_2->setEnabled(true);
-                            bPause = true;
-                            return;
-                        }
-                }
+                param = qrand()%25; //число полученное с COM-порта
+                str = "2) между точкой металлизации и контактом 1 соединителя Х3 «Х3-» = <b>"+QString::number(param)+"</b>";
                 break;
-            case 3://3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+»
-                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+            case 3:
                 delay(1000);
-                paramInsulationResistance3 = qrand()%25; //число полученное с COM-порта
-                color = (paramInsulationResistance3 < 20) ? "red" : "green";
-                ui->labelInsulationResistance3->setText("3) "+QString::number(paramInsulationResistance3));
-                Log(tr("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance3)), color);
-                progressBarSet(1);
-                iStepInsulationResistance++;
-                if (paramInsulationResistance3 < 20) {
-                    ui->rbModeDiagnosticManual->setChecked(true);
-                    ui->rbModeDiagnosticAuto->setEnabled(false);
-                    ui->rbInsulationResistance->setChecked(true);
-                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance3), tr("Да"), tr("Нет"))) {
-                        ui->btnInsulationResistance_2->setEnabled(true);
-                        bPause = true;
-                        return;
-                    }
-                }
+                param = qrand()%25; //число полученное с COM-порта
+                str = "3) между точкой металлизации и контактом 6 соединителя Х1 «Х1+» = <b>"+QString::number(param)+"</b>";
                 break;
-            case 4://4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-»
-                //меньше 20МОм спрашиваем продолжить или нет, больше 20МОм продолжаем не спрашивая
+            case 4:
                 delay(1000);
-                paramInsulationResistance4 = qrand()%25; //число полученное с COM-порта
-                color = (paramInsulationResistance4 < 20) ? "red" : "green";
-                ui->labelInsulationResistance4->setText("3) "+QString::number(paramInsulationResistance4));
-                Log(tr("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>%1</b>").arg(QString::number(paramInsulationResistance4)), color);
-                progressBarSet(1);
-                iStepInsulationResistance++;
-                if (paramInsulationResistance4 < 20) {
-                    ui->rbModeDiagnosticManual->setChecked(true);
-                    ui->rbModeDiagnosticAuto->setEnabled(false);
-                    ui->rbInsulationResistance->setChecked(true);
-                    if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>%1</b> \nпродолжить?").arg(paramInsulationResistance4), tr("Да"), tr("Нет"))) {
-                        ui->btnInsulationResistance_2->setEnabled(true);
-                        bPause = true;
-                        return;
-                    }
-                }
+                param = qrand()%25; //число полученное с COM-порта
+                str = "4) между точкой металлизации и контактом 7 соединителя Х3 «Х3-» = <b>"+QString::number(param)+"</b>";
                 break;
             default:
+                return;
                 break;
+            }
+
+            QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%1").arg(iStepInsulationResistance));
+            label->setText(tr("%1) %2").arg(iStepInsulationResistance).arg(QString::number(param)));
+            Log(str, (param < 20) ? "red" : "green");
+            progressBarSet(1);
+            iStepInsulationResistance++;
+            if (param < 20) {
+                ui->rbModeDiagnosticManual->setChecked(true);
+                ui->rbModeDiagnosticAuto->setEnabled(false);
+                //ui->rbInsulationResistance->setChecked(true);
+                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    ui->btnInsulationResistance_2->setEnabled(true);
+                    bPause = true;
+                    return;
+                }
             }
         }
         ui->btnInsulationResistance_2->setEnabled(false);
@@ -815,26 +745,109 @@ void MainWindow::checkOpenCircuitVoltageGroup()
         while (iStepOpenCircuitVoltageGroup <= 20) {
             if (bPause) return;
             switch (iStepOpenCircuitVoltageGroup) {
-            default:
+            case 1:
                 delay(1000);
-                paramOpenCircuitVoltageGroup1 = qrand()%40+10; //число полученное с COM-порта
-                color = (paramOpenCircuitVoltageGroup1 < 32.3) ? "red" : "green";
-                Log(tr("%1) Между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepOpenCircuitVoltageGroup).arg(paramOpenCircuitVoltageGroup1), color);
-                progressBarSet(1);
-                iStepOpenCircuitVoltageGroup++;
-                if (paramOpenCircuitVoltageGroup1 < 32.3) {
-                    ui->rbModeDiagnosticManual->setChecked(true);
-                    ui->rbModeDiagnosticAuto->setEnabled(false);
-                    ui->rbOpenCircuitVoltageGroup->setChecked(true);
-                    if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%1) Между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b> \nпродолжить?").arg(iStepOpenCircuitVoltageGroup).arg(paramOpenCircuitVoltageGroup1), tr("Да"), tr("Нет"))) {
-                        ui->btnOpenCircuitVoltageGroup_2->setEnabled(true);
-                        bPause = true;
-                        return;
-                    }
-                }
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 2:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 3:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 4:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 5:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 6:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 7:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 8:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 9:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 10:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 11:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 12:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 13:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 14:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 15:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 16:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 17:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 18:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 19:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 20:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            default:
+                return;
                 break;
             }
+
+            QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%1").arg(iStepOpenCircuitVoltageGroup));
+            label->setText(tr("%1) %2").arg(iStepOpenCircuitVoltageGroup).arg(QString::number(param)));
+            str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepOpenCircuitVoltageGroup).arg(QString::number(param));
+            Log(str, (param < 32.3) ? "red" : "green");
+            progressBarSet(1);
+            iStepOpenCircuitVoltageGroup++;
+            if (param < 32.3) {
+                ui->rbModeDiagnosticManual->setChecked(true);
+                ui->rbModeDiagnosticAuto->setEnabled(false);
+                //ui->rbInsulationResistance->setChecked(true);
+                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    ui->btnOpenCircuitVoltageGroup_2->setEnabled(true);
+                    bPause = true;
+                    return;
+                }
+            }
         }
+        ui->btnOpenCircuitVoltageGroup_2->setEnabled(false);
         if (ui->rbModeDiagnosticAuto->isChecked())
             bCheckCompleteClosedCircuitVoltageGroup = true;
         break;
@@ -873,29 +886,147 @@ void MainWindow::checkOpenCircuitVoltageGroup()
  */
 void MainWindow::checkClosedCircuitVoltageGroup()
 {
-    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
+        iStepClosedCircuitVoltageGroup = 1;
+        bPause = false;
+        ui->btnClosedCircuitVoltageGroup_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup_2")
+        bPause = false;
     if (bPause) return;
     ui->groupBoxCOMPort->setEnabled(false);
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
-    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        while (iStepClosedCircuitVoltageGroup <= 1) {
+        ui->progressBar->setValue(iStepClosedCircuitVoltageGroup-1);
+        ui->progressBar->setMaximum(20);
+        while (iStepClosedCircuitVoltageGroup <= 20) {
             if (bPause) return;
             switch (iStepClosedCircuitVoltageGroup) {
             case 1:
                 delay(1000);
-                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
-                progressBarSet(1);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 2:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 3:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 4:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 5:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 6:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 7:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 8:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 9:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 10:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 11:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 12:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 13:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 14:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 15:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 16:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 17:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 18:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 19:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 20:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
                 break;
             default:
+                return;
                 break;
             }
+
+            QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(iStepClosedCircuitVoltageGroup));
+            label->setText(tr("%1) %2").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param)));
+            str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param));
+            Log(str, (param < 32.3) ? "red" : "green");
+            progressBarSet(1);
             iStepClosedCircuitVoltageGroup++;
+            if (param < 32.3) {
+                int ret = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
+                switch (ret) {
+                case 0:
+                    break;
+                case 1:
+                    imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
+                    Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
+                    break;
+                case 2:
+                    ui->btnClosedCircuitVoltageGroup_2->setEnabled(true);
+                    bPause = true;
+                    return;
+                    break;
+                default:
+                    break;
+                }
+                ui->rbModeDiagnosticManual->setChecked(true);
+                ui->rbModeDiagnosticAuto->setEnabled(false);
+                //ui->rbInsulationResistance->setChecked(true);
+                /*if (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    ui->btnClosedCircuitVoltageGroup_2->setEnabled(true);
+                    bPause = true;
+                    return;
+                }*/
+            }
         }
+        if (imDepassivation.count() != 0)
+            ui->rbDepassivation->setEnabled(true);
+        ui->btnClosedCircuitVoltageGroup_2->setEnabled(false);
         if (ui->rbModeDiagnosticAuto->isChecked())
             bCheckCompleteClosedCircuitVoltageGroup = true;
         break;
@@ -929,11 +1060,59 @@ void MainWindow::checkClosedCircuitVoltageGroup()
 }
 
 /*
+ * Распассивация
+ */
+void MainWindow::checkDepassivation()
+{
+    if (((QPushButton*)sender())->objectName() == "btnDepassivation") {
+        iStepDepassivation = 1;
+        bPause = false;
+        ui->btnDepassivation_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnDepassivation_2")
+        bPause = false;
+    if (bPause) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    //ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+    Log(tr("Проверка начата - %1").arg(ui->rbDepassivation->text()), "blue");
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        ui->progressBar->setValue(iStepDepassivation-1);
+        ui->progressBar->setMaximum(imDepassivation.count());
+        while (iStepDepassivation <= imDepassivation.count()) {
+            if (bPause) return;
+            delay(1000);
+            Log(tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4»").arg(imDepassivation.at(iStepDepassivation-1)), "green");
+            progressBarSet(1);
+            iStepDepassivation++;
+        }
+        break;
+    default:
+        break;
+    }
+    Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
+    iStepDepassivation = 1;
+    //ui->rbDepassivation->setEnabled(false);
+    ui->btnDepassivation_2->setEnabled(false);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+}
+
+/*
  * Напряжение замкнутой цепи батареи
  */
 void MainWindow::checkClosedCircuitVoltageBattery()
 {
-    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
+    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageBattery") {
+        iStepClosedCircuitVoltageBattery = 1;
+        bPause = false;
+        ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageBattery_2")
+        bPause = false;
     if (bPause) return;
     ui->groupBoxCOMPort->setEnabled(false);
     ui->groupBoxDiagnosticDevice->setEnabled(false);
@@ -943,19 +1122,23 @@ void MainWindow::checkClosedCircuitVoltageBattery()
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        while (iStepClosedCircuitVoltageBattery <= 1) {
-            if (bPause) return;
-            switch (iStepClosedCircuitVoltageBattery) {
-            case 1:
-                delay(1000);
-                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
-                progressBarSet(1);
-                break;
-            default:
-                break;
+        if (bPause) return;
+        delay(1000);
+        progressBarSet(1);
+        ui->labelClosedCircuitVoltageBattery->setText(tr("1) %2").arg(QString::number(param)));
+        str = tr("1) между контактом 1 соединителя Х1 «1+» и контактом 1 соединителя Х3 «3-» = <b>%2</b>").arg(QString::number(param));
+        Log(str, (param > 30.0) ? "red" : "green");
+        progressBarSet(1);
+        if (param > 30.0) {
+            ui->rbModeDiagnosticManual->setChecked(true);
+            ui->rbModeDiagnosticAuto->setEnabled(false);
+            if (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageBattery->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                ui->btnClosedCircuitVoltageBattery_2->setEnabled(true);
+                bPause = true;
+                return;
             }
-            iStepClosedCircuitVoltageBattery++;
         }
+        ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
         if (ui->rbModeDiagnosticAuto->isChecked())
             bCheckCompleteClosedCircuitVoltageBattery = true;
         break;
