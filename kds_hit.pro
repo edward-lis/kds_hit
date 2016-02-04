@@ -13,8 +13,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    serialport.cpp \
+    checkbatterytype.cpp \
+    finitestatemachine.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    serialport.h
 
 FORMS    += mainwindow.ui
+
+DISTFILES += \
+    KDS_HIT_FSM.odt \
+    AGN_kds_prot09_xit_15.txt

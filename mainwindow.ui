@@ -40,19 +40,9 @@
        <widget class="QComboBox" name="comboBoxCOMPort"/>
       </item>
       <item>
-       <widget class="QPushButton" name="btnCOMPortConnect">
+       <widget class="QPushButton" name="btnCOMPortOpenClose">
         <property name="text">
-         <string>Подключить</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnCOMPortDisconnect">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Отключить</string>
+         <string>Открыть</string>
         </property>
        </widget>
       </item>

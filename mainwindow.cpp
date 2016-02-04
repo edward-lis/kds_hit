@@ -1,11 +1,111 @@
+/* История изменений:
+ * 03.02.2016 -
+ * Добавил класс для работы с последовательным портом.
+ * Добавил конечный автомат (КА).
+ * Логика по открытию последовательного порта.
+ * Добавлен Режим проверки соответствия типа выбранной оператором батареи и типа реально подключенной батареи.
+ */
+
+/* Замечания и план работы:
+ * 1. Сделать вёрстку tabWidget в лэйаут.  Чтобы при ресайзе окна tabWidget растягивался и вправо, и вниз.
+2. При выборе в комбобоксе типа батареи запрещать галку УУТББ для тех батарей, у которых УУТББ бы не может в принципе.
+А именно - 9ER14P-24 и 9ER20P-28. А для 9ER20P-20 и 9ЕR14PS-24 -  разрешать галку.
+
+Добавить прогресс-бар для режима проверки типа подключенной батареи.
+Добавить логику соответствия выбранного на экране порта - реально подключенному. (в одном из случаев есть неопределённость)
+Сейчас программка просто пишет в статус-бар.
+
+Где-то на виду сделать большое табло с буквами, в котором писать текущее состояние: типа идёт такая-то проверка.
+и туда же перетащить прогресс-бар.  Потому что в статус-баре нихрена не видно, там пусть останется инфа о состоянии связи,
+ну и дублируется инфа из табло.
+
+3. Переделать весь исходник под КА. Выкинуть лишнее (предыдущую реализацию последовательного порта, и логику кнопок)
+Добавить на каждый режим проверки батареи свой отдельный файл с КА. Чтобы там отлаживаться отдельно. Там же и вся логика.
+В качестве рыбы - режим открытия порта и режим проверки типа подключенной батареи при нажатии на кнопку "Проверить".
+Начать с какого-нибудь короткого режима, типа проверка изоляции.
+delay/sleep - не нужен в принципе.
+
+Дальнейший план:
+4. Вставить объекты класса батарей, в которых будут находиться все параметры проверяемых батарей - кол-во цепей, предельные значения
+и т.п. Использовать эти данные при режимах проверки батареи.
+5. Добавить ini-файл, в котором будут находиться все константы батарей (строковые, целые, вещественные) для КДС.
+По началу работы разбирать ini-файл и устанавливать параметры батарей в соответствии с.
+6. Добавить класс работы с файлом отчёта и само наполнение файла.
+
+7. График распассивации.
+
+8. !!! Сохранение текущего промежуточного состояния проверки, возобновление проверки с места предыдущей остановки сеанса проверки.
+Текущая проверка - прошедшие проверки, остановка, сохранение незаконченной долгой проверки, и т.д.
+Отчёт продолжить в старом файле, или бахнуть новый? ...
+Использовать журнал событий для.
+*/
+
+/* Соглашения:
+ * 1. три воскл.знака !!! в комментариях - обратить внимание, временный или недоделанный участок кода, важное замечание.
+ * 2. Писать как можно больше ОСМЫСЛЕННЫХ комментариев. Потому что потом хрен вспомнишь, что где и по чём.
+ * 3. Комментировать назначение всех переменных и функций (что, для чего, параметры, возвращаемое значение)
+    (ну, кроме откровенно вспомогательных переменных, типа счётчика цикла).
+ * Желательно в стиле Doxygen. Может быть потом автоматом соберётся хелп по программке.
+ * 4. Имена виджетов и контролов давать с префиксом, отражающим суть виджета - btn_, button_, pushButton_, label_  и т.п.
+ * 5.
+*/
+
+/* Описание начала работы:
+ * При начале работы пользователь должен открыть последовательный порт. Если портов нет, или порт открылся с ошибкой,
+ * то дальнейшая работа невозможна.
+ * Когда порт открылся нормально, периодически посылается пинг, и при нормальном ответе пишется сообщение, что связь установлена.
+ * При отсутствии ответа пишется, что связи нет.
+ * После установления связи с коробком, выдать команду IDLE, для сброса коробка в исходное состояние.
+ *
+ * По протоколу обмена: сначала режим собирается, а потом он опрашивается.
+ */
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    serialPort(new SerialPort),
+    start_work(true)
 {
     ui->setupUi(this);
+
+    //+++ Edward
+    //ui->btnCOMPortDisconnect->hide(); // !!! вообще отключу, за ненадобностью. надо будет выкинуть из формы
+    // Timeout - непериодический. таймаут ответа коробочки
+    timeout = new QTimer;
+    timeout->setSingleShot(true);
+    connect(timeout, SIGNAL(timeout()), this, SLOT(procTimeout()));
+    // Таймер между пингами.  непериодический
+    timerPing = new QTimer;
+    timerPing->setSingleShot(true);
+    //connect(timerPing, SIGNAL(timeout()), this, SLOT(procTimerPing())); // на всякий случай. пока не понадобилось
+    connect(timerPing, SIGNAL(timeout()), this, SLOT(sendPing())); // по окончанию паузы между пингами - послать следующий
+
+    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
+    timerDelay = new QTimer;
+    timerDelay->setSingleShot(true);
+    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
+    timerDelay0 = new QTimer;
+    timerDelay0->setSingleShot(true);
+    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
+    timerDelay1 = new QTimer;
+    timerDelay1->setSingleShot(true);
+
+    delayTime = 0; // обнулим время для timerDelay. потом будет подставляться необходимое кол-во мсек.
+    commandString = "IDLE#"; // init some string
+
+    // посылать данные в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
+    connect(this, SIGNAL(sendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
+    // при получении на порту данных - принимать их в главном окне
+    connect(serialPort, SIGNAL(readySerialData(quint8,QByteArray)), this, SLOT(recvSerialData(quint8,QByteArray)));
+
+    // Настройка и запуск КА
+    setupMachine();
+    //+++
+
+
     ui->groupBoxDiagnosticDevice->setDisabled(true);
     ui->groupBoxDiagnosticMode->setDisabled(true);
     ui->groupBoxCheckParams->setDisabled(true);
@@ -42,9 +142,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //ResetCheck();
     getCOMPorts();
-    com = new QSerialPort(this);
-    connect(ui->btnCOMPortConnect, SIGNAL(clicked(bool)), this, SLOT(openCOMPort()));
-    connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), this, SLOT(closeCOMPort()));
+    //com = new QSerialPort(this);
+    //connect(ui->btnCOMPortConnect, SIGNAL(clicked(bool)), this, SLOT(openCOMPort()));
+    //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), this, SLOT(closeCOMPort()));
     connect(ui->cbIsUUTBB, SIGNAL(toggled(bool)), this, SLOT(isUUTBB()));
     connect(ui->comboBoxBatteryList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedBattery(int)));
     connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->groupBoxCheckParams, SLOT(setDisabled(bool)));
@@ -81,13 +181,109 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
     connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));
     connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
-    connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
+    //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+//+++ Edward ====================================================================================================================
+// Приём данных от последовательного порта
+void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
+{
+    //qDebug()<<"mainwindow.cpp recvSerialData " << data.length() << " bytes " << data.toHex() << " text " << qPrintable(data);
+    // когда приняли данные вовремя - остановить таймаут
+    timeout->stop();
+    //ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть
+
+    if(operation_code == 0x01) // если приняли пинг, то
+    {
+        // следующий пинг пошлётся по окончанию timerPing
+        if(data == PING) // вот тут по-хорошему надо бы по результам анализа ответа делать что-то полезное. только хз.
+        {
+            //qDebug()<<"ping correct";
+            ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть, только при нормальном пинге
+            if(start_work) // если первый ответ после установления связи
+            {
+                // сбросить коробок, послать IDLE
+                // подготовим переменные: текущая команда#, пауза по протоколу, ф-ия разбора рез-та
+                prepareSendIdleToFirstCommand();
+                emit workStart(); // по этому сигналу КА перейдёт в состояние посылки первого сброса коробочки
+            }
+        }
+        else
+        {
+            qDebug()<<"ping incorrect";
+        }
+        return;
+    }
+    if(operation_code == 0x08) // если приняли ответ на команду
+    {
+        // ищем требуемую строку по шаблону
+        //if( data.indexOf(commandString + "OK")>=0 ) // Команда#OK режима отработана
+        if( data.contains("OK") ) // Команда#OK режима отработана/ совсем простенькая проверка на наличии в ответе OK
+        {
+            timerDelay->start(delayTime); // после нормального выполнения команды запустить задержку перед следующим обменом, по протоколу
+            // начинать отсчитывать задержку перед анализом инфы.  во-первых там может подготавливаться следующая команда и глобальная переменная delayTime перепишется
+            // а во-вторых, чего зря простаивать.
+
+            // выполнить ф-ю разбора принятой инфы
+            (this->*funcCommandAnswer)(data);
+        }
+        else // пришла какая-то другая посылка
+        {
+            qDebug()<<"Incorrect reply. Should be "<<(commandString + "OK")<<" but got: "<<data;
+            //emit signalWrongReply(); // по сигналу КА перейдёт в режим готовности/простоя/ожидания
+        }
+    }
+}
+
+// послать пинг
+void MainWindow::sendPing()
+{
+    //qDebug()<<"sendPing";
+    sendSerialData(0x01, PING); // пошлём пинг
+    timeout->start(delay_timeOut); // заведём тайм-аут на не ответ
+    timerPing->start(delay_timerPing); // цикл между пингами
+}
+
+// Посылка подготовленной команды commandString в порт
+void MainWindow::sendCommand()
+{
+    qDebug()<<"sendCommand"<<commandString;
+    timerPing->stop(); // остановим таймеры. отключим пинг и предыдущий таймаут (если вдруг он был)
+    timeout->stop(); //
+    timerDelay->stop(); // остановить таймеры задержек перед выдачей следующих команд после текущей.
+    timerDelay0->stop();
+    timerDelay1->stop();
+    sendSerialData(8, qPrintable(commandString)); // послать команду (8 - это по протоколу)
+    timeout->start(delay_timeOut); // заведём тайм-аут на неответ
+}
+
+// Подготовка команды для её последующей посылки в порт
+void MainWindow::prepareSendCommand(QString cS, int dT, void (MainWindow::*fCA)(QByteArray))
+{
+    // подготовим переменные
+    commandString = cS;
+    delayTime = dT;
+    funcCommandAnswer = fCA; // назначим конкретную ф-ию разбора ответа
+}
+
+// Подготовка команды IDLE с возвратом в первое состояние
+void MainWindow::prepareSendIdleToFirstCommand()
+{
+    prepareSendCommand("IDLE#", delay_after_IDLE_before_other, &onIdleOK);
+}
+
+// нет ответа на запрос
+void MainWindow::procTimeout()
+{
+    qDebug()<<"procTimeout";
+    ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
+}
+//+++
 
 /*
  * УУТББ дополнительные параметры проверки
@@ -128,75 +324,6 @@ void MainWindow::isUUTBB()
     }
 }
 
-/*
- * Проверка проверяемых параметров
- */
-/*void MainWindow::paramCheck()
-{
-    iParamsNumberChecked = 0;
-    paramMsg = "";
-    if (ui->checkBoxVoltageOnTheHousing->isChecked())
-        iParamsNumberChecked = 1;
-    if (ui->checkBoxInsulationResistance->isChecked())
-        iParamsNumberChecked = 2;
-    if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-        iParamsNumberChecked = 3;
-    if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-        iParamsNumberChecked = 4;
-    if (ui->checkBoxClosedCircuitVoltage->isChecked())
-        iParamsNumberChecked = 5;
-    if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-        iParamsNumberChecked = 6;
-    if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-        iParamsNumberChecked = 7;
-    if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-        iParamsNumberChecked = 8;
-    if (iParamsNumberChecked > 0) {
-        for (int i = 0; 0 < iParamsNumberChecked; iParamsNumberChecked--) {
-            switch (i++) {
-            case 1:
-                if (!ui->checkBoxVoltageOnTheHousing->isChecked())
-                    paramMsg += " - Напряжение на корпусе\n";
-                break;
-            case 2:
-                if (!ui->checkBoxInsulationResistance->isChecked())
-                    paramMsg += " - Сопротивление изоляции\n";
-                break;
-            case 3:
-                if (!ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-                    paramMsg += " - Напряжение разомкнутой цепи группы\n";
-                break;
-            case 4:
-                if (!ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-                    paramMsg += " - Напряжение замкнутой цепи группы\n";
-                break;
-            case 5:
-                if (!ui->checkBoxClosedCircuitVoltage->isChecked())
-                    paramMsg += " - Напряжение замкнутой цепи батареи\n";
-                break;
-            case 6:
-                if (!ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-                    paramMsg += " - Сопротивление изоляции платы измерительной УУТББ\n";
-                break;
-            case 7:
-                if (!ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-                    paramMsg += " - Напряжение разомкнутой цепи блока питания\n";
-                break;
-            case 8:
-                if (!ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-                    paramMsg += " - Напряжение замкнутой цепи блока питания";
-                break;
-            default:
-                break;
-            }
-        }
-        if (paramMsg.length() > 0)
-            iStartCheck = QMessageBox::question(this, "Внимание", "Вы уверны что хотите пропустить следующие этапы проверки?\n"+paramMsg, tr("Да"), tr("Нет"));
-    } else {
-        iStartCheck = QMessageBox::information(this, "Внимание", "Вы должны выбрать проверяемый параметр.");
-    }
-    Log(tr("[ОТЛАДКА] iParamsNumberChecked=%1").arg(iParamsNumberChecked), "blue");
-}*/
 
 /*
  * Прогресс бар шаг вперед
@@ -205,122 +332,6 @@ void MainWindow::progressBarSet(int iVal)
 {
     ui->progressBar->setValue(ui->progressBar->value()+iVal);
 }
-
-/*
- * Прогресс бар установка максимума
- */
-/*void MainWindow::progressBarSetMaximum()
-{
-    ui->progressBar->setValue(0);
-    iAllSteps = 0;
-    switch (iBatteryCurrentIndex) {
-    case 1: //Самодиагностика с помощью имитатора батареи
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        break;
-    case 2: //9ER20P-20
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 4;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 20;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 60;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        break;
-    case 3: //9ER20P-20 (УУТББ)
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 4;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 20;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 60;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        break;
-    case 4: //9ER20P-28
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 4;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 28;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 84;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        break;
-    case 5: //9ER14P-24
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 24;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 72;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        break;
-    case 6: //9ER14PS-24
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 24;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 72;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        break;
-    case 7: //9ER14PS-24 (УУТББ)
-        if (ui->checkBoxVoltageOnTheHousing->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxInsulationResistance->isChecked())
-            iAllSteps += 2;
-        if (ui->checkBoxBatteryOpenCircuitVoltageGroup->isChecked())
-            iAllSteps += 24;
-        if (ui->checkBoxBatteryClosedCircuitVoltageGroup->isChecked())
-            iAllSteps += 72;
-        if (ui->checkBoxClosedCircuitVoltage->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryInsulationResistanceMeasuringBoardUUTBB->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryOpenCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        if (ui->checkBoxBatteryClosedCircuitVoltagePowerSupply->isChecked())
-            iAllSteps += 1;
-        break;
-    default:
-        break;
-    }
-    ui->progressBar->setMaximum(iAllSteps);
-}*/
 
 /*
  * COM Порт получения списка портов
@@ -337,109 +348,6 @@ void MainWindow::getCOMPorts()
 }
 
 /*
- * COM Порт установка соединения
- */
-void MainWindow::openCOMPort()
-{
-    com->setPortName(ui->comboBoxCOMPort->currentText());
-    com->setBaudRate(QSerialPort::Baud115200);
-    com->setDataBits(QSerialPort::Data8);
-    com->setParity(QSerialPort::NoParity);
-    com->setStopBits(QSerialPort::OneStop);
-    com->setFlowControl(QSerialPort::NoFlowControl);
-    if (com->open(QIODevice::ReadWrite)) {
-        Log(tr("[COM Порт] - Соединение установлено на порт %1.").arg(ui->comboBoxCOMPort->currentText()), "green");
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-            if (info.portName() == ui->comboBoxCOMPort->currentText()) {
-                Log(tr("[COM Порт] - Описание: %1.").arg(info.description()), "blue");
-            }
-        }
-        ui->btnCOMPortConnect->setEnabled(false);
-        ui->btnCOMPortDisconnect->setEnabled(true);
-        ui->comboBoxCOMPort->setEnabled(true);
-        ui->groupBoxDiagnosticDevice->setEnabled(true);
-        ui->groupBoxDiagnosticMode->setEnabled(true);
-        ui->groupBoxCheckParams->setEnabled(true);
-    } else {
-        Log(tr("[COM Порт] - Ошибка устройства: %1.").arg(com->errorString()), "red");
-    }
-}
-
-/*
- * COM Порт запись данных
- */
-void MainWindow::writeCOMPortData()
-{
-    QByteArray data;
-    //data.append(ui->lineEditCOMPortCommand->text());
-    com->write(data);
-    //Log(tr("[COM Порт] - Отправка: %1").arg(ui->lineEditCOMPortCommand->text()), "green");
-}
-
-/*
- * COM Порт чтение данных
- */
-void MainWindow::readCOMPortData()
-{
-    QByteArray data = com->readAll();
-    Log(tr("[COM Порт] - Получение: %1").arg(QString(data)), "blue");
-}
-
-/*
- * COM Порт отключение
- */
-void MainWindow::closeCOMPort()
-{
-    if (com->isOpen()) {
-        com->close();
-        ui->btnCOMPortDisconnect->setEnabled(false);
-        ui->btnCOMPortConnect->setEnabled(true);
-        ui->comboBoxCOMPort->setEnabled(true);
-        ui->groupBoxDiagnosticDevice->setEnabled(false);
-        ui->groupBoxDiagnosticMode->setEnabled(false);
-        ui->groupBoxCheckParams->setEnabled(false);
-        ui->btnStartAutoModeDiagnostic->setEnabled(false);
-    }
-    Log("[COM Порт] - Соединение разъединено.", "red");
-}
-
-/*
- * Включение отключение элементов
- */
-/*void MainWindow::setEnabled(bool flag)
-{
-    if(com->isOpen()) {
-        ui->btnCOMPortDisconnect->setEnabled(true);
-        ui->btnCOMPortConnect->setEnabled(false);
-        ui->comboBoxCOMPort->setEnabled(false);
-    } else {
-        ui->btnCOMPortDisconnect->setEnabled(false);
-        ui->btnCOMPortConnect->setEnabled(true);
-        ui->comboBoxCOMPort->setEnabled(true);
-    }
-
-    ui->comboBoxBatteryList->setEnabled(flag);
-    ui->btnCheckConnectedBattery->setEnabled(flag);
-    ui->dateEditBatteryBuild->setEnabled(flag);
-    ui->lineEditBatteryNumber->setEnabled(flag);
-    //ui->rbModeDiagnosticAuto->setEnabled(flag);
-    //ui->rbModeDiagnosticManual->setEnabled(flag);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
-    //ui->groupBoxCheckParams->setEnabled(flag);
-    if (ui->rbModeDiagnosticManual->isChecked()) {
-        ui->rbVoltageOnTheHousing->setEnabled(flag);
-        ui->btnVoltageOnTheHousing->setEnabled(flag);
-    } else {
-        ui->rbVoltageOnTheHousing->setEnabled(!flag);
-        ui->btnVoltageOnTheHousing->setEnabled(!flag);
-    }
-    if(iBatteryCurrentIndex == 0 or iBatteryCurrentIndex == 1 or iBatteryCurrentIndex == 4 ) {
-        ui->checkBoxUUTBB->setEnabled(flag);
-    }
-    ui->btnStartCheckAll->setEnabled(flag);
-}*/
-
-/*
  * Задержка в милисекундах
  */
 void MainWindow::delay( int millisecondsToWait )
@@ -451,15 +359,6 @@ void MainWindow::delay( int millisecondsToWait )
     }
 }
 
-/*
- * Сброс параметров проверки
- */
-void MainWindow::resetCheck()
-{
-    iStep = 0;
-    iAllSteps = 0;
-    //QLabel * label = findChild<QLabel*>("label*");
-}
 
 /*
  * Выбор батареи
