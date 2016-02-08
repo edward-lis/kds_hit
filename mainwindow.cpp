@@ -110,12 +110,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->groupBoxDiagnosticMode->setDisabled(true);
     ui->groupBoxCheckParams->setDisabled(true);
     ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
+    ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
     ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
     ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
     ui->rbOpenCircuitVoltagePowerSupply->hide();
+    ui->cbOpenCircuitVoltagePowerSupply->hide();
     ui->btnOpenCircuitVoltagePowerSupply->hide();
     ui->btnOpenCircuitVoltagePowerSupply_2->hide();
     ui->rbClosedCircuitVoltagePowerSupply->hide();
+    ui->cbClosedCircuitVoltagePowerSupply->hide();
     ui->btnClosedCircuitVoltagePowerSupply->hide();
     ui->btnClosedCircuitVoltagePowerSupply_2->hide();
 
@@ -152,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->rbVoltageOnTheHousing, SLOT(setEnabled(bool)));
     //connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->btnPauseAutoModeDiagnostic, SLOT(setDisabled(bool)));
     connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->btnVoltageOnTheHousing, SLOT(setEnabled(bool)));
+    connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->cbVoltageOnTheHousing, SLOT(setEnabled(bool)));
     connect(ui->rbInsulationResistance, SIGNAL(toggled(bool)), ui->btnInsulationResistance, SLOT(setEnabled(bool)));
     connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
@@ -180,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
     connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
     connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));
-    connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
+    //connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
     //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
 }
 
@@ -303,22 +307,28 @@ void MainWindow::isUUTBB()
 {
     if (ui->cbIsUUTBB->isChecked()) {
         ui->rbInsulationResistanceMeasuringBoardUUTBB->show();
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->show();
         ui->btnInsulationResistanceMeasuringBoardUUTBB->show();
         ui->btnInsulationResistanceMeasuringBoardUUTBB_2->show();
         ui->rbOpenCircuitVoltagePowerSupply->show();
+        ui->cbOpenCircuitVoltagePowerSupply->show();
         ui->btnOpenCircuitVoltagePowerSupply->show();
         ui->btnOpenCircuitVoltagePowerSupply_2->show();
         ui->rbClosedCircuitVoltagePowerSupply->show();
+        ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply_2->show();
     } else {
         ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
         ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
         ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
         ui->rbOpenCircuitVoltagePowerSupply->hide();
+        ui->cbOpenCircuitVoltagePowerSupply->hide();
         ui->btnOpenCircuitVoltagePowerSupply->hide();
         ui->btnOpenCircuitVoltagePowerSupply_2->hide();
         ui->rbClosedCircuitVoltagePowerSupply->hide();
+        ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply_2->hide();
     }
@@ -398,7 +408,7 @@ void MainWindow::checkAutoModeDiagnostic()
     ui->groupBoxCOMPort->setEnabled(false);
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
-    ui->btnPauseAutoModeDiagnostic->setEnabled(true);
+    //ui->btnPauseAutoModeDiagnostic->setEnabled(true);
     ui->btnBuildReport->setEnabled(false);
     if(!bCheckCompleteVoltageOnTheHousing)
         checkVoltageOnTheHousing();
@@ -424,7 +434,7 @@ void MainWindow::checkAutoModeDiagnostic()
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);
     ui->groupBoxDiagnosticMode->setEnabled(true);
-    ui->btnPauseAutoModeDiagnostic->setEnabled(false);
+    //ui->btnPauseAutoModeDiagnostic->setEnabled(false);
     ui->btnBuildReport->setEnabled(true);
     Log("Проверка завершена - Автоматический режим", "blue");
     Log(tr("[ОТЛАДКА] progressBarValue= %1, progressBarMaximum= %2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()), "blue");
@@ -436,6 +446,12 @@ void MainWindow::checkAutoModeDiagnostic()
 void MainWindow::checkVoltageOnTheHousing()
 {
     if (((QPushButton*)sender())->objectName() == "btnVoltageOnTheHousing") {
+        /*if (((QPushButton*)sender())->isDown()) {
+            ((QPushButton*)sender())->setText(tr("Стоп"));
+
+        } else {
+            ((QPushButton*)sender())->setText(tr("Пуск"));
+        }*/
         iStepVoltageOnTheHousing = 1;
         bPause = false;
         ui->btnVoltageOnTheHousing_2->setEnabled(false);
@@ -474,8 +490,6 @@ void MainWindow::checkVoltageOnTheHousing()
             QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%1").arg(iStepVoltageOnTheHousing));
             label->setText(tr("%1) %2").arg(iStepVoltageOnTheHousing).arg(QString::number(param)));
             Log(str, (param > 1) ? "red" : "green");
-            progressBarSet(1);
-            iStepVoltageOnTheHousing++;
             if (param > 1) {
                 ui->rbModeDiagnosticManual->setChecked(true);
                 ui->rbModeDiagnosticAuto->setEnabled(false);
@@ -485,6 +499,8 @@ void MainWindow::checkVoltageOnTheHousing()
                     return;
                 }
             }
+            progressBarSet(1);
+            iStepVoltageOnTheHousing++;
         }
         if (ui->rbModeDiagnosticAuto->isChecked())
             bCheckCompleteVoltageOnTheHousing = true;
@@ -572,8 +588,6 @@ void MainWindow::checkInsulationResistance()
             QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%1").arg(iStepInsulationResistance));
             label->setText(tr("%1) %2").arg(iStepInsulationResistance).arg(QString::number(param)));
             Log(str, (param < 20) ? "red" : "green");
-            progressBarSet(1);
-            iStepInsulationResistance++;
             if (param < 20) {
                 ui->rbModeDiagnosticManual->setChecked(true);
                 ui->rbModeDiagnosticAuto->setEnabled(false);
@@ -584,6 +598,8 @@ void MainWindow::checkInsulationResistance()
                     return;
                 }
             }
+            progressBarSet(1);
+            iStepInsulationResistance++;
         }
         ui->btnInsulationResistance_2->setEnabled(false);
         if (ui->rbModeDiagnosticAuto->isChecked())
@@ -733,8 +749,6 @@ void MainWindow::checkOpenCircuitVoltageGroup()
             label->setText(tr("%1) %2").arg(iStepOpenCircuitVoltageGroup).arg(QString::number(param)));
             str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepOpenCircuitVoltageGroup).arg(QString::number(param));
             Log(str, (param < 32.3) ? "red" : "green");
-            progressBarSet(1);
-            iStepOpenCircuitVoltageGroup++;
             if (param < 32.3) {
                 ui->rbModeDiagnosticManual->setChecked(true);
                 ui->rbModeDiagnosticAuto->setEnabled(false);
@@ -745,6 +759,8 @@ void MainWindow::checkOpenCircuitVoltageGroup()
                     return;
                 }
             }
+            progressBarSet(1);
+            iStepOpenCircuitVoltageGroup++;
         }
         ui->btnOpenCircuitVoltageGroup_2->setEnabled(false);
         if (ui->rbModeDiagnosticAuto->isChecked())
@@ -894,8 +910,6 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             label->setText(tr("%1) %2").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param)));
             str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param));
             Log(str, (param < 32.3) ? "red" : "green");
-            progressBarSet(1);
-            iStepClosedCircuitVoltageGroup++;
             if (param < 32.3) {
                 int ret = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
                 switch (ret) {
@@ -922,6 +936,8 @@ void MainWindow::checkClosedCircuitVoltageGroup()
                     return;
                 }*/
             }
+            progressBarSet(1);
+            iStepClosedCircuitVoltageGroup++;
         }
         if (imDepassivation.count() != 0)
             ui->rbDepassivation->setEnabled(true);

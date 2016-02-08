@@ -82,7 +82,7 @@ void MainWindow::enterStateSerialPortClose()
     ui->comboBoxCOMPort->setEnabled(true); // и разрешим комбобокс выбора порта
     ui->statusBar->showMessage(tr("Порт закрыт"));
     Log(tr("[COM Порт] - Порт закрыт"), "red");
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->btnCheckConnectedBattery->setEnabled(false); // запретим тыцкать в проверку батареи
 
 
@@ -98,6 +98,9 @@ void MainWindow::enterStateSerialPortOpening()
     {
         ui->statusBar->showMessage(tr("Нет последовательных портов"));
         Log(tr("[COM Порт] - Порт закрыт"), "red");
+        ui->groupBoxDiagnosticDevice->setEnabled(false);
+        ui->groupBoxDiagnosticMode->setEnabled(false);
+        ui->groupBoxCheckParams->setEnabled(false);
         return;
     }
     if(serialPort->openPort(ui->comboBoxCOMPort->currentText())) // открыть порт. если он открылся нормально
@@ -107,6 +110,9 @@ void MainWindow::enterStateSerialPortOpening()
         Log(tr("[COM Порт] - Порт %1 открыт").arg(ui->comboBoxCOMPort->currentText()), "green");
         ui->btnCOMPortOpenClose->setText(tr("Закрыть")); // в этом состоянии напишем такие буквы на кнопке
         ui->comboBoxCOMPort->setEnabled(false); // и запретим выбор ком-порта
+        ui->groupBoxDiagnosticDevice->setEnabled(true);
+        ui->groupBoxDiagnosticMode->setEnabled(true);
+        ui->groupBoxCheckParams->setEnabled(true);
         emit signalSerialPortOpened(); // сигнал КА, что порт открылся
     }
     else // если порт не открылся
