@@ -177,7 +177,8 @@ void MainWindow::prepareCheckBatteryType()
     sendCommand(); // посылка команды
     ui->statusBar->showMessage(tr("Проверка типа подключенной батареи..."));
     // !!! тут бахнуть начало крутилочки прогресс-бара
-    ui->progressBarBatteryCheck->setValue(1);
+    ui->progressBar->setMaximum(6);
+    ui->progressBar->setValue(1);
     Log(tr("Проверка типа подключенной батареи"), "blue");
 }
 
@@ -188,7 +189,7 @@ void MainWindow::onstateCheckPolarB(QByteArray data)
     // Здесь провести разбор строки!!!
     // и подготовить тут след режим
     prepareSendCommand("PolarB?#", delay_command_after_request_before_next, &onstateCheckPolarBPoll);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // Анализ определения полярности
@@ -212,7 +213,7 @@ void MainWindow::onstateCheckPolarBPoll(QByteArray data)
         prepareSendCommand("IDLE#", delay_after_IDLE_before_other, &onstateCheckPolarBIdleUocPB);
         timerDelay1->start(delay_command_after_request_before_next);
     }
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // завершение режима и сборка следующего
@@ -220,7 +221,7 @@ void MainWindow::onstateCheckPolarBIdleTypeB(QByteArray data)
 {
     qDebug()<<"onstateCheckPolarBIdleTypeB"<<data;
     prepareSendCommand("TypeB 28#", delay_command_after_start_before_request, &onstateCheckTypeB);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // завершение режима и сборка следующего
@@ -228,7 +229,7 @@ void MainWindow::onstateCheckPolarBIdleUocPB(QByteArray data)
 {
     qDebug()<<"onstateCheckPolarBIdleUocPB"<<data;
     prepareSendCommand("UocPB#", delay_command_after_start_before_request, &onstateCheckUocPB);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // Собран режим проверки подтипа батареи, подготовка опроса подтипа батареи
@@ -236,7 +237,7 @@ void MainWindow::onstateCheckTypeB(QByteArray data)
 {
     qDebug()<<"onstateCheckTypeB" << data;
     prepareSendCommand("TypeB?#", delay_command_after_request_before_next, &onstateCheckTypeBPoll);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // Анализ подтипа батареи
@@ -252,7 +253,7 @@ void MainWindow::onstateCheckTypeBPoll(QByteArray data)
         ::y=2;
         ui->statusBar->showMessage(::type[::x][::y]);
         // !!! где-то надо будет проверить соответствие подключенной батареи к выбранной, и остановить крутилочку прогресс-бара
-        ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+        ui->progressBar->setValue(ui->progressBar->value()+1);
         Log(::type[::x][::y], "blue");
         prepareSendIdleToFirstCommand(); // выход в первое состояние, конец алгоритма
         timerDelay1->start(delay_command_after_request_before_next); // тут тоже можно сократить timerDelay1 до timerDelay. но оставим для ясности
@@ -262,7 +263,7 @@ void MainWindow::onstateCheckTypeBPoll(QByteArray data)
         prepareSendCommand("IDLE#", delay_after_IDLE_before_other, &onstateCheckTypeBIdleUocPB);
         timerDelay0->start(delay_command_after_request_before_next);
     }
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // Завершение режима и сборка следующего, проверка напряжения БП УУТББ
@@ -270,7 +271,7 @@ void MainWindow::onstateCheckTypeBIdleUocPB(QByteArray data)
 {
     qDebug()<<"onstateCheckTypeBIdleUocPB" << data;
     prepareSendCommand("UocPB#", delay_command_after_start_before_request, &onstateCheckUocPB);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // режим собран, подготовка опроса
@@ -278,7 +279,7 @@ void MainWindow::onstateCheckUocPB(QByteArray data)
 {
     qDebug()<<"onstateCheckUocPB"<<data;
     prepareSendCommand("UocPB?#", delay_command_after_request_before_next, &onstateCheckUocPBPoll);
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
 // Анализ наличия напряжения БП УУТББ
@@ -297,7 +298,7 @@ void MainWindow::onstateCheckUocPBPoll(QByteArray data)
         ::y=1;
     }
     prepareSendIdleToFirstCommand(); // выход в первое состояние, конец алгоритма
-    ui->progressBarBatteryCheck->setValue(ui->progressBarBatteryCheck->value()+1);
+    ui->progressBar->setValue(ui->progressBar->value()+1);
     ui->statusBar->showMessage(::type[::x][::y]);
     Log(::type[::x][::y], "blue");
     // !!! где-то надо будет проверить соответствие подключенной батареи к выбранной, и остановить крутилочку прогресс-бара

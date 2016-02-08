@@ -140,7 +140,6 @@ private:
 
 public slots:
     void checkAutoModeDiagnostic();
-    void isUUTBB();
     void setPause();
     void handleSelectionChangedBattery(int index);
     void Log(QString message, QString color);
@@ -195,6 +194,17 @@ signals:
    //void signalWrongReply();
    //+++
 
+private slots:
+   void on_rbModeDiagnosticAuto_toggled(bool checked);
+   void on_rbModeDiagnosticManual_toggled(bool checked);
+   void on_rbVoltageOnTheHousing_toggled(bool checked);
+   void on_rbInsulationResistance_toggled(bool checked);
+   void on_rbOpenCircuitVoltageGroup_toggled(bool checked);
+   void on_rbClosedCircuitVoltageGroup_toggled(bool checked);
+   void on_rbDepassivation_toggled(bool checked);
+   void on_rbClosedCircuitVoltageBattery_toggled(bool checked);
+   void on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked);
+   void on_cbIsUUTBB_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H
