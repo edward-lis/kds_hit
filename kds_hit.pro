@@ -16,10 +16,12 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     serialport.cpp \
     checkbatterytype.cpp \
-    finitestatemachine.cpp
+    finitestatemachine.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
-    serialport.h
+    serialport.h \
+    qcustomplot.h
 
 FORMS    += mainwindow.ui
 

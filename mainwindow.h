@@ -16,6 +16,8 @@
 #include <QStateMachine>
 
 #include "serialport.h"
+#include "qcustomplot.h"
+
 
 #define OFFLINE     "Нет связи"             // забить в ини-файл, сделать строкой
 #define ONLINE      "Связь установлена"
@@ -43,6 +45,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    QCustomPlot *customPlot;
 
     //+++ Edward
     /// Конечный автомат
@@ -85,6 +88,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QStandardItemModel *model;
     int iStartCheck;
     int iBatteryIndex;
     int iStep;
@@ -195,6 +199,7 @@ signals:
    //+++
 
 private slots:
+   void itemChanged(QStandardItem*);
    void on_rbModeDiagnosticAuto_toggled(bool checked);
    void on_rbModeDiagnosticManual_toggled(bool checked);
    void on_rbVoltageOnTheHousing_toggled(bool checked);
@@ -205,6 +210,8 @@ private slots:
    void on_rbClosedCircuitVoltageBattery_toggled(bool checked);
    void on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked);
    void on_cbIsUUTBB_toggled(bool checked);
+   void on_pushButton_clicked();
+   void on_cbInsulationResistance_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H

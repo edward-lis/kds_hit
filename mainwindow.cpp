@@ -70,6 +70,23 @@ MainWindow::MainWindow(QWidget *parent) :
     start_work(true)
 {
     ui->setupUi(this);
+    model = new QStandardItemModel(5, 1); // 4 rows, 1 col
+    for (int r = 0; r < 5; ++r)
+    {
+        QStandardItem* item;
+        if(r == 0)
+            item = new QStandardItem(QString("Все"));
+        else
+            item = new QStandardItem(QString("%0").arg(r));
+
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+
+        model->setItem(r, 0, item);
+    }
+
+    ui->cbInsulationResistance->setModel(model);
+    connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChanged(QStandardItem*)));
 
     //+++ Edward
     //ui->btnCOMPortDisconnect->hide(); // !!! вообще отключу, за ненадобностью. надо будет выкинуть из формы
@@ -186,6 +203,56 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));
     //connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
     //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
+
+    /*QStandardItemModel model(3, 1); // 3 rows, 1 col
+    for (int r = 0; r < 3; ++r)
+    {
+        QStandardItem* item = new QStandardItem(QString("Item %0").arg(r));
+        item->setText("test");
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        model.setItem(r, 0, item);
+    }
+    ui->cbInsulationResistance->setModel(&model);*/
+
+
+    /*connect(model, SIGNAL(dataChanged ( const QModelIndex&, const QModelIndex&)), this, SLOT(slot_changed(const QModelIndex&, const QModelIndex&)));*/
+    /*Model = new QStandardItemModel;
+    this->Item1 = new QStandardItem;
+    this->Item1->setText("test");
+    this->Item1->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+    this->Item1->setData(Qt::Unchecked, Qt::CheckStateRole);
+    this->Model->insertRow(0, this->Item1);
+    ui->cbInsulationResistance->setModel(&Model);*/
+}
+void MainWindow::itemChanged(QStandardItem* itm)
+{
+    QString text = itm->data(Qt::DisplayRole).toString();
+    if(text == QString("Все"))
+    {
+        Qt::CheckState checkState = itm->checkState();
+        if(checkState == Qt::Checked)
+        {
+           qDebug() << "Qt::Checked";
+           for(int i=1; i < model->rowCount(); i++)
+           {
+               QStandardItem *sitm = model->item(i, 0);
+               sitm->setData(Qt::Checked, Qt::CheckStateRole);
+           }
+
+        }
+        else if(checkState == Qt::Unchecked)
+        {
+            qDebug() << "Qt::Unchecked";
+            for(int i=1; i < model->rowCount(); i++)
+            {
+                QStandardItem *sitm = model->item(i, 0);
+                sitm->setData(Qt::Unchecked, Qt::CheckStateRole);
+            }
+        }
+    }
+
+    ui->cbInsulationResistance->setModel(this->model);
 }
 
 MainWindow::~MainWindow()
@@ -428,7 +495,7 @@ void MainWindow::checkVoltageOnTheHousing()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -516,7 +583,7 @@ void MainWindow::checkInsulationResistance()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -616,7 +683,7 @@ void MainWindow::checkOpenCircuitVoltageGroup()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -777,7 +844,8 @@ void MainWindow::checkClosedCircuitVoltageGroup()
     ui->groupBoxCOMPort->setEnabled(false);
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
-    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -998,7 +1066,7 @@ void MainWindow::checkClosedCircuitVoltageBattery()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -1062,7 +1130,7 @@ void MainWindow::checkInsulationResistanceMeasuringBoardUUTBB()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabInsulationResistanceMeasuringBoardUUTBB, ui->rbInsulationResistanceMeasuringBoardUUTBB->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -1123,7 +1191,7 @@ void MainWindow::checkOpenCircuitVoltagePowerSupply()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -1183,7 +1251,7 @@ void MainWindow::checkClosedCircuitVoltagePowerSupply()
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
-    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
@@ -1230,6 +1298,7 @@ void MainWindow::checkClosedCircuitVoltagePowerSupply()
     ui->groupBoxDiagnosticDevice->setEnabled(true);
     ui->groupBoxDiagnosticMode->setEnabled(true);
 }
+
 
 void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 {
@@ -1320,4 +1389,115 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->btnClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply_2->hide();
     }
+}
+
+
+// add two new graphs and set their look:
+/*customPlot->addGraph();
+customPlot->graph(0)->setPen(QPen(Qt::blue)); // line color blue for first graph
+customPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20))); // first graph will be filled with translucent blue
+customPlot->addGraph();
+customPlot->graph(1)->setPen(QPen(Qt::red)); // line color red for second graph
+// generate some points of data (y0 for first, y1 for second graph):
+QVector<double> x(250), y0(250), y1(250);
+for (int i=0; i<250; ++i)
+{
+  x[i] = i;
+  y0[i] = qExp(-i/150.0)*qCos(i/10.0); // exponentially decaying cosine
+  y1[i] = qExp(-i/150.0);              // exponential envelope
+}
+// configure right and top axis to show ticks but no labels:
+// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
+customPlot->xAxis2->setVisible(true);
+customPlot->xAxis2->setTickLabels(false);
+customPlot->yAxis2->setVisible(true);
+customPlot->yAxis2->setTickLabels(false);
+// make left and bottom axes always transfer their ranges to right and top axes:
+connect(customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->xAxis2, SLOT(setRange(QCPRange)));
+connect(customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->yAxis2, SLOT(setRange(QCPRange)));
+// pass data points to graphs:
+customPlot->graph(0)->setData(x, y0);
+customPlot->graph(1)->setData(x, y1);
+// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
+customPlot->graph(0)->rescaleAxes();
+// same thing for graph 1, but only enlarge ranges (in case graph 1 is smaller than graph 0):
+customPlot->graph(1)->rescaleAxes(true);
+// Note: we could have also just called customPlot->rescaleAxes(); instead
+// Allow user to drag axis ranges with mouse, zoom with mouse wheel and select graphs by clicking:
+customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);*/
+
+void MainWindow::on_pushButton_clicked()
+{
+    int h = 100; //Шаг, с которым будем пробегать по оси Ox
+    QVector<double> x(20), y(20); //Массивы координат точек
+
+    ui->widgetClosedCircuitVoltageGroup->clearGraphs();
+    for (int i=0; i<20; i++)
+    {
+        x[i] = h*i;
+        y[i] = qrand()%40+10;;
+
+    }
+    ui->widgetClosedCircuitVoltageGroup->addGraph();
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::green));
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->setData(x, y);
+    /*for (int i=0; i<20; i++)
+    {
+        x[i] = h*i;
+        y[i] = qrand()%40+10;;
+
+    }
+    ui->widgetClosedCircuitVoltageGroup->addGraph();
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::blue));
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setData(x, y);
+    for (int i=0; i<20; i++)
+    {
+        x[i] = h*i;
+        y[i] = qrand()%40+10;;
+
+    }
+    ui->widgetClosedCircuitVoltageGroup->addGraph();
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setData(x, y);*/
+
+    //ui->widgetClosedCircuitVoltageGroup->clearGraphs();//Если нужно, но очищаем все графики
+    //Добавляем один график в widget
+    ui->widgetClosedCircuitVoltageGroup->addGraph();
+    //ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
+    //ui->widgetClosedCircuitVoltageGroup->graph(0)->setData(x, y);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetClosedCircuitVoltageGroup->yAxis->grid()->setSubGridVisible(true);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->grid()->setSubGridVisible(true);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setSubTickCount(10);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, 360);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33); //
+    ui->widgetClosedCircuitVoltageGroup->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+    ui->widgetClosedCircuitVoltageGroup->axisRect()->setupFullAxesBox();
+    //ui->widgetClosedCircuitVoltageGroup->replot();
+
+    /*ui->widgetOpenCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
+    ui->widgetOpenCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
+
+    ui->widgetOpenCircuitVoltageGroup->yAxis->grid()->setSubGridVisible(true);
+    ui->widgetOpenCircuitVoltageGroup->xAxis->grid()->setSubGridVisible(true);
+    ui->widgetOpenCircuitVoltageGroup->yAxis->setSubTickCount(10);
+
+    // set axes ranges, so we see all data:
+    ui->widgetOpenCircuitVoltageGroup->xAxis->setRange(0, 120000/1000);
+    ui->widgetOpenCircuitVoltageGroup->yAxis->setRange(24, 33); //
+
+    // make range draggable and zoomable:
+    ui->widgetOpenCircuitVoltageGroup->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+
+    // make top right axes clones of bottom left axes:
+    ui->widgetOpenCircuitVoltageGroup->axisRect()->setupFullAxesBox();
+    // connect signals so top and right axes move in sync with bottom and left axes:
+    connect(ui->widgetOpenCircuitVoltageGroup->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->widgetOpenCircuitVoltageGroup->xAxis2, SLOT(setRange(QCPRange)));
+    connect(ui->widgetOpenCircuitVoltageGroup->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->widgetOpenCircuitVoltageGroup->yAxis2, SLOT(setRange(QCPRange)));*/
+}
+
+void MainWindow::on_cbInsulationResistance_currentIndexChanged(const QString &arg1)
+{
+
 }
