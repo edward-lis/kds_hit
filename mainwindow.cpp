@@ -60,12 +60,17 @@ delay/sleep - не нужен в принципе.
  * По протоколу обмена: сначала режим собирается, а потом он опрашивается.
  */
 
+#include <QShortcut>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+QVector<Battery> battery;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    settings(0),
     serialPort(new SerialPort),
     start_work(true)
 {
@@ -89,7 +94,27 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChanged(QStandardItem*)));
 
     //+++ Edward
-    //ui->btnCOMPortDisconnect->hide(); // !!! вообще отключу, за ненадобностью. надо будет выкинуть из формы
+    // загрузить конфигурационные установки и параметры батарей из ini-файла.
+    // файл находится в том же каталоге, что и исполняемый.
+    settings.loadSettings();
+
+    // по комбинации клавиш Ctrl-R перезагрузить ini-файл настроек settings.loadSettings();
+    QShortcut *reloadSettings = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this);
+    connect(reloadSettings, SIGNAL(activated()), &settings, SLOT(loadSettings()));
+    //reloadSettings->setContext(Qt::ShortcutContext::ApplicationShortcut);
+
+    // Добавить в комбобокс наименования батарей, считанных из ини-файла
+    for(int i=0; i<settings.num_batteries_types; i++)
+    {
+        ui->comboBoxBatteryList->addItem(battery[i].str_type_name);
+    }
+    // !!! написать во всех других виджетах соответствующие текущей батарее строки
+    ui->cbVoltageOnTheHousing->setItemText(0, battery[0].str_voltage_corpus[0]);
+    ui->cbVoltageOnTheHousing->setItemText(1, battery[0].str_voltage_corpus[1]);
+
+    coefADC1 = settings.coefADC1;
+    coefADC2 = settings.coefADC2;
+
     // Timeout - непериодический. таймаут ответа коробочки
     timeout = new QTimer;
     timeout->setSingleShot(true);
@@ -182,7 +207,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
     //connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(int)), this, SLOT(checkVoltageOnTheHousing(iBatteryIndex, iStepVoltageOnTheHousing)));
-    connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
+//Ed remove    connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
     connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
     connect(ui->btnOpenCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
@@ -408,15 +433,18 @@ void MainWindow::delay( int millisecondsToWait )
  */
 void MainWindow::handleSelectionChangedBattery(int index)
 {
-    if (index == 0 or index == 3) {
+    if (index == 0 or index == 1) {
         ui->cbIsUUTBB->setEnabled(true);
     } else {
         ui->cbIsUUTBB->setEnabled(false);
         ui->cbIsUUTBB->setChecked(false);
-
     }
 
-    iBatteryIndex = QString::number(index).toInt();
+    iBatteryIndex = index; // зачем целое преобразовывать в строку, а потом обратно в целое? - QString::number(index).toInt();
+
+    // !!! написать во всех других виджетах соответствующие текущей батарее строки
+    ui->cbVoltageOnTheHousing->setItemText(0, battery[index].str_voltage_corpus[0]);
+    ui->cbVoltageOnTheHousing->setItemText(1, battery[index].str_voltage_corpus[1]);
 }
 
 /*

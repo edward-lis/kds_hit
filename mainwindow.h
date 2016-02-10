@@ -15,9 +15,10 @@
 #include <QTimer>
 #include <QStateMachine>
 
-#include "serialport.h"
+#include "serialport.h"                     // ф-ии для работы с последовательным портом
+#include "battery.h"                        // структура с данными по батареям
+#include "settings.h"                       // загрузка конфигурации из ini-файла
 #include "qcustomplot.h"
-
 
 #define OFFLINE     "Нет связи"             // забить в ини-файл, сделать строкой
 #define ONLINE      "Связь установлена"
@@ -30,7 +31,7 @@
 #define delay_command_after_request_before_next     270     //ms    // в режиме, между запросами
 #define delay_after_IDLE_before_other               150     //ms    // после IDLE перед следующим режимом
 
-#define delay_timeOut                               450     //ms    // таймаут ответа на запрос
+#define delay_timeOut                               500     //ms    // таймаут ответа на запрос
 #define delay_timerPing                             1000     //ms    // пауза между пингами должна быть больше, чем таймаут!
 //+++
 
@@ -46,6 +47,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QCustomPlot *customPlot;
+
+    float coefADC1; ///< коэффициент пересчёта кода АЦП в вольты
+    float coefADC2; ///< коэффициент пересчёта кода АЦП в вольты
 
     //+++ Edward
     /// Конечный автомат
@@ -66,6 +70,7 @@ public:
     QState *stateCheckTypeBIdleUocPB; ///< разобрать режим подтипа батареи, тип хххР-20
     QState *stateCheckUocPB; ///< собрать режим проверки напряжения БП УТБ
     QState *stateCheckUocPBPoll; ///< опрос напряжения БП УТБ
+    QState *stateCheckShowResult; ///< показать результаты измерений
 
     void setupMachine(); ///< настроить КА (finitestatemachine.cpp)
     void machineAddCheckBatteryType(); ///< собрать КА для проверки типа подключенной батареи (checkbatterytype.cpp)
@@ -84,6 +89,18 @@ public:
     void prepareSendCommand(QString cS, int dT, void (MainWindow::*fCA)(QByteArray));
     /// Ф-ия подготовки и последующей посылки команды "IDLE#" с возвратом в первое состояние
     void prepareSendIdleToFirstCommand();
+
+    // Проверка напряжения на корпусе
+    /// Состояния КА проверки напряжения на корпусе
+    QState *stateVoltageCase; ///< Посылка команды и ожидание окончания задержки после отсылки (для сбора режима в коробочке) "UcaseX#
+    QState *stateVoltageCasePoll; ///< После приёма ответа подтверждения от коробочки о корректном сборе режима "UcaseX#OK - посылка опроса "Ucase?#"
+    QState *stateVoltageCaseIdle; ///< Разобрать режим
+    //QState *stateVoltageCaseIdleOk; ///< Разобрать режим
+    void onstateVoltageCase(QByteArray data);
+    void onstateVoltageCasePoll(QByteArray data);
+    void onstateVoltageCaseIdle(QByteArray data);
+    void machineAddVoltageCase(); ///< собрать КА для проверки напряжения на корпусе (voltagecase.cpp)
+
 //+++
 
 private:
@@ -118,6 +135,7 @@ private:
     void getCOMPorts();
     float param;
     //+++ Edward
+    Settings settings;
     /// Экземпляр класса последовательный порт
     SerialPort *serialPort;
     /// Признак состояния начала работы с коробком после установления связи. Сбросить систему в первоначальное состояние
@@ -166,6 +184,8 @@ public slots:
     void procTimeout();
     /// Послать пинг
     void sendPing();
+    /// показать месседжбокс о несоответствии подключенной и выбранной батарей
+    void slotCheckBatteryDone();
 
     /// ф-ия состояния Порт закрыт
     void enterStateSerialPortClose();
@@ -178,6 +198,8 @@ public slots:
 
     // Для режима проверки типа подключенной батареи
     void prepareCheckBatteryType(); ///< подготовка и запуск режима проверки типа батареи
+    // Для режима проверки напряжения на корпусе. Выполнится при нажатии на кнопку Старт проверки (1)
+    void prepareVoltageCase(); ///< подготовка и запуск режима проверки напряжения на корпусе
     //+++
 signals:
     //+++ Edward
@@ -196,6 +218,8 @@ signals:
    void workStart();
    /// Сигнал - ответ от коробочки не такой, какой ожидалось
    //void signalWrongReply();
+   /// Сигнал - показать месседжбокс о несоответствии подключенной и выбранной батарей
+   void signalCheckBatteryDone(int x, int y);
    //+++
 
 private slots:

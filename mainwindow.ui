@@ -103,28 +103,8 @@
               <bool>false</bool>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>-1</number>
              </property>
-             <item>
-              <property name="text">
-               <string>9ER20P-20</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>9ER20P-28</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>9ER14P-24</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>9ER14PS-24</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>
@@ -1093,11 +1073,6 @@
            <height>20</height>
           </rect>
          </property>
-         <item>
-          <property name="text">
-           <string>Сначала</string>
-          </property>
-         </item>
          <item>
           <property name="text">
            <string>1</string>

@@ -1,6 +1,11 @@
 #include <QDebug>
+#include <QMessageBox>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "battery.h"
+
+extern QVector<Battery> battery;
 
 // !!! добавить в ини-файл и в настройки - какое ПРИЛИЧНОЕ напряжение должно быть? U=2500, например
 // !!! отсутствие напряжения УУТББ - 0? или тоже некий порог?
@@ -68,7 +73,8 @@
 
 */
 
-QString type[2][3]={{"9ER20P-20 УУТББ", "9ER20P-20", "9ER20P-28"},{"9ЕR14PS-24 УУТББ", "9ЕR14PS-24 или 9ER14P-24", "???"}};
+//QString type[2][3]={{"9ER20P-20 УУТББ", "9ER20P-20", "9ER20P-28"},{"9ЕR14PS-24 УУТББ", "9ЕR14PS-24 или 9ER14P-24", "???"}};
+//QString type[2][3]={{battery[0].str_type_name+" УУТББ", battery[0].str_type_name, battery[3].str_type_name},{battery[1].str_type_name+" УУТББ", battery[1].str_type_name+" или "+battery[2].str_type_name, "???"}};
 static int x=0, y=0;
 
 void MainWindow::machineAddCheckBatteryType()
@@ -109,6 +115,10 @@ void MainWindow::machineAddCheckBatteryType()
     stateCheckUocPBPoll->setObjectName("stateCheckUocPBPoll");
     connect(stateCheckUocPBPoll, SIGNAL(entered()), this, SLOT(sendCommand()));
 
+    stateCheckShowResult = new QState;
+    stateCheckShowResult->setObjectName("stateCheckShowResult");
+    connect(stateCheckShowResult, SIGNAL(entered()), this, SLOT(slotCheckBatteryDone()));
+
     // добавляем переходы состояний
     stateCheckPolarB->addTransition(ui->btnCOMPortOpenClose, SIGNAL(clicked(bool)), stateSerialPortClose); // при нажатии кнопки порта - закроем его
     stateCheckPolarB->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
@@ -141,7 +151,7 @@ void MainWindow::machineAddCheckBatteryType()
     stateCheckTypeBPoll->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
     stateCheckTypeBPoll->addTransition(timeout, SIGNAL(timeout()), stateFirst); // по таймауту приёма вывалимся в начальное состояние
     stateCheckTypeBPoll->addTransition(timerDelay0, SIGNAL(timeout()), stateCheckTypeBIdleUocPB); // по таймауту задержки после режима - вывалимся в следующее состояние
-    stateCheckTypeBPoll->addTransition(timerDelay1, SIGNAL(timeout()), stateIdleCommand); // по таймауту задержки после режима - вывалимся в следующее состояние
+    stateCheckTypeBPoll->addTransition(timerDelay1, SIGNAL(timeout()), stateCheckShowResult); // по таймауту задержки после режима - вывалимся в следующее состояние
 
     stateCheckTypeBIdleUocPB->addTransition(ui->btnCOMPortOpenClose, SIGNAL(clicked(bool)), stateSerialPortClose); // при нажатии кнопки порта - закроем его
     stateCheckTypeBIdleUocPB->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
@@ -156,7 +166,9 @@ void MainWindow::machineAddCheckBatteryType()
     stateCheckUocPBPoll->addTransition(ui->btnCOMPortOpenClose, SIGNAL(clicked(bool)), stateSerialPortClose); // при нажатии кнопки порта - закроем его
     stateCheckUocPBPoll->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
     stateCheckUocPBPoll->addTransition(timeout, SIGNAL(timeout()), stateFirst); // по таймауту приёма вывалимся в начальное состояние
-    stateCheckUocPBPoll->addTransition(timerDelay, SIGNAL(timeout()), stateIdleCommand); // по таймауту задержки после режима - вывалимся в следующее состояние
+    stateCheckUocPBPoll->addTransition(timerDelay, SIGNAL(timeout()), stateCheckShowResult); // по таймауту задержки после режима - вывалимся в следующее состояние
+
+    stateCheckShowResult->addTransition(stateFirst); // из показа результатов вернёмся в первое состояние
 
     // добавляем состояния в КА
     machine->addState(stateCheckPolarB);
@@ -168,12 +180,15 @@ void MainWindow::machineAddCheckBatteryType()
     machine->addState(stateCheckTypeBIdleUocPB);
     machine->addState(stateCheckUocPB);
     machine->addState(stateCheckUocPBPoll);
+    machine->addState(stateCheckShowResult);
+
+    //connect(this, SIGNAL(signalCheckBatteryDone(int,int)), this, SLOT(slotCheckBatteryDone(int,int))); // показать месседжбокс по концу проверки
 }
 
 // подготовка и запуск режима проверки типа батареи. выполнится при входе в состояние stateCheckPolarB
 void MainWindow::prepareCheckBatteryType()
 {
-    prepareSendCommand("PolarB#", delay_command_after_start_before_request, &onstateCheckPolarB); // подготовка команды
+    prepareSendCommand("Polar#", delay_command_after_start_before_request, &onstateCheckPolarB); // подготовка команды
     sendCommand(); // посылка команды
     ui->statusBar->showMessage(tr("Проверка типа подключенной батареи..."));
     // !!! тут бахнуть начало крутилочки прогресс-бара
@@ -188,7 +203,7 @@ void MainWindow::onstateCheckPolarB(QByteArray data)
     qDebug()<<"onstateCheckPolarB"<<data;
     // Здесь провести разбор строки!!!
     // и подготовить тут след режим
-    prepareSendCommand("PolarB?#", delay_command_after_request_before_next, &onstateCheckPolarBPoll);
+    prepareSendCommand("Polar?#", delay_command_after_request_before_next, &onstateCheckPolarBPoll);
     ui->progressBar->setValue(ui->progressBar->value()+1);
 }
 
@@ -196,9 +211,11 @@ void MainWindow::onstateCheckPolarB(QByteArray data)
 void MainWindow::onstateCheckPolarBPoll(QByteArray data)
 {
     qDebug()<<"onPolarBPoll" << data;
-    QDataStream ds(data); // Для преобразования первых двух байт в unsigned short
+    // ниже времянка, патамушта байт QDataStream ds(data.left(2)); // Для преобразования первых двух байт в unsigned short
+    QDataStream ds(data.left(1)); // Для преобразования первых двух байт в unsigned short
     quint16 i=0;
     ds>>i;
+    qDebug()<<ds<<i;
     if(!i) // полярность прямая
     {
         qDebug()<<"polar straight"<<i;
@@ -243,19 +260,20 @@ void MainWindow::onstateCheckTypeB(QByteArray data)
 // Анализ подтипа батареи
 void MainWindow::onstateCheckTypeBPoll(QByteArray data)
 {
-    quint16 u=0, U=2500; // приличное напряжение. Взять из ини-файла
-    QDataStream ds(data); // Для преобразования первых двух байт в unsigned short
+    quint16 u=0, U=25.0/coefADC1; // приличное напряжение. Взять из ини-файла
+    qDebug()<<"coef"<<coefADC1<<"U"<<(quint16)(25.0/coefADC1);
+    QDataStream ds(data.left(2)); // Для преобразования первых двух байт в unsigned short
     ds>>u;
-    qDebug()<<"onstateCheckTypeBPoll" << data<<u;
+    qDebug()<<"onstateCheckTypeBPoll" << data<<u<<(float)(u*coefADC1)<<"U";
     if(u > U) // если есть приличное напряжение,
     {
         //qDebug()<<"Battery 9ER20P-28";
         ::y=2;
-        ui->statusBar->showMessage(::type[::x][::y]);
+        //ui->statusBar->showMessage(::type[::x][::y]);
         // !!! где-то надо будет проверить соответствие подключенной батареи к выбранной, и остановить крутилочку прогресс-бара
         ui->progressBar->setValue(ui->progressBar->value()+1);
-        Log(::type[::x][::y], "blue");
-        prepareSendIdleToFirstCommand(); // выход в первое состояние, конец алгоритма
+        //Log(::type[::x][::y], "blue");
+        prepareSendIdleToFirstCommand(); // подготовить идле, перейти к слоту slotCheckBatteryDone
         timerDelay1->start(delay_command_after_request_before_next); // тут тоже можно сократить timerDelay1 до timerDelay. но оставим для ясности
     }
     else // отстаётся батарея 9ER20P-20
@@ -286,10 +304,11 @@ void MainWindow::onstateCheckUocPB(QByteArray data)
 void MainWindow::onstateCheckUocPBPoll(QByteArray data)
 {
     qDebug()<<"onstateCheckUocPBPoll"<<data;
-    QDataStream ds(data); // Для преобразования первых двух байт в unsigned short
-    quint16 i=0;
-    ds>>i;
-    if(i > 0) // если есть напряжение, то УУТББ
+    quint16 u=0, U=5.0/coefADC1; // напряжение БП. Взять из ини-файла
+    qDebug()<<"coef"<<coefADC1<<"U"<<(quint16)(5.0/coefADC1);
+    QDataStream ds(data.left(2)); // Для преобразования первых двух байт в unsigned short
+    ds>>u;
+    if(u > U) // если есть напряжение, то УУТББ
     {
         ::y=0;
     }
@@ -297,9 +316,81 @@ void MainWindow::onstateCheckUocPBPoll(QByteArray data)
     {
         ::y=1;
     }
-    prepareSendIdleToFirstCommand(); // выход в первое состояние, конец алгоритма
+    prepareSendIdleToFirstCommand(); // подготовить идле, перейти к слоту slotCheckBatteryDone
     ui->progressBar->setValue(ui->progressBar->value()+1);
-    ui->statusBar->showMessage(::type[::x][::y]);
-    Log(::type[::x][::y], "blue");
-    // !!! где-то надо будет проверить соответствие подключенной батареи к выбранной, и остановить крутилочку прогресс-бара
+//    ui->statusBar->showMessage(::type[::x][::y]);
+//    Log(::type[::x][::y], "blue");
+    // проверить соответствие подключенной батареи к выбранной
+    //signalCheckBatteryDone(::x, ::y);
+}
+
+// бахнуть месседжбокс об несоответствии подключенной и выбранной батарей
+void MainWindow::slotCheckBatteryDone()
+{
+    sendCommand(); // посылка команды (IDLE)
+    qDebug()<<"slotCheckBatteryDone";
+    int x=::x;
+    int y=::y;
+
+    if((0==x) && (0==y)) // 9ER20P-20 УУТББ
+    {
+        if(!((ui->comboBoxBatteryList->currentIndex()==0) && ui->cbIsUUTBB->isChecked()))
+        {
+            Log("Подключена батарея "+battery[0].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" УУТББ не соответствует выбранной");
+        }
+        else
+        {
+            Log("Подключена батарея "+battery[0].str_type_name+" УУТББ", "blue");
+        }
+    }
+    if((0==x) && (1==y)) // 9ER20P-20
+    {
+        if(!((ui->comboBoxBatteryList->currentIndex()==0) && !ui->cbIsUUTBB->isChecked()))
+        {
+            Log("Подключена батарея "+battery[0].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" не соответствует выбранной");
+        }
+        else
+        {
+            Log("Подключена батарея "+battery[0].str_type_name, "blue");
+        }
+    }
+    if((1==x) && (0==y)) // 9ЕR14PS-24 УУТББ
+    {
+        if(!((ui->comboBoxBatteryList->currentIndex()==1) && ui->cbIsUUTBB->isChecked()))
+        {
+            Log("Подключена батарея "+battery[1].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" УУТББ не соответствует выбранной");
+        }
+        else
+        {
+            Log("Подключена батарея "+battery[1].str_type_name+" УУТББ", "blue");
+        }
+    }
+    if((1==x) && (1==y)) //9ЕR14PS-24 или 9ER14P-24
+    {
+        if(!(((ui->comboBoxBatteryList->currentIndex()==1) || (ui->comboBoxBatteryList->currentIndex()==2)) && !ui->cbIsUUTBB->isChecked()))
+        {
+            Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+" не соответствует выбранной");
+        }
+        else
+        {
+            Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name, "blue");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+"!");
+        }
+    }
+    if(2==y)
+    {
+        if(ui->comboBoxBatteryList->currentIndex()!=3) // если выбранная батарея не соответствует подключенной
+        {
+            Log("Подключена батарея "+battery[3].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[3].str_type_name+" не соответствует выбранной");
+        }
+        else
+        {
+            Log("Подключена батарея "+battery[3].str_type_name, "blue");
+        }
+    }
 }

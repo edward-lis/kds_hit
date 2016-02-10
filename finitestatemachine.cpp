@@ -44,6 +44,8 @@ void MainWindow::setupMachine()
 
     // добавить в КА режим проверки типа подключенной батареи (checkbatterytype.cpp)
     machineAddCheckBatteryType();
+    // добавить в КА режим проверки напряжения на корпусе (voltagecase.cpp)
+    machineAddVoltageCase();
 
     // добавляем переходы состояний
     stateSerialPortClose->addTransition(ui->btnCOMPortOpenClose, SIGNAL(clicked(bool)), stateSerialPortOpening); // при нажатии на кнопку порта - открыть
@@ -55,6 +57,7 @@ void MainWindow::setupMachine()
     stateFirst->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
     stateFirst->addTransition(this, SIGNAL(workStart()), stateIdleCommand); // при первом пинге в начале работы послать ИДЛЕ для сброса коробочки
     stateFirst->addTransition(ui->btnCheckConnectedBattery, SIGNAL(clicked(bool)), stateCheckPolarB); // нажата кнопка проверки типа батареи
+    stateFirst->addTransition(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), stateVoltageCase); // нажата кнопка проверки напряжения на корпусе
 
     stateIdleCommand->addTransition(ui->btnCOMPortOpenClose, SIGNAL(clicked(bool)), stateSerialPortClose); // при нажатии кнопки порта - закроем его
     stateIdleCommand->addTransition(serialPort, SIGNAL(signalCriticalError()), stateSerialPortClose); // при критической ошибке в порту - закроем его
