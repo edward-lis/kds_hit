@@ -71,8 +71,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     settings(0),
-    serialPort(new SerialPort),
-    start_work(true)
+    serialPort(new SerialPort), bPortOpen(false),
+    timeoutResponse(NULL), timerPing(NULL),
+    loop(0),
+    baRecvArray(0),
+    baSendArray(0), baSendCommand(0)
 {
     ui->setupUi(this);
     model = new QStandardItemModel(5, 1); // 4 rows, 1 col
@@ -115,42 +118,29 @@ MainWindow::MainWindow(QWidget *parent) :
     coefADC1 = settings.coefADC1;
     coefADC2 = settings.coefADC2;
 
+    // посылать масив в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
+    connect(this, SIGNAL(signalSendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
+    // при получении на порту данных - принимать их в главном окне
+    connect(serialPort, SIGNAL(readySerialData(quint8,QByteArray)), this, SLOT(recvSerialData(quint8,QByteArray)));
+    // по сигналу готовности данных по приёму из последовательного порта - выйти из пустого цикла
+    connect(this, SIGNAL(signalSerialDataReady()), &loop, SLOT(quit()));
+
     // Timeout - непериодический. таймаут ответа коробочки
-    timeout = new QTimer;
-    timeout->setSingleShot(true);
-    connect(timeout, SIGNAL(timeout()), this, SLOT(procTimeout()));
+    timeoutResponse = new QTimer;
+    timeoutResponse->setSingleShot(true);
+    connect(timeoutResponse, SIGNAL(timeout()), this, SLOT(procTimeoutResponse()));
     // Таймер между пингами.  непериодический
     timerPing = new QTimer;
     timerPing->setSingleShot(true);
-    //connect(timerPing, SIGNAL(timeout()), this, SLOT(procTimerPing())); // на всякий случай. пока не понадобилось
     connect(timerPing, SIGNAL(timeout()), this, SLOT(sendPing())); // по окончанию паузы между пингами - послать следующий
 
-    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
-    timerDelay = new QTimer;
-    timerDelay->setSingleShot(true);
-    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
-    timerDelay0 = new QTimer;
-    timerDelay0->setSingleShot(true);
-    // Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос.
-    timerDelay1 = new QTimer;
-    timerDelay1->setSingleShot(true);
-
-    delayTime = 0; // обнулим время для timerDelay. потом будет подставляться необходимое кол-во мсек.
-    commandString = "IDLE#"; // init some string
-
-    // посылать данные в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
-    connect(this, SIGNAL(sendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
-    // при получении на порту данных - принимать их в главном окне
-    connect(serialPort, SIGNAL(readySerialData(quint8,QByteArray)), this, SLOT(recvSerialData(quint8,QByteArray)));
-
-    // Настройка и запуск КА
-    setupMachine();
+    ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
     //+++
 
 
     ui->groupBoxDiagnosticDevice->setDisabled(true);
     ui->groupBoxDiagnosticMode->setDisabled(true);
-    ui->groupBoxCheckParams->setDisabled(true);
+    ui->groupBoxCheckParams->setDisabled(false);// !!!
     ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
     ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
     ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
@@ -289,96 +279,145 @@ MainWindow::~MainWindow()
 // Приём данных от последовательного порта
 void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
 {
-    //qDebug()<<"mainwindow.cpp recvSerialData " << data.length() << " bytes " << data.toHex() << " text " << qPrintable(data);
+    //qDebug()<<"recvSerialData"<<data<<"command:"<<baSendCommand;
     // когда приняли данные вовремя - остановить таймаут
-    timeout->stop();
+    timeoutResponse->stop();
     //ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть
-
-    if(operation_code == 0x01) // если приняли пинг, то
+//    if(operation_code == 0x01) // если приняли пинг, то
     {
         // следующий пинг пошлётся по окончанию timerPing
-        if(data == PING) // вот тут по-хорошему надо бы по результам анализа ответа делать что-то полезное. только хз.
+        if(data == baSendCommand) // вот тут по-хорошему надо бы по результам анализа ответа делать что-то полезное. только хз.
         {
             //qDebug()<<"ping correct";
             ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть, только при нормальном пинге
-            if(start_work) // если первый ответ после установления связи
+            if(bFirstPing) // если первый ответ после установления связи
             {
                 // сбросить коробок, послать IDLE
-                // подготовим переменные: текущая команда#, пауза по протоколу, ф-ия разбора рез-та
-                prepareSendIdleToFirstCommand();
-                emit workStart(); // по этому сигналу КА перейдёт в состояние посылки первого сброса коробочки
+                baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
+                sendSerialData(); // послать baSendArray в порт
+                // !!! первую посылку айдл надо бы куда-нить в другое место
+                //ret=loop.exec(); // ждём ответа. по сигналу о готовности принятых данных, вывалимся из цикла
+                //qDebug()<<"ret=loop.exec()"<<ret;
+                //qDebug()<<baRecvArray; // принятый массив
+                //baRecvArray.clear();
             }
+            return;
         }
-        else
+/*        else
         {
             qDebug()<<"ping incorrect";
-        }
-        return;
+            return;
+        }*/
+//        return;
     }
-    if(operation_code == 0x08) // если приняли ответ на команду
+//    if(operation_code == 0x08) // если приняли ответ на команду
     {
-        // ищем требуемую строку по шаблону
-        //if( data.indexOf(commandString + "OK")>=0 ) // Команда#OK режима отработана
-        if( data.contains("OK") ) // Команда#OK режима отработана/ совсем простенькая проверка на наличии в ответе OK
+        if( data.contains(baSendCommand) && data.contains("OK") ) // Команда#OK режима отработана/ совсем простенькая проверка на наличии в ответе OK
         {
-            timerDelay->start(delayTime); // после нормального выполнения команды запустить задержку перед следующим обменом, по протоколу
-            // начинать отсчитывать задержку перед анализом инфы.  во-первых там может подготавливаться следующая команда и глобальная переменная delayTime перепишется
-            // а во-вторых, чего зря простаивать.
-
-            // выполнить ф-ю разбора принятой инфы
-            (this->*funcCommandAnswer)(data);
+            qDebug()<<"recvSerialData"<<data<<"command:"<<baSendCommand;
+            baRecvArray=data;
+            emit signalSerialDataReady(); // сигнал - данные готовы. цикл ожидания закончится.
+            if(bFirstPing) // если это был ответ на первый айдл, то продолжить пинг
+            {
+                bFirstPing = false;
+                sendPing();
+                ui->btnCheckConnectedBattery->setEnabled(true); // т.к. коробочка на связи и сбросилась в исходное, то разрешим кнопочку "Проверить батарею"
+            }
         }
         else // пришла какая-то другая посылка
         {
-            qDebug()<<"Incorrect reply. Should be "<<(commandString + "OK")<<" but got: "<<data;
-            //emit signalWrongReply(); // по сигналу КА перейдёт в режим готовности/простоя/ожидания
+            qDebug()<<"Incorrect reply. Should be "<<(baSendCommand + " and OK")<<" but got: "<<data;
         }
+    }
+}
+
+// Посылка подготовленных данных baSendArray в порт
+void MainWindow::sendSerialData()
+{
+    if(!bPortOpen) return;
+    //qDebug()<<"sendSerialData"<<baSendArray;
+    timerPing->stop(); // остановим таймеры. отключим пинг и предыдущий таймаут (если вдруг он был)
+    timeoutResponse->stop();
+    signalSendSerialData(8, baSendArray);
+    timeoutResponse->start(delay_timeOut); // заведём тайм-аут на неответ
+}
+
+// Получить из принятого массива данные опроса
+quint16 MainWindow::getRecvData(QByteArray baRecvArray)
+{
+    quint16 u=0;
+    QDataStream ds(baRecvArray.left(2)); // Для преобразования первых двух байт в unsigned short
+    ds>>u;
+    return u;
+}
+
+// нет ответа на запрос
+void MainWindow::procTimeoutResponse()
+{
+    //qDebug()<<"procTimeoutResponse";
+    ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
+    //emit signalTimeoutResponse();
+    if(loop.isRunning())
+    {
+        loop.exit(1); // вывалиться из цикла ожидания приёма с кодом ошибки таймаута
+        baRecvArray.clear(); // очистить массив перед следующим приёмом
     }
 }
 
 // послать пинг
 void MainWindow::sendPing()
 {
-    //qDebug()<<"sendPing";
-    sendSerialData(0x01, PING); // пошлём пинг
-    timeout->start(delay_timeOut); // заведём тайм-аут на не ответ
+    if(!bPortOpen) return;
+    baSendCommand.clear();
+    baSendCommand="PING";
+    //qDebug()<<"sendPing"<<baSendCommand;
+    signalSendSerialData(1, baSendCommand);//PING);
+    timeoutResponse->start(delay_timeOut); // заведём тайм-аут на неответ
     timerPing->start(delay_timerPing); // цикл между пингами
 }
 
-// Посылка подготовленной команды commandString в порт
-void MainWindow::sendCommand()
+// Нажата кнопка открыть/закрыть порт
+void MainWindow::on_btnCOMPortOpenClose_clicked()
 {
-    qDebug()<<"sendCommand"<<commandString;
-    timerPing->stop(); // остановим таймеры. отключим пинг и предыдущий таймаут (если вдруг он был)
-    timeout->stop(); //
-    timerDelay->stop(); // остановить таймеры задержек перед выдачей следующих команд после текущей.
-    timerDelay0->stop();
-    timerDelay1->stop();
-    sendSerialData(8, qPrintable(commandString)); // послать команду (8 - это по протоколу)
-    timeout->start(delay_timeOut); // заведём тайм-аут на неответ
+    if(ui->comboBoxCOMPort->currentText().isEmpty()) // последовательных портов в системе нет
+    {
+        ui->statusBar->showMessage(tr("Нет последовательных портов"));
+        return;
+    }
+    if(serialPort && ui->btnCOMPortOpenClose->text()==tr("Открыть"))
+    {
+        if(serialPort->openPort(ui->comboBoxCOMPort->currentText())) // открыть порт. если он открылся нормально
+        {
+            // порт открыт
+            ui->statusBar->showMessage(tr("Порт %1 открыт").arg(serialPort->serial->portName()));
+            ui->btnCOMPortOpenClose->setText(tr("Закрыть")); // в этом состоянии напишем такие буквы на кнопке
+            ui->comboBoxCOMPort->setEnabled(false); // и запретим выбор ком-порта
+            bFirstPing = true; // первый удачный пинг после открытия порта
+            timerPing->start(delay_timerPing); // начнём пинговать
+            baSendArray.clear(); baSendCommand.clear(); // очистить буфера
+            baRecvArray.clear();
+            bPortOpen = true;
+            ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
+        }
+        else // если порт не открылся
+        {
+            QMessageBox::critical(this, tr("Ошибка"), serialPort->serial->errorString()); // показать текст ошибки
+            bPortOpen = false;
+        }
+    }
+    else //if(serialPort && ui->btnCOMPortOpenClose->text()=="Закрыть")  // если есть объект последовательного порта,
+    {
+        if(serialPort) serialPort->closePort(); // то закрыть его
+        ui->btnCOMPortOpenClose->setText(tr("Открыть")); // в этом состоянии напишем такие буквы на кнопке
+        ui->comboBoxCOMPort->setEnabled(true); // и разрешим комбобокс выбора порта
+        ui->statusBar->showMessage(tr("Порт закрыт"));
+        timerPing->stop();// остановить пинг
+        ui->btnCheckConnectedBattery->setEnabled(false); // закрыть кнопку проверки батареи
+        bPortOpen = false;
+        loop.exit(-1); // закончить цикл ожидания ответа
+    }
 }
 
-// Подготовка команды для её последующей посылки в порт
-void MainWindow::prepareSendCommand(QString cS, int dT, void (MainWindow::*fCA)(QByteArray))
-{
-    // подготовим переменные
-    commandString = cS;
-    delayTime = dT;
-    funcCommandAnswer = fCA; // назначим конкретную ф-ию разбора ответа
-}
-
-// Подготовка команды IDLE с возвратом в первое состояние
-void MainWindow::prepareSendIdleToFirstCommand()
-{
-    prepareSendCommand("IDLE#", delay_after_IDLE_before_other, &onIdleOK);
-}
-
-// нет ответа на запрос
-void MainWindow::procTimeout()
-{
-    qDebug()<<"procTimeout";
-    ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
-}
 //+++
 
 /*

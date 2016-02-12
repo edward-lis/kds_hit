@@ -194,6 +194,9 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbModeDiagnosticManual">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="geometry">
           <rect>
            <x>283</x>
@@ -304,9 +307,6 @@
       </item>
       <item row="3" column="0" colspan="3">
        <widget class="QGroupBox" name="groupBoxCheckParams">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -723,7 +723,7 @@
         </widget>
         <widget class="QPushButton" name="btnVoltageOnTheHousing">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
@@ -1063,7 +1063,7 @@
         </widget>
         <widget class="QComboBox" name="cbVoltageOnTheHousing">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
@@ -1086,7 +1086,7 @@
         </widget>
         <widget class="QRadioButton" name="rbVoltageOnTheHousing">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>

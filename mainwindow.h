@@ -9,6 +9,7 @@
 #include <QTime>
 #include <QMessageBox>
 #include <QDebug>
+#include <QEventLoop>
 
 
 //+++ Edward
@@ -51,58 +52,6 @@ public:
     float coefADC1; ///< коэффициент пересчёта кода АЦП в вольты
     float coefADC2; ///< коэффициент пересчёта кода АЦП в вольты
 
-    //+++ Edward
-    /// Конечный автомат
-    QStateMachine *machine;
-    /// Состояния КА
-    QState *stateSerialPortClose; ///< Порт закрыт
-    QState *stateSerialPortOpening; ///< Открытие порта
-    QState *stateFirst; ///< первое состояние
-    QState *stateIdleCommand; ///< Состояние посылки первой после окрытия порта команды Idle
-
-    /// Состояния режима проверки типа подключенной батареи
-    QState *stateCheckPolarB; ///< собрать режим полярности
-    QState *stateCheckPolarBPoll; ///< запрос полярности
-    QState *stateCheckPolarBIdleTypeB; ///< разобрать режим полярности, полярность прямая = 0
-    QState *stateCheckPolarBIdleUocPB; ///< разобрать режим полярности, полярность обратная = 1
-    QState *stateCheckTypeB; ///< собрать режим подтипа батареи
-    QState *stateCheckTypeBPoll; ///< запрос подтипа батареи
-    QState *stateCheckTypeBIdleUocPB; ///< разобрать режим подтипа батареи, тип хххР-20
-    QState *stateCheckUocPB; ///< собрать режим проверки напряжения БП УТБ
-    QState *stateCheckUocPBPoll; ///< опрос напряжения БП УТБ
-    QState *stateCheckShowResult; ///< показать результаты измерений
-
-    void setupMachine(); ///< настроить КА (finitestatemachine.cpp)
-    void machineAddCheckBatteryType(); ///< собрать КА для проверки типа подключенной батареи (checkbatterytype.cpp)
-    // для режима проверки типа батареи, callback, ф-ии анализа ответа, переходные ф-ии
-    void onstateCheckPolarB(QByteArray data);
-    void onstateCheckPolarBPoll(QByteArray data);
-    void onstateCheckPolarBIdleTypeB(QByteArray data);
-    void onstateCheckPolarBIdleUocPB(QByteArray data);
-    void onstateCheckTypeB(QByteArray data);
-    void onstateCheckTypeBPoll(QByteArray data);
-    void onstateCheckTypeBIdleUocPB(QByteArray data);
-    void onstateCheckUocPB(QByteArray data);
-    void onstateCheckUocPBPoll(QByteArray data);
-
-    /// Ф-ия подготовки и последующей посылки команды cS
-    void prepareSendCommand(QString cS, int dT, void (MainWindow::*fCA)(QByteArray));
-    /// Ф-ия подготовки и последующей посылки команды "IDLE#" с возвратом в первое состояние
-    void prepareSendIdleToFirstCommand();
-
-    // Проверка напряжения на корпусе
-    /// Состояния КА проверки напряжения на корпусе
-    QState *stateVoltageCase; ///< Посылка команды и ожидание окончания задержки после отсылки (для сбора режима в коробочке) "UcaseX#
-    QState *stateVoltageCasePoll; ///< После приёма ответа подтверждения от коробочки о корректном сборе режима "UcaseX#OK - посылка опроса "Ucase?#"
-    QState *stateVoltageCaseIdle; ///< Разобрать режим
-    //QState *stateVoltageCaseIdleOk; ///< Разобрать режим
-    void onstateVoltageCase(QByteArray data);
-    void onstateVoltageCasePoll(QByteArray data);
-    void onstateVoltageCaseIdle(QByteArray data);
-    void machineAddVoltageCase(); ///< собрать КА для проверки напряжения на корпусе (voltagecase.cpp)
-
-//+++
-
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *model;
@@ -135,29 +84,38 @@ private:
     void getCOMPorts();
     float param;
     //+++ Edward
+    /// Установки из ini-файла
     Settings settings;
+
     /// Экземпляр класса последовательный порт
     SerialPort *serialPort;
-    /// Признак состояния начала работы с коробком после установления связи. Сбросить систему в первоначальное состояние
-    bool start_work;
+
+    /// Признак отрытого порта
+    bool bPortOpen;
+
     /// Тайм-аут ответа коробочки при запросе
-    QTimer *timeout;
+    QTimer *timeoutResponse;
+
     /// Таймер между пингами
     QTimer *timerPing;
-    /// Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос. Если переход один.
-    QTimer *timerDelay;
-    /// Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос. Если переход с состоянием 0
-    QTimer *timerDelay0;
-    /// Таймер задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос. Если переход с состоянием 1
-    QTimer *timerDelay1;
-    /// Время задержки выдачи следующей команды после выдачи ИДЛЕ, команд, опрос/запрос
-    int delayTime;
-    /// Текущая команда для посылки в порт
-    QString commandString;
-    /// Функция анализа принятого ответа на команду (переходная ф-ия)(типа callback)
-    void (MainWindow::*funcCommandAnswer)(QByteArray); ///< указатель на ф-ию
-    /// конкретная функция "funcCommandAnswer", которая будет подставляться и выполнятся для анализа ответа на посылку первого IDLE сброса коробка в исходное
-    void onIdleOK(QByteArray data);
+
+    /// Пустой цикл для ожидания ответа от коробочки
+    QEventLoop loop;
+
+    /// Буфер с текущими принятым массивом из порта
+    QByteArray baRecvArray;
+
+    /// Буфер с текущим подготовленным массивом для передачи в порт
+    QByteArray baSendArray;
+
+    /// Буфер с текущей подготовленной командой для передачи в порт
+    QByteArray baSendCommand;
+
+    /// Получить из принятого массива данные опроса
+    quint16 getRecvData(QByteArray baRecvArray);
+
+    /// Первый принятый пинг - послать Idle
+    bool bFirstPing;
     //+++
 
 public slots:
@@ -177,49 +135,19 @@ public slots:
     void checkOpenCircuitVoltagePowerSupply();
     void checkClosedCircuitVoltagePowerSupply();
 
-    //+++ Edward
-    /// Приём данных от последовательного порта
-    void recvSerialData(quint8 operation_code, const QByteArray data);
-    /// Срабатывание таймаута
-    void procTimeout();
-    /// Послать пинг
-    void sendPing();
-    /// показать месседжбокс о несоответствии подключенной и выбранной батарей
-    void slotCheckBatteryDone();
-
-    /// ф-ия состояния Порт закрыт
-    void enterStateSerialPortClose();
-    /// ф-ия состояния Открытие порта
-    void enterStateSerialPortOpening();
-    /// ф-ия состояния Порт открыт, готовность к работе
-    void enter1State();
-    /// ф-ия посылки команды
-    void sendCommand();
-
-    // Для режима проверки типа подключенной батареи
-    void prepareCheckBatteryType(); ///< подготовка и запуск режима проверки типа батареи
-    // Для режима проверки напряжения на корпусе. Выполнится при нажатии на кнопку Старт проверки (1)
-    void prepareVoltageCase(); ///< подготовка и запуск режима проверки напряжения на корпусе
-    //+++
 signals:
     //+++ Edward
-    /*! Cигнал передачи данных в последовательный порт.
+    /*! Cигнал передачи массива в последовательный порт.
      * \param[in] operation_code Код операции
      * \param[in] data Тело сообщения
      */
-   void sendSerialData(quint8 operation_code, const QByteArray &data);
-   /// Сигнал события, что порт открылся нормально
-   void signalSerialPortOpened();
-   /// Сигнал события, что порт не открылся. Ошибка при открытии порта.
-   void signalSerialPortErrorOpened();
-   /// Сигнал таймера пинга
-   // void signalTimerPing();
-   /// Сигнал наступления события сброса коробочки в начале работы после установления связи по последовательному порту
-   void workStart();
-   /// Сигнал - ответ от коробочки не такой, какой ожидалось
-   //void signalWrongReply();
-   /// Сигнал - показать месседжбокс о несоответствии подключенной и выбранной батарей
-   void signalCheckBatteryDone(int x, int y);
+   void signalSendSerialData(quint8 operation_code, const QByteArray &data);
+
+   /// Сигнал готовности данных по приёму, выйти из пустого цикла ожидания
+   void signalSerialDataReady();
+
+   /// Сигнал срабатывания тайм-аута по приёму
+   void signalTimeoutResponse();
    //+++
 
 private slots:
@@ -236,6 +164,22 @@ private slots:
    void on_cbIsUUTBB_toggled(bool checked);
    void on_pushButton_clicked();
    void on_cbInsulationResistance_currentIndexChanged(const QString &arg1);
+
+   //+++ Edward
+   /// Приём массива из последовательного порта
+   void recvSerialData(quint8 operation_code, const QByteArray data);
+
+   /// Посылка подготовленного массива baSendArray в порт
+   void sendSerialData();
+
+   /// Срабатывание таймаута ответа
+   void procTimeoutResponse();
+
+   /// Послать пинг
+   void sendPing();
+   //+++
+   void on_btnCOMPortOpenClose_clicked();
+   void on_btnCheckConnectedBattery_clicked();
 };
 
 #endif // MAINWINDOW_H

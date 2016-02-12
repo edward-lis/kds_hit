@@ -34,20 +34,23 @@ void Settings::loadSettings()
     //testString = sText;
     //qDebug() << "sText" << testString;
 
-    coefADC1 = settings.value("k1_volt").toFloat()/settings.value("k1_code").toUInt();
-    qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt").toFloat()<<settings.value("k1_code").toUInt();
-    coefADC2 = settings.value("k2_volt").toFloat()/settings.value("k2_code").toUInt();
-    qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt").toFloat()<<settings.value("k2_code").toUInt();
+    coefADC1 = settings.value("k1_volt", 0).toFloat()/settings.value("k1_code", 1).toUInt();
+    qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<settings.value("k1_code", 1).toUInt();
+    coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toUInt();
+    qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()<<settings.value("k2_code", 1).toUInt();
     // get battaries names, as array
     //int size = settings.beginReadArray("batteries");  // добавляет преффикс к текущей группе, и начинает чтение из массива. возвращает размер массива
     num_batteries_types = settings.beginReadArray("batteries");
-    battery.resize(num_batteries_types);
-    for(int i=0; i<num_batteries_types; i++)
+    if(num_batteries_types > 0)
     {
-        settings.setArrayIndex(i);
-        battery[i].str_type_name = settings.value("name").toString(); // считываем наименования батарей
+        battery.resize(num_batteries_types);
+        for(int i=0; i<num_batteries_types; i++)
+        {
+            settings.setArrayIndex(i);
+            battery[i].str_type_name = settings.value("name").toString(); // считываем наименования батарей
+        }
+        settings.endArray(); // end array, don't forget!
     }
-    settings.endArray(); // end array, don't forget!
 
     // value(,): первый параметр - ключ. второй параметр - параметр по умолчанию (допустим, если нет запрашиваемого ключа в тексте файла)
     // ключ - секция/ключ.   если без секции, то секция по умолчанию [General]

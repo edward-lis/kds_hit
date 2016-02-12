@@ -16,10 +16,8 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     serialport.cpp \
     checkbatterytype.cpp \
-    finitestatemachine.cpp \
     qcustomplot.cpp \
-    settings.cpp \
-    voltagecase.cpp
+    settings.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
@@ -30,8 +28,5 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 DISTFILES += \
-    KDS_HIT_FSM.odt \
-    AGN_kds_prot09_xit_15.txt \
-    KDS_HIT_FSM.odt \
     AGN_kds_prot09_xit_15.txt \
     kds_hit.ini
