@@ -1,8 +1,6 @@
 #include "serialport.h"
-#include <QMessageBox>
 #include <QtCore>
-#include "mainwindow.h" // for *w, for QMessageBox::critical
-extern MainWindow *w;
+#include <QErrorMessage>
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
@@ -55,8 +53,12 @@ void SerialPort::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ResourceError)
     {
-        emit signalCriticalError(); // сначала по сигналу изменим состояние КА
-        QMessageBox::critical(w, tr("Критическая ошибка порта!"), serial->errorString()); // а уже потом бахнем сообщение.
+        emit signalCriticalError(); //
+        //closePort();
+        /*QErrorMessage errorMessage;
+        errorMessage.showMessage("Критическая ошибка порта\n"+serial->errorString());
+        errorMessage.exec();*/
+        //QMessageBox::critical(NULL, tr("Критическая ошибка порта!"), serial->errorString()); // а уже потом бахнем сообщение.
         // при вытаскивании из юсб-порта разъёма, почему-то приходит два соообщения. хотя порт закрывается после первого (а потом виджеты открываются)
         // надо бы исследовать поведение КА. http://doc.qt.io/qt-5/statemachine-api.html - вот тут погуглить про месседжбокс, что-то было похожее.
     }

@@ -26,13 +26,16 @@ extern QVector<Battery> battery;
 
 void MainWindow::on_btnCheckConnectedBattery_clicked()
 {
-    quint16 U1=25.0/coefADC1; // приличное напряжение. Взять из ини-файла
-    quint16 U2=5.0/coefADC1; // напряжение БП. Взять из ини-файла
+    quint16 U1=settings.voltage_circuit_type/settings.coefADC1; // код приличного напряжения цепи.
+    quint16 U2=settings.voltage_power_uutbb/settings.coefADC1; // код наличия напряжения БП.
     int x=0, y=0; // индексы в матрице
     quint16 polar; // полярность батареи
     quint16 typeb; // напряжение цепи 28
     quint16 uocpb; // напряжение БП УУТББ
     //int ret=0;
+
+    qDebug()<<U1<<U2;
+
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"; return;} // !!! костыль: если цикл уже работает - выйти обратно
     ui->btnCheckConnectedBattery->setEnabled(false); // на время проверки запретить кнопку
     timerPing->stop(); // остановить пинг
@@ -67,7 +70,6 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
         if(loop.exec()) goto stop;
         typeb = getRecvData(baRecvArray);
-        //qDebug()<<"coef"<<coefADC1<<"U"<<(quint16)(25.0/coefADC1)<<U1;
         //qDebug()<<"onstateCheckTypeBPoll" << typeb<<(float)(typeb*coefADC1)<<"U";
     }
     if(polar == 1) // полярность обратная
@@ -96,7 +98,7 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         y=2;
     }
 
-    qDebug()<<x<<y;
+    //qDebug()<<x<<y;
     if((0==x) && (0==y)) // 9ER20P-20 УУТББ
     {
         if(!((ui->comboBoxBatteryList->currentIndex()==0) && ui->cbIsUUTBB->isChecked()))
@@ -165,76 +167,3 @@ stop:
     baSendCommand.clear();
     baRecvArray.clear();
 }
-
-#if 0
-// бахнуть месседжбокс об несоответствии подключенной и выбранной батарей
-void MainWindow::slotCheckBatteryDone()
-{
-    sendCommand(); // посылка команды (IDLE)
-    qDebug()<<"slotCheckBatteryDone";
-    int x=::x;
-    int y=::y;
-
-    if((0==x) && (0==y)) // 9ER20P-20 УУТББ
-    {
-        if(!((ui->comboBoxBatteryList->currentIndex()==0) && ui->cbIsUUTBB->isChecked()))
-        {
-            Log("Подключена батарея "+battery[0].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" УУТББ не соответствует выбранной");
-        }
-        else
-        {
-            Log("Подключена батарея "+battery[0].str_type_name+" УУТББ", "blue");
-        }
-    }
-    if((0==x) && (1==y)) // 9ER20P-20
-    {
-        if(!((ui->comboBoxBatteryList->currentIndex()==0) && !ui->cbIsUUTBB->isChecked()))
-        {
-            Log("Подключена батарея "+battery[0].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" не соответствует выбранной");
-        }
-        else
-        {
-            Log("Подключена батарея "+battery[0].str_type_name, "blue");
-        }
-    }
-    if((1==x) && (0==y)) // 9ЕR14PS-24 УУТББ
-    {
-        if(!((ui->comboBoxBatteryList->currentIndex()==1) && ui->cbIsUUTBB->isChecked()))
-        {
-            Log("Подключена батарея "+battery[1].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" УУТББ не соответствует выбранной");
-        }
-        else
-        {
-            Log("Подключена батарея "+battery[1].str_type_name+" УУТББ", "blue");
-        }
-    }
-    if((1==x) && (1==y)) //9ЕR14PS-24 или 9ER14P-24
-    {
-        if(!(((ui->comboBoxBatteryList->currentIndex()==1) || (ui->comboBoxBatteryList->currentIndex()==2)) && !ui->cbIsUUTBB->isChecked()))
-        {
-            Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+" не соответствует выбранной");
-        }
-        else
-        {
-            Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name, "blue");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+"!");
-        }
-    }
-    if(2==y)
-    {
-        if(ui->comboBoxBatteryList->currentIndex()!=3) // если выбранная батарея не соответствует подключенной
-        {
-            Log("Подключена батарея "+battery[3].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
-            QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[3].str_type_name+" не соответствует выбранной");
-        }
-        else
-        {
-            Log("Подключена батарея "+battery[3].str_type_name, "blue");
-        }
-    }
-}
-#endif

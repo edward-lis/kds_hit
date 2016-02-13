@@ -65,7 +65,7 @@ delay/sleep - не нужен в принципе.
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-QVector<Battery> battery;
+QVector<Battery> battery; ///< массив типов батарей, с настройками для каждого типа
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -75,7 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
     timeoutResponse(NULL), timerPing(NULL),
     loop(0),
     baRecvArray(0),
-    baSendArray(0), baSendCommand(0)
+    baSendArray(0), baSendCommand(0),
+    bDeveloperState(true) // режим разработчика, временно тру, потом поменять на фолс!!!
 {
     ui->setupUi(this);
     model = new QStandardItemModel(5, 1); // 4 rows, 1 col
@@ -114,9 +115,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // !!! написать во всех других виджетах соответствующие текущей батарее строки
     ui->cbVoltageOnTheHousing->setItemText(0, battery[0].str_voltage_corpus[0]);
     ui->cbVoltageOnTheHousing->setItemText(1, battery[0].str_voltage_corpus[1]);
-
-    coefADC1 = settings.coefADC1;
-    coefADC2 = settings.coefADC2;
 
     // посылать масив в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
     connect(this, SIGNAL(signalSendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));

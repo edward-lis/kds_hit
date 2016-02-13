@@ -49,14 +49,11 @@ public:
     ~MainWindow();
     QCustomPlot *customPlot;
 
-    float coefADC1; ///< коэффициент пересчёта кода АЦП в вольты
-    float coefADC2; ///< коэффициент пересчёта кода АЦП в вольты
-
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *model;
     int iStartCheck;
-    int iBatteryIndex;
+    int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     int iStep;
     int iAllSteps;
     int iStepVoltageOnTheHousing;
@@ -116,6 +113,9 @@ private:
 
     /// Первый принятый пинг - послать Idle
     bool bFirstPing;
+
+    /// Режим разработчика
+    bool bDeveloperState;
     //+++
 
 public slots:

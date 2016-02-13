@@ -25,9 +25,6 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="5" column="2">
        <widget class="QPushButton" name="btnBuildReport">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>188</width>
@@ -47,9 +44,6 @@
       </item>
       <item row="5" column="1">
        <widget class="QPushButton" name="btnStopAutoModeDiagnostic">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>180</width>
@@ -69,9 +63,6 @@
       </item>
       <item row="1" column="0" colspan="3">
        <widget class="QGroupBox" name="groupBoxDiagnosticDevice">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>560</width>
@@ -123,6 +114,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btnCheckConnectedBattery">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
               <string>Проверить</string>
              </property>
@@ -159,9 +153,6 @@
       </item>
       <item row="2" column="0" colspan="3">
        <widget class="QGroupBox" name="groupBoxDiagnosticMode">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>60</width>
@@ -194,9 +185,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbModeDiagnosticManual">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>283</x>
@@ -254,9 +242,6 @@
       </item>
       <item row="4" column="0" colspan="3">
        <widget class="QProgressBar" name="progressBar">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>560</width>
@@ -285,9 +270,6 @@
       </item>
       <item row="5" column="0">
        <widget class="QPushButton" name="btnStartAutoModeDiagnostic">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="minimumSize">
          <size>
           <width>180</width>
@@ -329,9 +311,6 @@
          <string>Проверяемый параметр</string>
         </property>
         <widget class="QRadioButton" name="rbClosedCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -345,9 +324,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -361,9 +337,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbInsulationResistance">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -377,9 +350,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbInsulationResistanceMeasuringBoardUUTBB">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -393,9 +363,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -409,9 +376,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbClosedCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -425,9 +389,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbDepassivation">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -441,9 +402,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbClosedCircuitVoltageBattery">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -457,9 +415,6 @@
          </property>
         </widget>
         <widget class="QComboBox" name="cbClosedCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -485,9 +440,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbInsulationResistance">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -498,9 +450,6 @@
          </property>
         </widget>
         <widget class="QComboBox" name="cbOpenCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -526,9 +475,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbClosedCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -554,9 +500,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbOpenCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -582,9 +525,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbClosedCircuitVoltageBattery">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -610,9 +550,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbDepassivation">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -638,9 +575,6 @@
          </item>
         </widget>
         <widget class="QComboBox" name="cbInsulationResistanceMeasuringBoardUUTBB">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -666,9 +600,6 @@
          </item>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -694,9 +625,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -722,9 +650,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnVoltageOnTheHousing">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -750,9 +675,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltageBattery">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -778,9 +700,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnInsulationResistance">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -806,9 +725,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnOpenCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -834,9 +750,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnDepassivation">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -862,9 +775,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnInsulationResistanceMeasuringBoardUUTBB">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -890,9 +800,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnOpenCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>393</x>
@@ -918,9 +825,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltagePowerSupply_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -934,9 +838,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnOpenCircuitVoltagePowerSupply_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -950,9 +851,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnInsulationResistance_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -966,9 +864,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnVoltageOnTheHousing_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -982,9 +877,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnOpenCircuitVoltageGroup_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -998,9 +890,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnDepassivation_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -1014,9 +903,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnInsulationResistanceMeasuringBoardUUTBB_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -1030,9 +916,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltageBattery_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -1046,9 +929,6 @@
          </property>
         </widget>
         <widget class="QPushButton" name="btnClosedCircuitVoltageGroup_2">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>474</x>
@@ -1062,9 +942,6 @@
          </property>
         </widget>
         <widget class="QComboBox" name="cbVoltageOnTheHousing">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>318</x>
@@ -1085,9 +962,6 @@
          </item>
         </widget>
         <widget class="QRadioButton" name="rbVoltageOnTheHousing">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>10</x>
