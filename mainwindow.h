@@ -82,6 +82,7 @@ private:
     bool bCheckCompleteClosedCircuitVoltagePowerSupply;
     void getCOMPorts();
     float param;
+    double randMToN(double M, double N);
     //+++ Edward
     /// Установки из ini-файла
     Settings settings;
@@ -164,8 +165,6 @@ private slots:
    void on_rbClosedCircuitVoltageBattery_toggled(bool checked);
    void on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked);
    void on_cbIsUUTBB_toggled(bool checked);
-   void on_pushButton_clicked();
-   void on_cbInsulationResistance_currentIndexChanged(const QString &arg1);
 
    //+++ Edward
    /// Приём массива из последовательного порта

@@ -152,7 +152,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btnClosedCircuitVoltagePowerSupply->hide();
     ui->btnClosedCircuitVoltagePowerSupply_2->hide();
 
-    for (int i = 1; i < 9; i++) {
+    for (int i = 1; i < 11; i++) {
         ui->tabWidget->removeTab(1);
     }
 
@@ -451,6 +451,11 @@ void MainWindow::getCOMPorts()
         list << info.portName();
         ui->comboBoxCOMPort->addItems(list);
     }
+}
+
+double MainWindow::randMToN(double M, double N)
+{
+    return M + (rand() / ( RAND_MAX / (N-M) ) ) ;
 }
 
 /*
@@ -899,6 +904,29 @@ void MainWindow::checkOpenCircuitVoltageGroup()
  */
 void MainWindow::checkClosedCircuitVoltageGroup()
 {
+    qDebug()<<"checkClosedCircuitVoltageGroup";
+    int h = 45; //Шаг, с которым будем пробегать по оси Ox
+    //double x, y;
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // green dot
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
+    //ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::green));
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setLineStyle(QCPGraph::lsNone);
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // red line
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, 32.3);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(900, 32.3);
+
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, 900);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(20, 40);
+
     if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
         iStepClosedCircuitVoltageGroup = 1;
         bPause = false;
@@ -922,94 +950,103 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             switch (iStepClosedCircuitVoltageGroup) {
             case 1:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 2:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 3:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 4:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 5:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 6:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 7:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 8:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 9:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 10:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 11:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 12:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 13:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 14:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 15:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 16:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 17:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 18:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 19:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             case 20:
                 delay(1000);
-                param = qrand()%40+10; //число полученное с COM-порта
+                param = randMToN(34, 32); //число полученное с COM-порта
                 break;
             default:
                 return;
                 break;
             }
+            //ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
+            ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true);
+            ui->widgetClosedCircuitVoltageGroup->graph(0)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
+            //ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
+            /*ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::green, Qt::white, 7));
+            if (param < settings.opencircuitgroup_limit_min)
+                ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::red, Qt::white, 7));*/
+            ui->widgetClosedCircuitVoltageGroup->graph(1)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
+            ui->widgetClosedCircuitVoltageGroup->replot();
 
             QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(iStepClosedCircuitVoltageGroup));
             label->setText(tr("%1) %2").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param)));
             str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param));
-            Log(str, (param < 32.3) ? "red" : "green");
-            if (param < 32.3) {
+            Log(str, (param < settings.opencircuitgroup_limit_min) ? "red" : "green");
+            if (param < settings.opencircuitgroup_limit_min) {
                 int ret = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
                 switch (ret) {
                 case 0:
@@ -1492,79 +1529,5 @@ customPlot->graph(1)->rescaleAxes(true);
 // Allow user to drag axis ranges with mouse, zoom with mouse wheel and select graphs by clicking:
 customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);*/
 
-void MainWindow::on_pushButton_clicked()
-{
-    int h = 100; //Шаг, с которым будем пробегать по оси Ox
-    QVector<double> x(20), y(20); //Массивы координат точек
 
-    ui->widgetClosedCircuitVoltageGroup->clearGraphs();
-    for (int i=0; i<20; i++)
-    {
-        x[i] = h*i;
-        y[i] = qrand()%40+10;;
-
-    }
-    ui->widgetClosedCircuitVoltageGroup->addGraph();
-    ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::green));
-    ui->widgetClosedCircuitVoltageGroup->graph(0)->setData(x, y);
-    /*for (int i=0; i<20; i++)
-    {
-        x[i] = h*i;
-        y[i] = qrand()%40+10;;
-
-    }
-    ui->widgetClosedCircuitVoltageGroup->addGraph();
-    ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::blue));
-    ui->widgetClosedCircuitVoltageGroup->graph(1)->setData(x, y);
-    for (int i=0; i<20; i++)
-    {
-        x[i] = h*i;
-        y[i] = qrand()%40+10;;
-
-    }
-    ui->widgetClosedCircuitVoltageGroup->addGraph();
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->setData(x, y);*/
-
-    //ui->widgetClosedCircuitVoltageGroup->clearGraphs();//Если нужно, но очищаем все графики
-    //Добавляем один график в widget
-    ui->widgetClosedCircuitVoltageGroup->addGraph();
-    //ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
-    //ui->widgetClosedCircuitVoltageGroup->graph(0)->setData(x, y);
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetClosedCircuitVoltageGroup->yAxis->grid()->setSubGridVisible(true);
-    ui->widgetClosedCircuitVoltageGroup->xAxis->grid()->setSubGridVisible(true);
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setSubTickCount(10);
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, 360);
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33); //
-    ui->widgetClosedCircuitVoltageGroup->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-    ui->widgetClosedCircuitVoltageGroup->axisRect()->setupFullAxesBox();
-    //ui->widgetClosedCircuitVoltageGroup->replot();
-
-    /*ui->widgetOpenCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
-    ui->widgetOpenCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
-
-    ui->widgetOpenCircuitVoltageGroup->yAxis->grid()->setSubGridVisible(true);
-    ui->widgetOpenCircuitVoltageGroup->xAxis->grid()->setSubGridVisible(true);
-    ui->widgetOpenCircuitVoltageGroup->yAxis->setSubTickCount(10);
-
-    // set axes ranges, so we see all data:
-    ui->widgetOpenCircuitVoltageGroup->xAxis->setRange(0, 120000/1000);
-    ui->widgetOpenCircuitVoltageGroup->yAxis->setRange(24, 33); //
-
-    // make range draggable and zoomable:
-    ui->widgetOpenCircuitVoltageGroup->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
-    // make top right axes clones of bottom left axes:
-    ui->widgetOpenCircuitVoltageGroup->axisRect()->setupFullAxesBox();
-    // connect signals so top and right axes move in sync with bottom and left axes:
-    connect(ui->widgetOpenCircuitVoltageGroup->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->widgetOpenCircuitVoltageGroup->xAxis2, SLOT(setRange(QCPRange)));
-    connect(ui->widgetOpenCircuitVoltageGroup->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->widgetOpenCircuitVoltageGroup->yAxis2, SLOT(setRange(QCPRange)));*/
-}
-
-void MainWindow::on_cbInsulationResistance_currentIndexChanged(const QString &arg1)
-{
-
-}
 
