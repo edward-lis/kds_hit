@@ -1037,7 +1037,7 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             ui->widgetClosedCircuitVoltageGroup->graph(0)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
             //ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
             /*ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::green, Qt::white, 7));
-            if (param < settings.opencircuitgroup_limit_min)
+            if (param < settings.closecircuitgroup_limit)
                 ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::red, Qt::white, 7));*/
             ui->widgetClosedCircuitVoltageGroup->graph(1)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
             ui->widgetClosedCircuitVoltageGroup->replot();
@@ -1045,8 +1045,8 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(iStepClosedCircuitVoltageGroup));
             label->setText(tr("%1) %2").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param)));
             str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(iStepClosedCircuitVoltageGroup).arg(QString::number(param));
-            Log(str, (param < settings.opencircuitgroup_limit_min) ? "red" : "green");
-            if (param < settings.opencircuitgroup_limit_min) {
+            Log(str, (param < settings.closecircuitgroup_limit) ? "red" : "green");
+            if (param < settings.closecircuitgroup_limit) {
                 int ret = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
                 switch (ret) {
                 case 0:
