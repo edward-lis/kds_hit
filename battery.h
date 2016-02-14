@@ -14,7 +14,9 @@ struct Battery
     /// точки измерения напряжения на корпусе батареи
     QString str_voltage_corpus[2];
     /// точки измерения сопротивления изоляции
-    QString str_isolation_resistance[4];
+    QVector<QString> str_isolation_resistance;
+    /// кол-во точек измерения сопротивления изоляции
+    int i_isolation_resistance_num;
     /// точки измерения цепей групп
     QString circuitgroup[28];
     /// точка измерения цепи батареи
@@ -24,7 +26,7 @@ struct Battery
     /// точки измерений сопротивления изоляции платы УУТББ
     QVector<QString> uutbb_resist;
     /// кол-во точек измерения сопротивления изоляции платы УУТББ
-    int uutbb_resist_num;
+    int i_uutbb_resist_num;
 
 };
 

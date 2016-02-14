@@ -987,7 +987,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabEventLog">
        <attribute name="title">
@@ -1021,7 +1021,7 @@
       </widget>
       <widget class="QWidget" name="tabVoltageOnTheHousing">
        <attribute name="title">
-        <string>Напряжение на копрусе</string>
+        <string>Напряжение на корпусе</string>
        </attribute>
        <widget class="QLabel" name="labelVoltageOnTheHousing2">
         <property name="geometry">

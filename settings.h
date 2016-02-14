@@ -2,8 +2,15 @@
 #define SETTINGS_H
 
 #include <QObject>
+#include <QVector>
 
 #define INI_FILE_NAME   "kds_hit.ini" // короткое имя файла
+
+struct Dot
+{
+    quint32 resist;
+    quint16 codeADC;
+};
 
 class Settings : public QObject
 {
@@ -37,6 +44,8 @@ public:
     float uutbb_closecircuitpower_limit; ///< предельное напряжение замкнутой цепи блока питания УУТББ, при токе 0.1А, вольт
     int uutbb_time_ccp; ///< время подключения нагрузки на БП УУТББ, секунды
 
+    QVector<Dot> functionResist;
+
 private:
     QString m_sSettingsFile; ///< полное имя ini-файла
 
@@ -44,6 +53,7 @@ signals:
 
 public slots:
     void loadSettings(); ///< загрузить конфиг из ini-файла
+    void printSettings(); ///< распечатать конфиг
 };
 
 #endif // SETTINGS_H
