@@ -46,10 +46,18 @@ void Settings::loadSettings()
     }
     // !!! сделать в релизе проверку на целостность конф.файла
 
-    coefADC1 = settings.value("k1_volt", 0).toFloat()/settings.value("k1_code", 1).toUInt();
+    QString str;
+    bool ok;
+    //coefADC1 = settings.value("k1_volt", 0).toFloat()/settings.value("k1_code", 1).toUInt();
     //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<settings.value("k1_code", 1).toUInt();
-    coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toUInt();
-    //qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()<<settings.value("k2_code", 1).toUInt();
+    // Для чтения шестнадцатиричных данных
+    str = settings.value("k1_code", 1).toString();
+    coefADC1 = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);
+    qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
+
+    coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
+    qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
+           <<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
     voltage_circuit_type = settings.value("voltage_circuit_type", 25.0).toFloat();
     voltage_power_uutbb = settings.value("voltage_power_uutbb", 5.0).toFloat();
 

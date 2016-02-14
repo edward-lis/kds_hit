@@ -7,9 +7,6 @@
 
 extern QVector<Battery> battery;
 
-// !!! добавить в ини-файл и в настройки - какое ПРИЛИЧНОЕ напряжение должно быть? U=2500, например
-// !!! отсутствие напряжения УУТББ - 0? или тоже некий порог?
-
 /* Алгоритм определения типа подключенной батареи описан в файле протокола информационного обмена с коробочкой.
 
 Матрица типов подключенных батарей, в зависимости от электрических цепей:
@@ -85,6 +82,12 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop;
     uocpb = getRecvData(baRecvArray);
+
+    // сбросить коробочку
+    baSendArray = (baSendCommand="IDLE")+"#";
+    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
+
     if(uocpb > U2) // если есть напряжение, то УУТББ
     {
         y=0;

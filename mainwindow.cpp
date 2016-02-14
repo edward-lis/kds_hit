@@ -113,8 +113,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBoxBatteryList->addItem(battery[i].str_type_name);
     }
     // !!! написать во всех других виджетах соответствующие текущей батарее строки
-    ui->cbVoltageOnTheHousing->setItemText(0, battery[0].str_voltage_corpus[0]);
-    ui->cbVoltageOnTheHousing->setItemText(1, battery[0].str_voltage_corpus[1]);
+    ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[0]);
+    ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[1]);
 
     // посылать масив в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
     connect(this, SIGNAL(signalSendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
@@ -281,7 +281,7 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
     // когда приняли данные вовремя - остановить таймаут
     timeoutResponse->stop();
     //ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть
-//    if(operation_code == 0x01) // если приняли пинг, то
+    if(operation_code == 0x01) // если приняли пинг, то
     {
         // следующий пинг пошлётся по окончанию timerPing
         if(data == baSendCommand) // вот тут по-хорошему надо бы по результам анализа ответа делать что-то полезное. только хз.
@@ -301,14 +301,14 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
             }
             return;
         }
-/*        else
+        else
         {
             qDebug()<<"ping incorrect";
-            return;
-        }*/
+            //return;
+        }
 //        return;
     }
-//    if(operation_code == 0x08) // если приняли ответ на команду
+    if(operation_code == 0x08) // если приняли ответ на команду
     {
         if( data.contains(baSendCommand) && data.contains("OK") ) // Команда#OK режима отработана/ совсем простенькая проверка на наличии в ответе OK
         {
@@ -325,6 +325,7 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
         else // пришла какая-то другая посылка
         {
             qDebug()<<"Incorrect reply. Should be "<<(baSendCommand + " and OK")<<" but got: "<<data;
+            loop.exit(KDS_INCORRECT_REPLY); // вывалиться из цикла ожидания приёма с кодом ошибки неправильной команды
         }
     }
 }
@@ -352,12 +353,12 @@ quint16 MainWindow::getRecvData(QByteArray baRecvArray)
 // нет ответа на запрос
 void MainWindow::procTimeoutResponse()
 {
-    //qDebug()<<"procTimeoutResponse";
+    qDebug()<<"procTimeoutResponse";
     ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
     //emit signalTimeoutResponse();
     if(loop.isRunning())
     {
-        loop.exit(1); // вывалиться из цикла ожидания приёма с кодом ошибки таймаута
+        loop.exit(KDS_TIMEOUT); // вывалиться из цикла ожидания приёма с кодом ошибки таймаута
         baRecvArray.clear(); // очистить массив перед следующим приёмом
     }
 }
@@ -1566,3 +1567,4 @@ void MainWindow::on_cbInsulationResistance_currentIndexChanged(const QString &ar
 {
 
 }
+

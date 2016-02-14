@@ -26,6 +26,8 @@
 // КОМАНДА PING доступна всегда, но лучше в пассивном/IDLE режиме устройства.
 #define PING    "PING"  // некая строка пинга.  длина до 240 байт
 //#define PING    "123456789012345678901234567890123456789012345678901234567890"  // некая строка пинга.  длина до 240 байт
+#define KDS_TIMEOUT           1           // код ошибки таймаут
+#define KDS_INCORRECT_REPLY   2           // код ошибки неверный ответ
 
 // задержки после определённой команды и перед выдачей следующей команды, по протоколу
 #define delay_command_after_start_before_request    400     //ms    // после команды пуска режима, перед первым запросом
@@ -180,6 +182,7 @@ private slots:
    //+++
    void on_btnCOMPortOpenClose_clicked();
    void on_btnCheckConnectedBattery_clicked();
+   void on_btnVoltageOnTheHousing_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     serialport.cpp \
     checkbatterytype.cpp \
     qcustomplot.cpp \
-    settings.cpp
+    settings.cpp \
+    voltagecase.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
