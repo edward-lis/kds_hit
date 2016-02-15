@@ -48,16 +48,14 @@ void Settings::loadSettings()
 
     QString str;
     bool ok;
-    //coefADC1 = settings.value("k1_volt", 0).toFloat()/settings.value("k1_code", 1).toUInt();
-    //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<settings.value("k1_code", 1).toUInt();
     // Для чтения шестнадцатиричных данных
     str = settings.value("k1_code", 1).toString();
     coefADC1 = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);
-    qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
+    //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
 
     coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
-    qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
-           <<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
+    //qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
+           //<<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
     voltage_circuit_type = settings.value("voltage_circuit_type", 25.0).toFloat();
     voltage_power_uutbb = settings.value("voltage_power_uutbb", 5.0).toFloat();
 
@@ -95,18 +93,42 @@ void Settings::loadSettings()
     voltage_corpus_limit = settings.value("voltage_corpus_limit", 1.0).toFloat();
 
     // строки - точки измерения сопротивления изоляции
-    battery[0].str_isolation_resistance[0] = settings.value("9ER20P_20/isolation_resistance_1", "").toString();
-    battery[0].str_isolation_resistance[1] = settings.value("9ER20P_20/isolation_resistance_2", "").toString();
-    battery[0].str_isolation_resistance[2] = settings.value("9ER20P_20/isolation_resistance_3", "").toString();
-    battery[0].str_isolation_resistance[3] = settings.value("9ER20P_20/isolation_resistance_4", "").toString();
-    battery[1].str_isolation_resistance[0] = settings.value("9ER14PS_24/isolation_resistance_1", "").toString();
-    battery[1].str_isolation_resistance[1] = settings.value("9ER14PS_24/isolation_resistance_2", "").toString();
-    battery[2].str_isolation_resistance[0] = settings.value("9ER14P_24/isolation_resistance_1", "").toString();
-    battery[2].str_isolation_resistance[1] = settings.value("9ER14P_24/isolation_resistance_2", "").toString();
-    battery[3].str_isolation_resistance[0] = settings.value("9ER20P_28/isolation_resistance_1", "").toString();
-    battery[3].str_isolation_resistance[1] = settings.value("9ER20P_28/isolation_resistance_2", "").toString();
-    battery[3].str_isolation_resistance[2] = settings.value("9ER20P_28/isolation_resistance_3", "").toString();
-    battery[3].str_isolation_resistance[3] = settings.value("9ER20P_28/isolation_resistance_4", "").toString();
+    battery[0].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_20");
+    battery[0].str_isolation_resistance.resize(battery[0].i_isolation_resistance_num); // зарезервируем место под строки
+    for(i=0; i<battery[0].i_isolation_resistance_num; i++)
+    {
+        settings.setArrayIndex(i);
+        battery[0].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+    }
+    settings.endArray();
+
+    battery[1].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14PS_24");
+    battery[1].str_isolation_resistance.resize(battery[1].i_isolation_resistance_num); // зарезервируем место под строки
+    for(i=0; i<battery[1].i_isolation_resistance_num; i++)
+    {
+        settings.setArrayIndex(i);
+        battery[1].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+    }
+    settings.endArray();
+
+    battery[2].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14P_24");
+    battery[2].str_isolation_resistance.resize(battery[2].i_isolation_resistance_num); // зарезервируем место под строки
+    for(i=0; i<battery[2].i_isolation_resistance_num; i++)
+    {
+        settings.setArrayIndex(i);
+        battery[2].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+    }
+    settings.endArray();
+
+    battery[3].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_28");
+    battery[3].str_isolation_resistance.resize(battery[3].i_isolation_resistance_num); // зарезервируем место под строки
+    for(i=0; i<battery[3].i_isolation_resistance_num; i++)
+    {
+        settings.setArrayIndex(i);
+        battery[3].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+    }
+    settings.endArray();
+
     // вещественные предельное сопротивление изоляции батареи
     isolation_resistance_limit = settings.value("isolation_resistance_limit", 20).toFloat();
 
@@ -178,26 +200,62 @@ void Settings::loadSettings()
     uutbb_time_ccp = settings.value("uutbb_time_ccp", 10).toInt();
 
     // строки - точки измерения сопротивления изоляции УУТББ
-    battery[0].uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER20P_20");
-    battery[0].uutbb_resist.resize(battery[0].uutbb_resist_num); // зарезервируем место под строки
-    for(i=0; i<battery[0].uutbb_resist_num; i++)
+    battery[0].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER20P_20");
+    battery[0].uutbb_resist.resize(battery[0].i_uutbb_resist_num); // зарезервируем место под строки
+    for(i=0; i<battery[0].i_uutbb_resist_num; i++)
     {
         settings.setArrayIndex(i);
         battery[0].uutbb_resist[i] = settings.value("uutbb_resist", "").toString(); // считываем наименования точек измерения сопротивления изоляции
     }
     settings.endArray();
-    battery[1].uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER14PS_24");
-    battery[1].uutbb_resist.resize(battery[1].uutbb_resist_num); // зарезервируем место под строки
-    for(i=0; i<battery[1].uutbb_resist_num; i++)
+    battery[1].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER14PS_24");
+    battery[1].uutbb_resist.resize(battery[1].i_uutbb_resist_num); // зарезервируем место под строки
+    for(i=0; i<battery[1].i_uutbb_resist_num; i++)
     {
         settings.setArrayIndex(i);
         battery[1].uutbb_resist[i] = settings.value("uutbb_resist", "").toString(); // считываем наименования точек измерения сопротивления изоляции
     }
     settings.endArray();
 
+    // Функция сопротивления/кода АЦП
+    functionResist.resize(settings.beginReadArray("resist_function"));
+    for(i=0; i<functionResist.size(); i++)
+    {
+        settings.setArrayIndex(i);
+        functionResist[i].resist = settings.value("resist", 0).toInt(); // dec
+        functionResist[i].codeADC = settings.value("codeADC", 0).toString().toUInt(&ok, 16); // hex
+    }
+
+
+    printSettings();
+
 #if 0
     // если есть ключ в конкретной секции, то берётся он. если его нет, то берётся такой же ключ из общей секции
     // если и его нету, то тогда значение по умолчанию.
     b_9ER20P_20.opencircuitgroup_limit_min = settings.value("9ER20P_20/opencircuitgroup_limit_min", settings.value("opencircuitgroup_limit_min", 32.3).toFloat()).toFloat();
 #endif
+}
+
+void Settings::printSettings()
+{
+    int i,j;
+    for(i=0; i<num_batteries_types; i++)
+    {
+        qDebug()<<"Battery"<<battery[i].str_type_name<<"==================================================";
+        qDebug()<<tr("Сопротивление изоляции :");
+        for(j=0; j<battery[i].i_isolation_resistance_num; j++)
+        {
+            qDebug()<<battery[i].str_isolation_resistance[j];
+        }
+        qDebug()<<tr("Сопротивление изоляции УУТББ:");
+        for(j=0; j<battery[i].i_uutbb_resist_num; j++)
+        {
+            qDebug()<<j<<battery[i].uutbb_resist[j];
+        }
+    }
+    qDebug()<<"Resistance function:";
+    for(i=0; i<functionResist.size(); i++)
+    {
+        qDebug()<<i<<" R= "<<qPrintable(QString::number(functionResist[i].resist))<<", codeADC= 0x"<<qPrintable(QString::number(functionResist[i].codeADC, 16));
+    }
 }

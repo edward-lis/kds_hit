@@ -1158,7 +1158,7 @@
       </widget>
       <widget class="QWidget" name="tabVoltageOnTheHousing">
        <attribute name="title">
-        <string>Напряжение на копрусе</string>
+        <string>Напряжение на корпусе</string>
        </attribute>
        <widget class="QLabel" name="labelVoltageOnTheHousing2">
         <property name="geometry">
