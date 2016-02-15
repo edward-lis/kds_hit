@@ -99,12 +99,12 @@
           <rect>
            <x>7</x>
            <y>283</y>
-           <width>247</width>
+           <width>191</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Напряжение замкнутой цепи блока питания</string>
+          <string>Напряжение замкнутой цепи БП</string>
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltageGroup">
@@ -143,7 +143,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Сопротивление изоляции платы измерительной УУТББ</string>
+          <string>Сопротивление изоляции УУТББ</string>
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltagePowerSupply">
@@ -151,12 +151,12 @@
           <rect>
            <x>7</x>
            <y>254</y>
-           <width>259</width>
+           <width>211</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Напряжение разомкнутой цепи блока питания</string>
+          <string>Напряжение разомкнутой цепи БП</string>
          </property>
         </widget>
         <widget class="QRadioButton" name="rbClosedCircuitVoltageGroup">
@@ -201,15 +201,15 @@
         <widget class="QComboBox" name="cbClosedCircuitVoltagePowerSupply">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>281</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -223,15 +223,15 @@
         <widget class="QComboBox" name="cbInsulationResistance">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>50</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -245,15 +245,15 @@
         <widget class="QComboBox" name="cbOpenCircuitVoltageGroup">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>79</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -267,15 +267,15 @@
         <widget class="QComboBox" name="cbClosedCircuitVoltageGroup">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>136</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -289,15 +289,15 @@
         <widget class="QComboBox" name="cbOpenCircuitVoltagePowerSupply">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>252</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -311,15 +311,15 @@
         <widget class="QComboBox" name="cbClosedCircuitVoltageBattery">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>194</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -333,15 +333,15 @@
         <widget class="QComboBox" name="cbDepassivation">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>165</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -355,15 +355,15 @@
         <widget class="QComboBox" name="cbInsulationResistanceMeasuringBoardUUTBB">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>223</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -719,15 +719,15 @@
         <widget class="QComboBox" name="cbVoltageOnTheHousing">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>21</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>
@@ -754,15 +754,15 @@
         <widget class="QComboBox" name="cbOpenCircuitVoltageBattery">
          <property name="geometry">
           <rect>
-           <x>315</x>
+           <x>240</x>
            <y>108</y>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </rect>
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>225</width>
            <height>20</height>
           </size>
          </property>

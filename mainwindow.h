@@ -53,7 +53,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QStandardItemModel *model;
+    QStandardItemModel *modelClosedCircuitVoltageGroup;
+    QStandardItemModel *modelOpenCircuitVoltageGroup;
+    QStandardItemModel *modelInsulationResistanceMeasuringBoardUUTBB;
     int iStartCheck;
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     int iStep;
@@ -71,6 +73,7 @@ private:
     QVector<int> imDepassivation;
     QString str;
     QString paramMsg;
+    //QString checkedTextInsulationResistance;
     bool bPause;
     bool bCheckCompleteVoltageOnTheHousing;
     bool bCheckCompleteInsulationResistance;
@@ -81,6 +84,7 @@ private:
     bool bCheckCompleteOpenCircuitVoltagePowerSupply;
     bool bCheckCompleteClosedCircuitVoltagePowerSupply;
     void getCOMPorts();
+    void comboxSetData();
     float param;
     double randMToN(double M, double N);
     //+++ Edward
@@ -124,7 +128,6 @@ private:
 public slots:
     void checkAutoModeDiagnostic();
     void setPause();
-    void handleSelectionChangedBattery(int index);
     void Log(QString message, QString color);
     void delay(int millisecondsToWait);
     void progressBarSet(int iVal);
@@ -154,7 +157,9 @@ signals:
    //+++
 
 private slots:
-   void itemChanged(QStandardItem*);
+   void itemChangedOpenCircuitVoltageGroup(QStandardItem* itm);
+   void itemChangedClosedCircuitVoltageGroup(QStandardItem* itm);
+   void itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem* itm);
    void on_rbModeDiagnosticAuto_toggled(bool checked);
    void on_rbModeDiagnosticManual_toggled(bool checked);
    void on_rbVoltageOnTheHousing_toggled(bool checked);
@@ -182,6 +187,7 @@ private slots:
    void on_btnCOMPortOpenClose_clicked();
    void on_btnCheckConnectedBattery_clicked();
    void on_btnVoltageOnTheHousing_clicked();
+   void on_comboBoxBatteryList_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H

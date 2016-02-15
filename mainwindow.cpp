@@ -79,23 +79,6 @@ MainWindow::MainWindow(QWidget *parent) :
     bDeveloperState(true) // режим разработчика, временно тру, потом поменять на фолс!!!
 {
     ui->setupUi(this);
-    model = new QStandardItemModel(5, 1); // 4 rows, 1 col
-    for (int r = 0; r < 5; ++r)
-    {
-        QStandardItem* item;
-        if(r == 0)
-            item = new QStandardItem(QString("Все"));
-        else
-            item = new QStandardItem(QString("%0").arg(r));
-
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(Qt::Unchecked, Qt::CheckStateRole);
-
-        model->setItem(r, 0, item);
-    }
-
-    ui->cbInsulationResistance->setModel(model);
-    connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChanged(QStandardItem*)));
 
     //+++ Edward
     // загрузить конфигурационные установки и параметры батарей из ini-файла.
@@ -113,8 +96,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->comboBoxBatteryList->addItem(battery[i].str_type_name);
     }
     // !!! написать во всех других виджетах соответствующие текущей батарее строки
-    ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[0]);
-    ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[1]);
+    //ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[0]);
+    //ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[1]);
 
     // посылать масив в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
     connect(this, SIGNAL(signalSendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
@@ -134,7 +117,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
     //+++
-
 
     ui->groupBoxDiagnosticDevice->setDisabled(true);
     ui->groupBoxDiagnosticMode->setDisabled(true);
@@ -173,13 +155,9 @@ MainWindow::MainWindow(QWidget *parent) :
     iStepInsulationResistance = 1;
     iStepOpenCircuitVoltageGroup = 1;
 
-    //ResetCheck();
     getCOMPorts();
-    //com = new QSerialPort(this);
-    //connect(ui->btnCOMPortConnect, SIGNAL(clicked(bool)), this, SLOT(openCOMPort()));
-    //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), this, SLOT(closeCOMPort()));
-    //connect(ui->cbIsUUTBB, SIGNAL(toggled(bool)), this, SLOT(isUUTBB()));
-    connect(ui->comboBoxBatteryList, SIGNAL(currentIndexChanged(int)), this , SLOT(handleSelectionChangedBattery(int)));
+    comboxSetData();
+    connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
     //connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->groupBoxCheckParams, SLOT(setDisabled(bool)));
     //connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
     //connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->rbVoltageOnTheHousing, SLOT(setEnabled(bool)));
@@ -187,16 +165,16 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->btnVoltageOnTheHousing, SLOT(setEnabled(bool)));
     //connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->cbVoltageOnTheHousing, SLOT(setEnabled(bool)));
     //connect(ui->rbInsulationResistance, SIGNAL(toggled(bool)), ui->btnInsulationResistance, SLOT(setEnabled(bool)));
-    connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
+    /*connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageBattery, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageBattery, SLOT(setEnabled(bool)));
     connect(ui->rbDepassivation, SIGNAL(toggled(bool)), ui->btnDepassivation, SLOT(setEnabled(bool)));
     connect(ui->rbInsulationResistanceMeasuringBoardUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceMeasuringBoardUUTBB, SLOT(setEnabled(bool)));
     connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
-    connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
+    connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));*/
     //connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(int)), this, SLOT(checkVoltageOnTheHousing(iBatteryIndex, iStepVoltageOnTheHousing)));
 //Ed remove    connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
-    connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
+    /*connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
     connect(ui->btnOpenCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
     connect(ui->btnDepassivation, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
@@ -213,7 +191,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnInsulationResistanceMeasuringBoardUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
     connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
     connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
-    connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));
+    connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));*/
     //connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
     //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
 
@@ -238,34 +216,53 @@ MainWindow::MainWindow(QWidget *parent) :
     this->Model->insertRow(0, this->Item1);
     ui->cbInsulationResistance->setModel(&Model);*/
 }
-void MainWindow::itemChanged(QStandardItem* itm)
+
+void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
 {
-    QString text = itm->data(Qt::DisplayRole).toString();
-    if(text == QString("Все"))
+    qDebug() << "modelOpenCircuitVoltageGroup->rowCount()=" << modelOpenCircuitVoltageGroup->rowCount();
+    int count = 0;
+    for(int i=1; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
     {
-        Qt::CheckState checkState = itm->checkState();
-        if(checkState == Qt::Checked)
-        {
-           qDebug() << "Qt::Checked";
-           for(int i=1; i < model->rowCount(); i++)
-           {
-               QStandardItem *sitm = model->item(i, 0);
-               sitm->setData(Qt::Checked, Qt::CheckStateRole);
-           }
-
-        }
-        else if(checkState == Qt::Unchecked)
-        {
-            qDebug() << "Qt::Unchecked";
-            for(int i=1; i < model->rowCount(); i++)
-            {
-                QStandardItem *sitm = model->item(i, 0);
-                sitm->setData(Qt::Unchecked, Qt::CheckStateRole);
-            }
-        }
+        QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
     }
+    qDebug() << "countOpenCircuitVoltageGroup=" << count;
+    ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelOpenCircuitVoltageGroup->rowCount()-1));
+    ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
+}
 
-    ui->cbInsulationResistance->setModel(this->model);
+void MainWindow::itemChangedClosedCircuitVoltageGroup(QStandardItem* itm)
+{
+    qDebug() << "modelClosedCircuitVoltageGroup->rowCount()=" << modelClosedCircuitVoltageGroup->rowCount();
+    int count = 0;
+    for(int i=1; i < modelClosedCircuitVoltageGroup->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelClosedCircuitVoltageGroup->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+    qDebug() << "countClosedCircuitVoltageGroup=" << count;
+    ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelClosedCircuitVoltageGroup->rowCount()-1));
+    ui->cbClosedCircuitVoltageGroup->setCurrentIndex(0);
+}
+
+void MainWindow::itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem* itm)
+{
+    qDebug() << "modelInsulationResistanceMeasuringBoardUUTBB->rowCount()=" << modelInsulationResistanceMeasuringBoardUUTBB->rowCount();
+    int count = 0;
+    for(int i=1; i < modelInsulationResistanceMeasuringBoardUUTBB->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelInsulationResistanceMeasuringBoardUUTBB->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+    qDebug() << "countInsulationResistanceMeasuringBoardUUTBB=" << count;
+    ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelInsulationResistanceMeasuringBoardUUTBB->rowCount()-1));
+    ui->cbInsulationResistanceMeasuringBoardUUTBB->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
@@ -471,23 +468,98 @@ void MainWindow::delay( int millisecondsToWait )
 }
 
 
-/*
- * Выбор батареи
+
+/*!
+ * Заполнение комбоксов
+ * Вызывается при инициализации и выборе батареи.
+ * Входные параметры: int iBatteryIndex
  */
-void MainWindow::handleSelectionChangedBattery(int index)
-{
-    if (index == 0 or index == 1) {
-        ui->cbIsUUTBB->setEnabled(true);
-    } else {
-        ui->cbIsUUTBB->setEnabled(false);
-        ui->cbIsUUTBB->setChecked(false);
+void MainWindow::comboxSetData() {
+    qDebug() << "comboxSetData()= " << iBatteryIndex;
+
+    /// 1. Напряжения на корпусе
+    ui->cbVoltageOnTheHousing->clear();
+    ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[0]);
+    ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[1]);
+
+    /// 2. Сопротивление изоляции
+    ui->cbInsulationResistance->clear();
+    ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[0]);
+    ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[1]);
+    if (iBatteryIndex == 0 or iBatteryIndex == 3) { /// еще две пары если батарея 9ER20P_20 или 9ER20P_28
+        ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[2]);
+        ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[3]);
     }
 
-    iBatteryIndex = index; // зачем целое преобразовывать в строку, а потом обратно в целое? - QString::number(index).toInt();
+    /// 3. Напряжение разомкнутой цепи группы
+    ui->cbOpenCircuitVoltageGroup->clear();
+    modelOpenCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    for (int r = 0; r < battery[iBatteryIndex].group_num; ++r)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Checked, Qt::CheckStateRole);
+        modelOpenCircuitVoltageGroup->setItem(r+1, 0, item);
+    }
+    ui->cbOpenCircuitVoltageGroup->setModel(modelOpenCircuitVoltageGroup);
+    ui->cbOpenCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
+    //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
+    connect(modelOpenCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedOpenCircuitVoltageGroup(QStandardItem*)));
 
-    // !!! написать во всех других виджетах соответствующие текущей батарее строки
-    ui->cbVoltageOnTheHousing->setItemText(0, battery[index].str_voltage_corpus[0]);
-    ui->cbVoltageOnTheHousing->setItemText(1, battery[index].str_voltage_corpus[1]);
+    /// 3а. Напряжение разомкнутой цепи батареи
+    ui->cbOpenCircuitVoltageBattery->clear();
+    ui->cbOpenCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
+
+    /// 4. Напряжение замкнутой цепи группы
+    ui->cbClosedCircuitVoltageGroup->clear();
+    modelClosedCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    for (int r = 0; r < battery[iBatteryIndex].group_num; ++r)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Checked, Qt::CheckStateRole);
+        modelClosedCircuitVoltageGroup->setItem(r+1, 0, item);
+    }
+    ui->cbClosedCircuitVoltageGroup->setModel(modelClosedCircuitVoltageGroup);
+    ui->cbClosedCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
+    //ui->cbClosedCircuitVoltageGroup->setCurrentIndex(0);
+    connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
+
+    /// 5. Напряжение замкнутой цепи батареи
+    ui->cbClosedCircuitVoltageBattery->clear();
+    ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
+
+    /// только для батарей 9ER20P_20 или 9ER14PS_24
+    if (iBatteryIndex == 0 or iBatteryIndex == 1) {
+        /// 6. Сопротивление изоляции УУТББ
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->clear();
+        modelInsulationResistanceMeasuringBoardUUTBB = new QStandardItemModel(battery[iBatteryIndex].uutbb_resist_num, 1);
+        for (int r = 0; r < battery[iBatteryIndex].uutbb_resist_num; ++r)
+        {
+            QStandardItem* item;
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[r]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+            modelInsulationResistanceMeasuringBoardUUTBB->setItem(r+1, 0, item);
+        }
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->setModel(modelInsulationResistanceMeasuringBoardUUTBB);
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemData(0, "DISABLE", Qt::UserRole-1);
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].uutbb_resist_num).arg(battery[iBatteryIndex].uutbb_resist_num));
+        //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
+        connect(modelInsulationResistanceMeasuringBoardUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem*)));
+
+        /// 7. Напряжение разомкнутой цепи БП
+        ui->cbOpenCircuitVoltagePowerSupply->clear();
+        ui->cbOpenCircuitVoltagePowerSupply->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+
+        /// 8. Напряжение замкнутой цепи БП
+        ui->cbClosedCircuitVoltagePowerSupply->clear();
+        ui->cbClosedCircuitVoltagePowerSupply->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+    }
 }
 
 /*
@@ -910,17 +982,17 @@ void MainWindow::checkClosedCircuitVoltageGroup()
     ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
     ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
-    ui->widgetClosedCircuitVoltageGroup->addGraph(); // green dot
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue dot
     ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
-    //ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::green));
     ui->widgetClosedCircuitVoltageGroup->graph(1)->setLineStyle(QCPGraph::lsNone);
+    //ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::green));
     ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
     ui->widgetClosedCircuitVoltageGroup->addGraph(); // red line
     ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
     ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
     ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, 32.3);
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(900, 32.3);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(900, settings.closecircuitgroup_limit);
 
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
     ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, 900);
@@ -950,83 +1022,83 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             switch (iStepClosedCircuitVoltageGroup) {
             case 1:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 2:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 3:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 4:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 5:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 6:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 7:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 8:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 9:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 10:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 11:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 12:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 13:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 14:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 15:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 16:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 17:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 18:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 19:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             case 20:
                 delay(1000);
-                param = randMToN(34, 32); //число полученное с COM-порта
+                param = randMToN(26, 29); //число полученное с COM-порта
                 break;
             default:
                 return;
@@ -1036,10 +1108,14 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true);
             ui->widgetClosedCircuitVoltageGroup->graph(0)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
             //ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
-            /*ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::green, Qt::white, 7));
-            if (param < settings.closecircuitgroup_limit)
-                ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::red, Qt::white, 7));*/
-            ui->widgetClosedCircuitVoltageGroup->graph(1)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
+            //ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::green, Qt::white, 7));
+            /*if (param < settings.closecircuitgroup_limit) {
+                QPen gridPen;
+                gridPen.setStyle(Qt::DotLine);
+                gridPen.setColor(QColor(255, 0, 0, 25));
+                ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(gridPen);
+            }*/
+            //ui->widgetClosedCircuitVoltageGroup->graph(1)->addData(h*(iStepClosedCircuitVoltageGroup-1), param);
             ui->widgetClosedCircuitVoltageGroup->replot();
 
             QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(iStepClosedCircuitVoltageGroup));
@@ -1495,39 +1571,14 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
 }
 
 
-// add two new graphs and set their look:
-/*customPlot->addGraph();
-customPlot->graph(0)->setPen(QPen(Qt::blue)); // line color blue for first graph
-customPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20))); // first graph will be filled with translucent blue
-customPlot->addGraph();
-customPlot->graph(1)->setPen(QPen(Qt::red)); // line color red for second graph
-// generate some points of data (y0 for first, y1 for second graph):
-QVector<double> x(250), y0(250), y1(250);
-for (int i=0; i<250; ++i)
+void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
 {
-  x[i] = i;
-  y0[i] = qExp(-i/150.0)*qCos(i/10.0); // exponentially decaying cosine
-  y1[i] = qExp(-i/150.0);              // exponential envelope
+    if (index == 0 or index == 1) {
+        ui->cbIsUUTBB->setEnabled(true);
+    } else {
+        ui->cbIsUUTBB->setEnabled(false);
+        ui->cbIsUUTBB->setChecked(false);
+    }
+    iBatteryIndex = index; /// QString::number(index).toInt();
+    comboxSetData();
 }
-// configure right and top axis to show ticks but no labels:
-// (see QCPAxisRect::setupFullAxesBox for a quicker method to do this)
-customPlot->xAxis2->setVisible(true);
-customPlot->xAxis2->setTickLabels(false);
-customPlot->yAxis2->setVisible(true);
-customPlot->yAxis2->setTickLabels(false);
-// make left and bottom axes always transfer their ranges to right and top axes:
-connect(customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->xAxis2, SLOT(setRange(QCPRange)));
-connect(customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), customPlot->yAxis2, SLOT(setRange(QCPRange)));
-// pass data points to graphs:
-customPlot->graph(0)->setData(x, y0);
-customPlot->graph(1)->setData(x, y1);
-// let the ranges scale themselves so graph 0 fits perfectly in the visible area:
-customPlot->graph(0)->rescaleAxes();
-// same thing for graph 1, but only enlarge ranges (in case graph 1 is smaller than graph 0):
-customPlot->graph(1)->rescaleAxes(true);
-// Note: we could have also just called customPlot->rescaleAxes(); instead
-// Allow user to drag axis ranges with mouse, zoom with mouse wheel and select graphs by clicking:
-customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);*/
-
-
-
