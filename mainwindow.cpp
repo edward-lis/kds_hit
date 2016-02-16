@@ -67,7 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
     loop(0),
     baRecvArray(0),
     baSendArray(0), baSendCommand(0),
-    bDeveloperState(true) // режим разработчика, временно тру, потом поменять на фолс!!!
+    bDeveloperState(true), // признак режим разработчика, временно тру, потом поменять на фолс!!!
+    bModeManual(true) // признак ручной режим. менять при выборе радиобаттонов !!!
+
 {
     ui->setupUi(this);
 
@@ -81,14 +83,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(reloadSettings, SIGNAL(activated()), &settings, SLOT(loadSettings()));
     //reloadSettings->setContext(Qt::ShortcutContext::ApplicationShortcut);
 
+    // по комбинации клавиш Ctrl-D переключить режим разработчика/отладчика
+    QShortcut *developMode = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this);
+    //connect(developMode, SIGNAL(activated()), &settings, SLOT(loadSettings())); !!! сделать слот, в котором менять bDeveloperState=!bDeveloperState;
+
     // Добавить в комбобокс наименования батарей, считанных из ини-файла
     for(int i=0; i<settings.num_batteries_types; i++)
     {
         ui->comboBoxBatteryList->addItem(battery[i].str_type_name);
     }
-    // !!! написать во всех других виджетах соответствующие текущей батарее строки
-    //ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[0]);
-    //ui->cbVoltageOnTheHousing->addItem(battery[0].str_voltage_corpus[1]);
 
     // посылать масив в порт. можно, конечно, напрямую serialPort->writeSerialPort();  но лучше так.
     connect(this, SIGNAL(signalSendSerialData(quint8,QByteArray)), serialPort, SLOT(writeSerialPort(quint8,QByteArray)));
@@ -109,8 +112,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
     //+++
 
-    ui->groupBoxDiagnosticDevice->setDisabled(true);
-    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления свяязи с коробком
+    ui->groupBoxDiagnosticMode->setDisabled(false); //
     ui->groupBoxCheckParams->setDisabled(false);// !!!
     ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
     ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
@@ -384,7 +387,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
             baSendArray.clear(); baSendCommand.clear(); // очистить буфера
             baRecvArray.clear();
             bPortOpen = true;
-            ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
+            //ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
         }
         else // если порт не открылся
         {

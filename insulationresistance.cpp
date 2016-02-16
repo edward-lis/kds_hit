@@ -15,6 +15,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     float resist=0; // получившееся сопротивление
     int j=0;
     int ret=0; // код возврата ошибки
+    QString strResist; // строка с получившимся значением
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     ui->btnInsulationResistance->setEnabled(false); // на время проверки запретить кнопку
@@ -75,8 +76,25 @@ void MainWindow::on_btnInsulationResistance_clicked()
     }
     // если меньше нуля, то обнулим
     if(resist<0) resist=0; // не бывает отрицательного сопротивления
-    // переведём в мегаомы
-    resist = resist/1000000;
+    if(resist > 1000000)
+    {
+        // переведём в мегаомы
+        resist = resist/1000000;
+        strResist = QString::number(resist, 'f', 2) + "МОм, ";
+    }
+    else if(resist > 1000)
+    {
+        // переведём в килоомы
+        resist = resist/1000;
+        strResist = QString::number(resist, 'f', 2) + "кОм, ";
+    }
+    else
+    {
+        // омы
+        resist = resist/1000;
+        strResist = QString::number(resist, 'f', 2) + "Ом, ";
+    }
+
 
     qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
@@ -89,7 +107,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
-        Log("Сопротивление изоляции: " + ui->cbInsulationResistance->currentText() + "=" + QString::number(resist, 'f', 2) + "Мом, " + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
+        Log("Сопротивление изоляции: " + ui->cbInsulationResistance->currentText() + "=" + strResist + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
     }
 stop:
     // если отладочный режим, напечатать отладочную инфу

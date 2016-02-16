@@ -123,6 +123,9 @@ private:
 
     /// Режим разработчика
     bool bDeveloperState;
+
+    /// Признак ручного режима
+    bool bModeManual;
     //+++
 
 public slots:

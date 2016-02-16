@@ -69,12 +69,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         voltageU = ((codeU-settings.offsetADC2)*settings.coefADC2); // напряжение в вольтах
 //        ui->progressBar->setValue(ui->progressBar->value()+1);
 
-        // сбросить коробочку
-        baSendArray = (baSendCommand="IDLE")+"#";
-        QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
-        ret=loop.exec();
-        if(ret) goto stop;
-
         if(codeU > codeLimit) // напряжение больше
         {
             qDebug()<<baSendCommand<<" > "<<codeU;
@@ -82,7 +76,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
 //            if(ui->rbModeDiagnosticAuto->isChecked())// если в автоматическом режиме
             {
                 // !!! переход в ручной режим
-                if(!bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
+                //if(!bModeManual && !bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
             }
         }
         if(codeU <= codeLimit) // напряжение в норме
@@ -96,7 +90,15 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     {
         Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x "+settings.offsetADC2+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
     }
+
+    // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
+    if(bModeManual) QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
 stop:
+    // сбросить коробочку
+    baSendArray = (baSendCommand="IDLE")+"#";
+    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    loop.exec();
+
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
