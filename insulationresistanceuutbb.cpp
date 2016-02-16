@@ -7,8 +7,8 @@
 
 extern QVector<Battery> battery;
 
-// Нажата кнопка проверки сопротивления изоляции
-void MainWindow::on_btnInsulationResistance_clicked()
+// Нажата кнопка проверки сопротивления изоляции УУТББ
+void MainWindow::on_btnInsulationResistanceMeasuringBoardUUTBB_clicked()
 {
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
@@ -24,9 +24,16 @@ void MainWindow::on_btnInsulationResistance_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
-    ui->statusBar->showMessage(tr("Проверка сопротивления изоляции ..."));
+    ui->statusBar->showMessage(tr("Проверка сопротивления изоляции УУТББ ..."));
 //    ui->progressBar->setValue(ui->progressBar->value()+1);
     Log(tr("Проверка сопротивления изоляции"), "blue");
+
+    // Пробежимся по списку точек измерения сопротивлений изоляции
+    for(int i=1; i < modelInsulationResistanceMeasuringBoardUUTBB->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelInsulationResistanceMeasuringBoardUUTBB->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState != Qt::Checked) continue;
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -35,7 +42,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
 
-    str_num.sprintf(" %02i", battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]); // напечатать номер точки измерения изоляции
+    str_num.sprintf(" %02i", battery[iBatteryIndex].uutbb_resist_nn[i-1]); // напечатать номер точки измерения изоляции
     baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
     if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
     QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
@@ -78,7 +85,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     // переведём в мегаомы
     resist = resist/1000000;
 
-    qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
+    //qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
@@ -89,8 +96,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
-        Log("Сопротивление изоляции: " + ui->cbInsulationResistance->currentText() + "=" + QString::number(resist, 'f', 2) + "Мом, " + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
+        Log("Сопротивление изоляции: " + battery[iBatteryIndex].uutbb_resist[i-1] + "=" + QString::number(resist, 'f', 2) + "Мом, " + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
     }
+    }// конец цикла обхода всех точек измерения сопротивления изоляции
 stop:
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
@@ -105,34 +113,3 @@ stop:
     baRecvArray.clear();
 // !!! сбросить прогрессбар
 }
-
-
-#if 0
-u=code; // будем щщитать сразу в коде, без перехода в вольты
- // пробежимся по точкам ф-ии, и высчитаем сопротивление согласно напряжению
- for(j=0; j<points-1; j++)
- {
-     if((u>uizol[j]) && (u<=uizol[j+1]))
-     {
-         resist=(-(uizol[j]*r[j+1] - uizol[j+1]*r[j]) - (r[j]-r[j+1])*u)/(uizol[j+1]-uizol[j]);
-     }
- }
- // если напряжение меньше меньшего, то будем щщитать как первом отрезке ф-ии
- if(u<=uizol[0])
- {
-     j=0;
-     resist=(-(uizol[j]*r[j+1] - uizol[j+1]*r[j]) - (r[j]-r[j+1])*u)/(uizol[j+1]-uizol[j]);
- }
- // если напряжение больше большего, то будем щщитать как на последнем отрезке ф-ии
- if(u>uizol[11])
- {
-     j=10;
-     resist=(-(uizol[j]*r[j+1] - uizol[j+1]*r[j]) - (r[j]-r[j+1])*u)/(uizol[j+1]-uizol[j]);
- }
- // если меньше нуля, то обнулим
- if(resist<0) resist=0; // не бывает отрицательного сопротивления
- // переведём в мегаомы
- resist = resist/1000000;
-
- qDebug()<<"code= "<<code<<" u= "<<u<<" resist= "<<resist;
-#endif

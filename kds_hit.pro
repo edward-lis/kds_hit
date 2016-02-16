@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     settings.cpp \
     voltagecase.cpp \
     openciruitgroup.cpp \
-    insulationresistance.cpp
+    insulationresistance.cpp \
+    insulationresistanceuutbb.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \

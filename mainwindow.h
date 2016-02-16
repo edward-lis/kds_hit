@@ -189,6 +189,7 @@ private slots:
    void on_btnVoltageOnTheHousing_clicked();
    void on_comboBoxBatteryList_currentIndexChanged(int index);
    void on_btnInsulationResistance_clicked();
+   void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
 };
 
 #endif // MAINWINDOW_H

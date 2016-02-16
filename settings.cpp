@@ -95,39 +95,47 @@ void Settings::loadSettings()
     voltage_corpus_limit = settings.value("voltage_corpus_limit", 1.0).toFloat();
 
     // строки - точки измерения сопротивления изоляции
-    battery[0].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_20");
+    battery[0].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_20"); // кол-во цепей, размер массива
     battery[0].str_isolation_resistance.resize(battery[0].i_isolation_resistance_num); // зарезервируем место под строки
+    battery[0].isolation_resistance_nn.resize(battery[0].i_isolation_resistance_num); // зарезервируем место под строки
     for(i=0; i<battery[0].i_isolation_resistance_num; i++)
     {
         settings.setArrayIndex(i);
         battery[0].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[0].isolation_resistance_nn[i] = settings.value("isolation_resistance_nn", 0).toInt();
     }
     settings.endArray();
 
-    battery[1].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14PS_24");
+    battery[1].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14PS_24"); // кол-во цепей, размер массива
     battery[1].str_isolation_resistance.resize(battery[1].i_isolation_resistance_num); // зарезервируем место под строки
+    battery[1].isolation_resistance_nn.resize(battery[1].i_isolation_resistance_num); // зарезервируем место под строки
     for(i=0; i<battery[1].i_isolation_resistance_num; i++)
     {
         settings.setArrayIndex(i);
         battery[1].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[1].isolation_resistance_nn[i] = settings.value("isolation_resistance_nn", 0).toInt();
     }
     settings.endArray();
 
-    battery[2].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14P_24");
+    battery[2].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER14P_24"); // кол-во цепей, размер массива
     battery[2].str_isolation_resistance.resize(battery[2].i_isolation_resistance_num); // зарезервируем место под строки
+    battery[2].isolation_resistance_nn.resize(battery[2].i_isolation_resistance_num); // зарезервируем место под строки
     for(i=0; i<battery[2].i_isolation_resistance_num; i++)
     {
         settings.setArrayIndex(i);
         battery[2].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[2].isolation_resistance_nn[i] = settings.value("isolation_resistance_nn", 0).toInt();
     }
     settings.endArray();
 
-    battery[3].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_28");
+    battery[3].i_isolation_resistance_num=settings.beginReadArray("isolation_resistance_9ER20P_28"); // кол-во цепей, размер массива
     battery[3].str_isolation_resistance.resize(battery[3].i_isolation_resistance_num); // зарезервируем место под строки
+    battery[3].isolation_resistance_nn.resize(battery[3].i_isolation_resistance_num); // зарезервируем место под строки
     for(i=0; i<battery[3].i_isolation_resistance_num; i++)
     {
         settings.setArrayIndex(i);
         battery[3].str_isolation_resistance[i] = settings.value("isolation_resistance", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[3].isolation_resistance_nn[i] = settings.value("isolation_resistance_nn", 0).toInt();
     }
     settings.endArray();
 
@@ -202,20 +210,24 @@ void Settings::loadSettings()
     uutbb_time_ccp = settings.value("uutbb_time_ccp", 10).toInt();
 
     // строки - точки измерения сопротивления изоляции УУТББ
-    battery[0].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER20P_20");
+    battery[0].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER20P_20"); // кол-во цепей, размер массива
     battery[0].uutbb_resist.resize(battery[0].i_uutbb_resist_num); // зарезервируем место под строки
+    battery[0].uutbb_resist_nn.resize(battery[0].i_uutbb_resist_num); // зарезервируем место под строки
     for(i=0; i<battery[0].i_uutbb_resist_num; i++)
     {
         settings.setArrayIndex(i);
         battery[0].uutbb_resist[i] = settings.value("uutbb_resist", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[0].uutbb_resist_nn[i] = settings.value("uutbb_resist_nn", 0).toInt();
     }
     settings.endArray();
-    battery[1].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER14PS_24");
+    battery[1].i_uutbb_resist_num=settings.beginReadArray("uutbb_resist_9ER14PS_24"); // кол-во цепей, размер массива
     battery[1].uutbb_resist.resize(battery[1].i_uutbb_resist_num); // зарезервируем место под строки
+    battery[1].uutbb_resist_nn.resize(battery[1].i_uutbb_resist_num); // зарезервируем место под строки
     for(i=0; i<battery[1].i_uutbb_resist_num; i++)
     {
         settings.setArrayIndex(i);
         battery[1].uutbb_resist[i] = settings.value("uutbb_resist", "").toString(); // считываем наименования точек измерения сопротивления изоляции
+        battery[1].uutbb_resist_nn[i] = settings.value("uutbb_resist_nn", 0).toInt();
     }
     settings.endArray();
 
@@ -253,12 +265,12 @@ void Settings::printSettings()
         qDebug()<<tr("Сопротивление изоляции :");
         for(j=0; j<battery[i].i_isolation_resistance_num; j++)
         {
-            qDebug()<<battery[i].str_isolation_resistance[j];
+            qDebug()<<j<<battery[i].str_isolation_resistance[j]<<battery[i].isolation_resistance_nn[j];
         }
         qDebug()<<tr("Сопротивление изоляции УУТББ:");
         for(j=0; j<battery[i].i_uutbb_resist_num; j++)
         {
-            qDebug()<<j<<battery[i].uutbb_resist[j];
+            qDebug()<<j<<battery[i].uutbb_resist[j]<<battery[i].uutbb_resist_nn[j];
         }
     }
     qDebug()<<"Resistance function: dot's number="<<functionResist.size();
