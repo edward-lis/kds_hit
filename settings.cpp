@@ -51,9 +51,11 @@ void Settings::loadSettings()
     // Для чтения шестнадцатиричных данных
     str = settings.value("k1_code", 1).toString();
     coefADC1 = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);
+    offsetADC1 = settings.value("k1_offset", 0x0).toString().toUInt(&ok, 16);
     //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
 
     coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
+    offsetADC2 = settings.value("k2_offset", 0x0).toString().toUInt(&ok, 16);
     //qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
            //<<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
     voltage_circuit_type = settings.value("voltage_circuit_type", 25.0).toFloat();
@@ -217,6 +219,12 @@ void Settings::loadSettings()
     }
     settings.endArray();
 
+    // строки - точки измерения напряжения БП УУТББ
+    battery[0].uutbb_closecircuitpower[0] = settings.value("9ER20P_20/uutbb_circuitpower_1", "").toString();
+    battery[0].uutbb_closecircuitpower[1] = settings.value("9ER20P_20/uutbb_circuitpower_2", "").toString();
+    battery[1].uutbb_closecircuitpower[0] = settings.value("9ER14PS_24/uutbb_circuitpower_1", "").toString();
+    battery[1].uutbb_closecircuitpower[1] = settings.value("9ER14PS_24/uutbb_circuitpower_2", "").toString();
+
     // Функция сопротивления/кода АЦП
     functionResist.resize(settings.beginReadArray("resist_function"));
     for(i=0; i<functionResist.size(); i++)
@@ -253,7 +261,7 @@ void Settings::printSettings()
             qDebug()<<j<<battery[i].uutbb_resist[j];
         }
     }
-    qDebug()<<"Resistance function:";
+    qDebug()<<"Resistance function: dot's number="<<functionResist.size();
     for(i=0; i<functionResist.size(); i++)
     {
         qDebug()<<i<<" R= "<<qPrintable(QString::number(functionResist[i].resist))<<", codeADC= 0x"<<qPrintable(QString::number(functionResist[i].codeADC, 16));

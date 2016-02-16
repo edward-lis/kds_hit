@@ -9,10 +9,13 @@ extern QVector<Battery> battery;
 
 void MainWindow::on_btnVoltageOnTheHousing_clicked()
 {
-    quint16 uCaseM, uCaseP, u; // напряжение минус, плюс
-    quint16 Ucase=settings.voltage_corpus_limit/settings.coefADC2; // код, пороговое напряжение.
+    int ret=0; // код возврата ошибки
+    quint16 codeU=0; // код напряжение минус, плюс
+    // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
+    quint16 codeLimit=settings.voltage_corpus_limit/settings.coefADC2 + settings.offsetADC2; // код, пороговое напряжение.
+    float voltageU=0;
     qDebug()<<"on_btnVoltageOnTheHousing_clicked";
-    qDebug()<<ui->rbModeDiagnosticAuto->isChecked()<<ui->rbModeDiagnosticManual->isChecked()<<ui->cbVoltageOnTheHousing->currentIndex()<<Ucase;
+    //qDebug()<<ui->rbModeDiagnosticAuto->isChecked()<<ui->rbModeDiagnosticManual->isChecked()<<ui->cbVoltageOnTheHousing->currentIndex()<<Ucase;
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     ui->btnVoltageOnTheHousing->setEnabled(false); // на время проверки запретить кнопку
@@ -23,66 +26,83 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     baRecvArray.clear();
 
     ui->statusBar->showMessage(tr("Проверка напряжения на корпусе ..."));
-    ui->progressBar->setValue(ui->progressBar->value()+1);
+//    ui->progressBar->setValue(ui->progressBar->value()+1);
     Log(tr("Проверка напряжения на корпусе"), "blue");
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     sendSerialData(); // послать baSendArray в порт
     // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
-    if(loop.exec()) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
+    ret=loop.exec();
+    if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
 
-    if(bDeveloperState || ui->rbModeDiagnosticManual->isChecked())// если в ручном режиме
+//    if(bDeveloperState || ui->rbModeDiagnosticManual->isChecked())// если в ручном режиме
     {
         if(ui->cbVoltageOnTheHousing->currentIndex() == 1) // если выбрана в комбобоксе такая цепь
         {
-            baSendArray=(baSendCommand="Ucase")+"M#";
+            baSendArray=(baSendCommand="UcaseM")+"#";
+            if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
             QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
-            if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
+            ret=loop.exec();
+            if(ret) goto stop;
 
             baSendArray=baSendCommand+"?#";
             QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
-            if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
-            u=uCaseM = getRecvData(baRecvArray); // получить данные опроса
+            ret=loop.exec();
+            if(ret) goto stop;
+            codeU = getRecvData(baRecvArray); // получить данные опроса
         }
         else
         {
-            baSendArray=(baSendCommand="Ucase")+"P#";
+            baSendArray=(baSendCommand="UcaseP")+"#";
+            if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
             QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
-            if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
+            ret=loop.exec();
+            if(ret) goto stop;
 
             baSendArray=baSendCommand+"?#";
             QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
-            if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
-            u=uCaseP = getRecvData(baRecvArray); // получить данные опроса
+            ret=loop.exec();
+            if(ret) goto stop;
+            codeU = getRecvData(baRecvArray); // получить данные опроса
         }
-        ui->progressBar->setValue(ui->progressBar->value()+1);
+        voltageU = ((codeU-settings.offsetADC2)*settings.coefADC2); // напряжение в вольтах
+//        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#";
         QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
-        if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
+        ret=loop.exec();
+        if(ret) goto stop;
 
-        if(u > Ucase) // напряжение больше
+        if(codeU > codeLimit) // напряжение больше
         {
-            qDebug()<<baSendCommand<<" > "<<u;
-            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number((float)(u*settings.coefADC2))+" В. Не норма!", "red"); // !!! отформатировать вывод напряжения!
-            if(ui->rbModeDiagnosticAuto->isChecked())// если в автоматическом режиме
+            qDebug()<<baSendCommand<<" > "<<codeU;
+            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В. Не норма!", "red"); // !!! отформатировать вывод напряжения!
+//            if(ui->rbModeDiagnosticAuto->isChecked())// если в автоматическом режиме
             {
                 // !!! переход в ручной режим
-                if(!bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number((float)(u*settings.coefADC2))+" В больше нормы");// !!!
+                if(!bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
             }
         }
-        if(u <= Ucase) // напряжение в норме
+        if(codeU <= codeLimit) // напряжение в норме
         {
-            qDebug()<<baSendCommand<<" norm"<<u;
-            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number((float)(u*settings.coefADC2))+" В.  Норма.", "blue"); // !!!
+            qDebug()<<baSendCommand<<" norm"<<codeU;
+            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В.  Норма.", "blue"); // !!!
         }
+    }
+    // если отладочный режим, напечатать отладочную инфу
+    if(bDeveloperState)
+    {
+        Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x "+settings.offsetADC2+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
     }
 stop:
     // если отладочный режим, напечатать отладочную инфу
-    if(bDeveloperState) Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " code = 0x" + qPrintable(QString::number(u, 16)) + " U=k*code = " + QString::number((float)(u*settings.coefADC2)), "green");
-
+    if(bDeveloperState)
+    {
+        if(ret==1) Log(tr("Timeout!"), "red");
+        else if(ret==2) Log(tr("Incorrect reply!"), "red");
+    }
     ui->btnVoltageOnTheHousing->setEnabled(true); // разрешить кнопку
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?

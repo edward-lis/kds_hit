@@ -528,8 +528,8 @@ void MainWindow::comboxSetData() {
     if (iBatteryIndex == 0 or iBatteryIndex == 1) {
         /// 6. Сопротивление изоляции УУТББ
         ui->cbInsulationResistanceMeasuringBoardUUTBB->clear();
-        modelInsulationResistanceMeasuringBoardUUTBB = new QStandardItemModel(battery[iBatteryIndex].uutbb_resist_num, 1);
-        for (int r = 0; r < battery[iBatteryIndex].uutbb_resist_num; ++r)
+        modelInsulationResistanceMeasuringBoardUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
+        for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; ++r)
         {
             QStandardItem* item;
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[r]));
@@ -539,7 +539,7 @@ void MainWindow::comboxSetData() {
         }
         ui->cbInsulationResistanceMeasuringBoardUUTBB->setModel(modelInsulationResistanceMeasuringBoardUUTBB);
         ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemData(0, "DISABLE", Qt::UserRole-1);
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].uutbb_resist_num).arg(battery[iBatteryIndex].uutbb_resist_num));
+        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].i_uutbb_resist_num).arg(battery[iBatteryIndex].i_uutbb_resist_num));
         //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
         connect(modelInsulationResistanceMeasuringBoardUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem*)));
 
@@ -1573,3 +1573,4 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     iBatteryIndex = index; /// QString::number(index).toInt();
     comboxSetData();
 }
+
