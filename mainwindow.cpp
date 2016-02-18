@@ -1576,3 +1576,4 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     iBatteryIndex = index; /// QString::number(index).toInt();
     comboxSetData();
 }
+

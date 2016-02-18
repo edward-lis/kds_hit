@@ -72,7 +72,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         if(codeU > codeLimit) // напряжение больше
         {
             qDebug()<<baSendCommand<<" > "<<codeU;
-            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В. Не норма!", "red"); // !!! отформатировать вывод напряжения!
+            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В. Не норма!", "red");
 //            if(ui->rbModeDiagnosticAuto->isChecked())// если в автоматическом режиме
             {
                 // !!! переход в ручной режим
@@ -82,7 +82,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         if(codeU <= codeLimit) // напряжение в норме
         {
             qDebug()<<baSendCommand<<" norm"<<codeU;
-            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В.  Норма.", "blue"); // !!!
+            Log("Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В.  Норма.", "blue");
         }
     }
     // если отладочный режим, напечатать отладочную инфу
