@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     insulationresistance.cpp \
     insulationresistanceuutbb.cpp \
     opencircuitgroup.cpp \
-    opencircuitbattery.cpp
+    opencircuitbattery.cpp \
+    closecircuitgroup.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \

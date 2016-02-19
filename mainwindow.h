@@ -137,7 +137,7 @@ public slots:
     void checkVoltageOnTheHousing();
     void checkInsulationResistance();
     void checkOpenCircuitVoltageGroup();
-    void checkClosedCircuitVoltageGroup();
+    //Ed void checkClosedCircuitVoltageGroup();
     void checkClosedCircuitVoltageBattery();
     void checkDepassivation();
     void checkInsulationResistanceMeasuringBoardUUTBB();
@@ -186,6 +186,9 @@ private slots:
 
    /// Послать пинг
    void sendPing();
+
+   /// Переключение комбинацией клавиш Ctrl+D DeveloperState
+   void triggerDeveloperState() { bDeveloperState=!bDeveloperState; }
    //+++
    void on_btnCOMPortOpenClose_clicked();
    void on_btnCheckConnectedBattery_clicked();
@@ -195,6 +198,7 @@ private slots:
    void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
+   void on_btnClosedCircuitVoltageGroup_clicked();
 };
 
 #endif // MAINWINDOW_H
