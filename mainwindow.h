@@ -53,10 +53,12 @@ private:
     QStandardItemModel *modelInsulationResistanceMeasuringBoardUUTBB;
     int iStartCheck;
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
-    int iStep;
-    int iAllSteps;
-    int iStepVoltageOnTheHousing;
-    int iStepInsulationResistance;
+    //int iStep;
+    //int iAllSteps;
+    //int iStepVoltageOnTheHousing;
+    int iCurrentStep;
+    int iMaxSteps;
+    //int iStepInsulationResistance;
     int iStepOpenCircuitVoltageGroup;
     int iStepClosedCircuitVoltageGroup;
     int iStepDepassivation;
@@ -67,9 +69,9 @@ private:
     int iParamsNumberChecked;
     QVector<int> imDepassivation;
     QString str;
+    QString color;
     QString paramMsg;
-    //QString checkedTextInsulationResistance;
-    bool bPause;
+    bool bState;
     bool bCheckCompleteVoltageOnTheHousing;
     bool bCheckCompleteInsulationResistance;
     bool bCheckCompleteOpenCircuitVoltageGroup;
@@ -118,21 +120,21 @@ private:
 
     /// Режим разработчика
     bool bDeveloperState;
-
+	
     /// Признак ручного режима
     bool bModeManual;
+
     //+++
 
 public slots:
-    void checkAutoModeDiagnostic();
-    void setPause();
+    //void checkAutoModeDiagnostic();
     void Log(QString message, QString color);
     void delay(int millisecondsToWait);
-    void progressBarSet(int iVal);
     void checkVoltageOnTheHousing();
     void checkInsulationResistance();
     void checkOpenCircuitVoltageGroup();
-    //Ed void checkClosedCircuitVoltageGroup();
+    void checkOpenCircuitVoltageBattery();
+    //void checkClosedCircuitVoltageGroup();
     void checkClosedCircuitVoltageBattery();
     void checkDepassivation();
     void checkInsulationResistanceMeasuringBoardUUTBB();
@@ -189,6 +191,9 @@ private slots:
    void on_btnCheckConnectedBattery_clicked();
    void on_btnVoltageOnTheHousing_clicked();
    void on_comboBoxBatteryList_currentIndexChanged(int index);
+   void on_btnStartStopAutoModeDiagnostic_clicked();
+   void on_btnContinueAutoModeDiagnostic_clicked();
+   void on_cbParamsAutoMode_currentIndexChanged(int index);
    void on_btnInsulationResistance_clicked();
    void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
    void on_btnOpenCircuitVoltageGroup_clicked();
