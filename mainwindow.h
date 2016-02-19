@@ -29,11 +29,6 @@
 #define KDS_TIMEOUT           1           // код ошибки таймаут
 #define KDS_INCORRECT_REPLY   2           // код ошибки неверный ответ
 
-// задержки после определённой команды и перед выдачей следующей команды, по протоколу
-#define delay_command_after_start_before_request    400     //ms    // после команды пуска режима, перед первым запросом
-#define delay_command_after_request_before_next     270     //ms    // в режиме, между запросами
-#define delay_after_IDLE_before_other               150     //ms    // после IDLE перед следующим режимом
-
 #define delay_timeOut                               500     //ms    // таймаут ответа на запрос
 #define delay_timerPing                             1000     //ms    // пауза между пингами должна быть больше, чем таймаут!
 //+++

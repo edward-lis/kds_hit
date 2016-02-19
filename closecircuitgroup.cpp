@@ -50,7 +50,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
     ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, cycleTimeSec);
     ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(20, 33);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
 
     if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
         iStepClosedCircuitVoltageGroup = 1;
@@ -86,14 +86,14 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         str_num.sprintf(" %02i", i); // напечатать номер цепи
         baSendArray=(baSendCommand="UccG")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-        QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+        QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
         ret=loop.exec();
         if(ret) goto stop;
 
         starttime = QDateTime::currentDateTime(); // время начала измерения
         // опросить
         baSendArray=baSendCommand+"?#";
-        QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+        QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
         ret=loop.exec();
         if(ret) goto stop;
         codeADC = getRecvData(baRecvArray); // напряжение в коде
@@ -103,7 +103,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         dt = QDateTime::currentDateTime();
         x= -dt.secsTo(starttime);
         ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
-        ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для чего? узнать.
+        ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если за пределами
         ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x, (double)fU);
         ui->widgetClosedCircuitVoltageGroup->replot();
 
@@ -111,7 +111,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         {
             // опросить
             baSendArray=baSendCommand+"?#";
-            QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+            QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
             ret=loop.exec();
             if(ret) goto stop;
             codeADC = getRecvData(baRecvArray); // напряжение в коде
@@ -164,11 +164,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->rbModeDiagnosticAuto->setEnabled(false);
         }
 
-        // разобрать режим
-        baSendArray = (baSendCommand="IDLE")+"#";
-        QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
-        ret=loop.exec();
-        if(ret) goto stop;
     }// конец цикла проверок цепей
 stop:
     // если отладочный режим, напечатать отладочную инфу
@@ -177,6 +172,12 @@ stop:
         if(ret==1) Log(tr("Timeout!"), "red");
         else if(ret==2) Log(tr("Incorrect reply!"), "red");
     }
+
+    // разобрать режим
+    baSendArray = (baSendCommand="IDLE")+"#";
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+    ret=loop.exec();
+    if(ret) goto stop;
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.

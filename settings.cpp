@@ -48,6 +48,14 @@ void Settings::loadSettings()
 
     QString str;
     bool ok;
+
+    // Задержки
+    delay_after_start_before_request_ADC1 = settings.value("delay_after_start_before_request_ADC1", 400).toInt();
+    delay_after_start_before_request_ADC2 = settings.value("delay_after_start_before_request_ADC2", 900).toInt();
+    delay_after_request_before_next_ADC1 = settings.value("delay_after_request_before_next_ADC1", 270).toInt();
+    delay_after_request_before_next_ADC2 = settings.value("delay_after_request_before_next_ADC2", 800).toInt();
+    delay_after_IDLE_before_other = settings.value("delay_after_IDLE_before_other", 150).toInt();
+
     // Для чтения шестнадцатиричных данных
     str = settings.value("k1_code", 1).toString();
     coefADC1 = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);

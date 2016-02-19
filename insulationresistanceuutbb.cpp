@@ -45,12 +45,12 @@ void MainWindow::on_btnInsulationResistanceMeasuringBoardUUTBB_clicked()
     str_num.sprintf(" %02i", battery[iBatteryIndex].uutbb_resist_nn[i-1]); // напечатать номер точки измерения изоляции
     baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
     if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-    QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
     ret=loop.exec();
     if(ret) goto stop;
 
     baSendArray=baSendCommand+"?#";
-    QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_start_before_request_ADC2, this, SLOT(sendSerialData()));
     ret=loop.exec();
     if(ret) goto stop; // если ошибка - вывалиться из режима
     u = getRecvData(baRecvArray); // получить данные опроса
@@ -89,7 +89,7 @@ void MainWindow::on_btnInsulationResistanceMeasuringBoardUUTBB_clicked()
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC2, this, SLOT(sendSerialData()));
     ret=loop.exec();
     if(ret) goto stop; // если ошибка - вывалиться из режима
 

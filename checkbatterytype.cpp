@@ -44,33 +44,33 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     if(loop.exec()) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
 
     baSendArray=(baSendCommand="Polar")+"#";
-    QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
+    QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
     if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
 
     baSendArray=baSendCommand+"?#";
-    QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
     polar = getRecvData(baRecvArray); // получить данные опроса
 
     baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
 
     if(polar == 0) // полярность прямая
     {
         x=0;
         baSendArray=(baSendCommand="TypeB")+" 28#";
-        QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+        QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
         if(loop.exec()) goto stop;
 
         baSendArray=baSendCommand+"?#";
-        QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+        QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
         if(loop.exec()) goto stop;
         typeb = getRecvData(baRecvArray);
         //qDebug()<<"onstateCheckTypeBPoll" << typeb<<(float)(typeb*coefADC1)<<"U";
 
         baSendArray = (baSendCommand="IDLE")+"#";
-        QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+        QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
         if(loop.exec()) goto stop;
     }
     if(polar == 1) // полярность обратная
@@ -79,17 +79,17 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     }
 
     baSendArray=(baSendCommand="UocPB")+"#";
-    QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop;
 
     baSendArray=baSendCommand+"?#";
-    QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop;
     uocpb = getRecvData(baRecvArray);
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
     if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
 
     if(uocpb > U2) // если есть напряжение, то УУТББ

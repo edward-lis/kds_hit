@@ -21,6 +21,14 @@ public:
     void saveSettings();
 
     // общие переменные, которые настраиваются
+
+    // задержки после определённой команды и перед выдачей следующей команды, по протоколу
+    int delay_after_start_before_request_ADC1; ///< после команды пуска режима, перед первым запросом, мс
+    int delay_after_start_before_request_ADC2;
+    int delay_after_request_before_next_ADC1; ///< в режиме, между запросами, мс
+    int delay_after_request_before_next_ADC2;
+    int delay_after_IDLE_before_other; ///< после IDLE перед следующим режимом, мс
+
     int num_batteries_types; ///< кол-во уникальных типов батарей
     float coefADC1; ///< коэффициент пересчёта кода АЦП в вольты
     float coefADC2; ///< коэффициент пересчёта кода АЦП в вольты

@@ -42,12 +42,12 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         {
             baSendArray=(baSendCommand="UcaseM")+"#";
             if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-            QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
+            QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
             ret=loop.exec();
             if(ret) goto stop;
 
             baSendArray=baSendCommand+"?#";
-            QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+            QTimer::singleShot(settings.delay_after_start_before_request_ADC2, this, SLOT(sendSerialData()));
             ret=loop.exec();
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
@@ -56,12 +56,12 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         {
             baSendArray=(baSendCommand="UcaseP")+"#";
             if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-            QTimer::singleShot(delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
+            QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
             ret=loop.exec();
             if(ret) goto stop;
 
             baSendArray=baSendCommand+"?#";
-            QTimer::singleShot(delay_command_after_start_before_request, this, SLOT(sendSerialData()));
+            QTimer::singleShot(settings.delay_after_start_before_request_ADC2, this, SLOT(sendSerialData()));
             ret=loop.exec();
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
@@ -96,7 +96,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
 stop:
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC2, this, SLOT(sendSerialData()));
     loop.exec();
 
     // если отладочный режим, напечатать отладочную инфу
