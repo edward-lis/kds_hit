@@ -19,10 +19,10 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     settings.cpp \
     voltagecase.cpp \
-    openciruitgroup.cpp \
     insulationresistance.cpp \
     insulationresistanceuutbb.cpp \
-    opencircuitgroup.cpp
+    opencircuitgroup.cpp \
+    opencircuitbattery.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \

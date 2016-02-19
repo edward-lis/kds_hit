@@ -67,13 +67,14 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         {
             Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
+            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
         }
         else // напряжение меньше (не норма)
         {
             Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
+            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
+            // !!! добавить цепь в список неисправных, запрет проверки цепи под нагрузкой
         }
 
         // разобрать режим

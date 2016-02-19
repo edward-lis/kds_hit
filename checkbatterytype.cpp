@@ -68,6 +68,10 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(loop.exec()) goto stop;
         typeb = getRecvData(baRecvArray);
         //qDebug()<<"onstateCheckTypeBPoll" << typeb<<(float)(typeb*coefADC1)<<"U";
+
+        baSendArray = (baSendCommand="IDLE")+"#";
+        QTimer::singleShot(delay_command_after_request_before_next, this, SLOT(sendSerialData()));
+        if(loop.exec()) goto stop;
     }
     if(polar == 1) // полярность обратная
     {

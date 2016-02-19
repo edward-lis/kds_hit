@@ -194,6 +194,7 @@ private slots:
    void on_btnInsulationResistance_clicked();
    void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
    void on_btnOpenCircuitVoltageGroup_clicked();
+   void on_btnOpenCircuitVoltageBattery_clicked();
 };
 
 #endif // MAINWINDOW_H
