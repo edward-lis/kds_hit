@@ -128,7 +128,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btnClosedCircuitVoltagePowerSupply->hide();
     //ui->btnClosedCircuitVoltagePowerSupply_2->hide();
 
-    for (int i = 1; i < 11; i++) {
+    /// удаляем все вкладки кроме первой - журнала событий(0), каждый раз удаляем вторую(1)
+    int tab_count = ui->tabWidget->count();
+    for (int i = 1; i < tab_count; i++) {
         ui->tabWidget->removeTab(1);
     }
 
