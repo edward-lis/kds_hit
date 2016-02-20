@@ -199,6 +199,9 @@ private slots:
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
    void on_btnClosedCircuitVoltageGroup_clicked();
+   void on_actionSave_triggered();
+   void on_actionLoad_triggered();
+   void on_actionExit_triggered();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна
