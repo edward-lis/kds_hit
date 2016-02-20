@@ -1463,24 +1463,6 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
 
 
 /*!
- * \brief MainWindow::on_actionSave_triggered
- */
-void MainWindow::on_actionSave_triggered()
-{
-    qDebug() << "on_actionSave_triggered()";
-}
-
-
-/*!
- * \brief MainWindow::on_actionLoad_triggered
- */
-void MainWindow::on_actionLoad_triggered()
-{
-    qDebug() << "on_actionLoad_triggered()";
-}
-
-
-/*!
  * \brief MainWindow::on_actionExit_triggered
  */
 void MainWindow::on_actionExit_triggered()

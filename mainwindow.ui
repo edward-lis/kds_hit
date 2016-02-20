@@ -2011,17 +2011,17 @@
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>С&amp;охранить</string>
+    <string>Сохранить</string>
    </property>
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>З&amp;агрузить</string>
+    <string>Загрузить</string>
    </property>
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>В&amp;ыход</string>
+    <string>Выход</string>
    </property>
   </action>
  </widget>

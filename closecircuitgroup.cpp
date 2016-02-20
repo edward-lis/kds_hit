@@ -30,7 +30,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
-    int h = 45; //Шаг, с которым будем пробегать по оси Ox
     //double x, y;
     ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
     ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));

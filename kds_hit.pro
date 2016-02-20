@@ -23,13 +23,15 @@ SOURCES += main.cpp\
     insulationresistanceuutbb.cpp \
     opencircuitgroup.cpp \
     opencircuitbattery.cpp \
-    closecircuitgroup.cpp
+    closecircuitgroup.cpp \
+    datafile.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
     qcustomplot.h \
     settings.h \
-    battery.h
+    battery.h \
+    datafile.h
 
 FORMS    += mainwindow.ui
 
