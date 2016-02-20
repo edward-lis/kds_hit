@@ -199,6 +199,11 @@ private slots:
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
    void on_btnClosedCircuitVoltageGroup_clicked();
+
+protected:
+    //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна
+    //перегруз для закрытия крестиком
+    virtual void closeEvent(QCloseEvent *e);
 };
 
 #endif // MAINWINDOW_H

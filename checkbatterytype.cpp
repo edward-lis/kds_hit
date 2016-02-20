@@ -23,8 +23,8 @@ extern QVector<Battery> battery;
 
 void MainWindow::on_btnCheckConnectedBattery_clicked()
 {
-    quint16 U1=settings.voltage_circuit_type/settings.coefADC1; // код приличного напряжения цепи.
-    quint16 U2=settings.voltage_power_uutbb/settings.coefADC1; // код наличия напряжения БП.
+    quint16 U1=settings.voltage_circuit_type/settings.coefADC1 + settings.offsetADC1; // код приличного напряжения цепи.
+    quint16 U2=settings.voltage_power_uutbb/settings.coefADC1 + settings.offsetADC1; // код наличия напряжения БП.
     int x=0, y=0; // индексы в матрице
     quint16 polar; // полярность батареи
     quint16 typeb; // напряжение цепи 28

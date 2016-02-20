@@ -264,6 +264,14 @@ MainWindow::~MainWindow()
 }
 
 //+++ Edward ====================================================================================================================
+// перегруз крестика закрытия и Alt-F4
+void MainWindow::closeEvent(QCloseEvent *event)
+ {
+    event->accept();
+    qApp->quit(); // qApp - это глобальный (доступный из любого места приложения) указатель на объект текущего приложения
+    exit(0);
+ }
+
 // Приём данных от последовательного порта
 void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
 {
