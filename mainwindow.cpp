@@ -540,12 +540,13 @@ void MainWindow::comboxSetData() {
         /// 7. Напряжение разомкнутой цепи БП
         ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         ui->cbOpenCircuitVoltagePowerSupply->clear();
-        ui->cbOpenCircuitVoltagePowerSupply->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+        ui->cbOpenCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
 
         /// 8. Напряжение замкнутой цепи БП
         ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
         ui->cbClosedCircuitVoltagePowerSupply->clear();
-        ui->cbClosedCircuitVoltagePowerSupply->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+        ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+        ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[1]);
     }
 }
 
@@ -1438,13 +1439,41 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
         break;
     case 7:
         /// 7. Напряжение разомкнутой цепи БП
-        ui->cbStartSubParametrAutoMode->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         break;
     case 8:
         /// 8. Напряжение замкнутой цепи БП
-        ui->cbStartSubParametrAutoMode->addItem("Между выводами 1(+) и 3(-) соедини-теля Х6 «6»");
+        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[1]);
         break;
     default:
         break;
     }
+}
+
+
+/*!
+ * \brief MainWindow::on_actionSave_triggered
+ */
+void MainWindow::on_actionSave_triggered()
+{
+    qDebug() << "on_actionSave_triggered()";
+}
+
+
+/*!
+ * \brief MainWindow::on_actionLoad_triggered
+ */
+void MainWindow::on_actionLoad_triggered()
+{
+    qDebug() << "on_actionLoad_triggered()";
+}
+
+
+/*!
+ * \brief MainWindow::on_actionExit_triggered
+ */
+void MainWindow::on_actionExit_triggered()
+{
+    qDebug() << "on_actionExit_triggered()";
 }

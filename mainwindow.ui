@@ -1970,6 +1970,25 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1275</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Ф&amp;айл</string>
+    </property>
+    <addaction name="actionSave"/>
+    <addaction name="actionLoad"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
   <action name="menuExit">
    <property name="text">
     <string>Выход</string>
@@ -1988,6 +2007,21 @@
   <action name="action">
    <property name="text">
     <string>Сформировать файл-отчет</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>С&amp;охранить</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>З&amp;агрузить</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>В&amp;ыход</string>
    </property>
   </action>
  </widget>

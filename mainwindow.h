@@ -199,6 +199,9 @@ private slots:
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
    void on_btnClosedCircuitVoltageGroup_clicked();
+   void on_actionSave_triggered();
+   void on_actionLoad_triggered();
+   void on_actionExit_triggered();
 };
 
 #endif // MAINWINDOW_H
