@@ -115,10 +115,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления связи с коробком
     ui->groupBoxDiagnosticMode->setDisabled(false); //
     ui->groupBoxCheckParams->setDisabled(false);// !!!
-    ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
-    ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
-    ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
-    //ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
+    ui->rbInsulationResistanceUUTBB->hide();
+    ui->cbInsulationResistanceUUTBB->hide();
+    ui->btnInsulationResistanceUUTBB->hide();
+    //ui->btnInsulationResistanceUUTBB_2->hide();
     ui->rbOpenCircuitVoltagePowerSupply->hide();
     ui->cbOpenCircuitVoltagePowerSupply->hide();
     ui->btnOpenCircuitVoltagePowerSupply->hide();
@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bCheckCompleteOpenCircuitVoltageGroup = false;
     bCheckCompleteClosedCircuitVoltageGroup = false;
     bCheckCompleteClosedCircuitVoltageBattery = false;
-    bCheckCompleteInsulationResistanceMeasuringBoardUUTBB = false;
+    bCheckCompleteInsulationResistanceUUTBB = false;
     bCheckCompleteOpenCircuitVoltagePowerSupply = false;
     bCheckCompleteClosedCircuitVoltagePowerSupply = false;
     iBatteryIndex = 0;
@@ -164,7 +164,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltageBattery, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageBattery, SLOT(setEnabled(bool)));
     connect(ui->rbDepassivation, SIGNAL(toggled(bool)), ui->btnDepassivation, SLOT(setEnabled(bool)));
-    connect(ui->rbInsulationResistanceMeasuringBoardUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceMeasuringBoardUUTBB, SLOT(setEnabled(bool)));
+    connect(ui->rbInsulationResistanceUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceUUTBB, SLOT(setEnabled(bool)));
     connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
     connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));*/
     //connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(int)), this, SLOT(checkVoltageOnTheHousing(iBatteryIndex, iStepVoltageOnTheHousing)));
@@ -174,7 +174,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
     connect(ui->btnDepassivation, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
     connect(ui->btnClosedCircuitVoltageBattery, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
-    connect(ui->btnInsulationResistanceMeasuringBoardUUTBB, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
+    connect(ui->btnInsulationResistanceUUTBB, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceUUTBB()));
     connect(ui->btnOpenCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
     connect(ui->btnClosedCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
     connect(ui->btnVoltageOnTheHousing_2, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
@@ -183,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnClosedCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
     connect(ui->btnClosedCircuitVoltageBattery_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
     connect(ui->btnDepassivation_2, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
-    connect(ui->btnInsulationResistanceMeasuringBoardUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceMeasuringBoardUUTBB()));
+    connect(ui->btnInsulationResistanceUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceUUTBB()));
     connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
     connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
     connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));*/
@@ -288,6 +288,7 @@ void MainWindow::comboxSetData() {
         item->setData(Qt::Checked, Qt::CheckStateRole);
         modelOpenCircuitVoltageGroup->setItem(r+1, 0, item);
     }
+
     ui->cbOpenCircuitVoltageGroup->setModel(modelOpenCircuitVoltageGroup);
     ui->cbOpenCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
     ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
@@ -326,24 +327,24 @@ void MainWindow::comboxSetData() {
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
-    if (ui->cbIsUUTBB->isChecked()) {
+    if (iBatteryIndex == 0 or iBatteryIndex == 1) {
         /// 6. Сопротивление изоляции УУТББ
-        ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()));
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->clear();
-        modelInsulationResistanceMeasuringBoardUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
+        ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
+        ui->cbInsulationResistanceUUTBB->clear();
+        modelInsulationResistanceUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
         for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
         {
             QStandardItem* item;
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[r]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Checked, Qt::CheckStateRole);
-            modelInsulationResistanceMeasuringBoardUUTBB->setItem(r+1, 0, item);
+            modelInsulationResistanceUUTBB->setItem(r+1, 0, item);
         }
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->setModel(modelInsulationResistanceMeasuringBoardUUTBB);
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemData(0, "DISABLE", Qt::UserRole-1);
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].i_uutbb_resist_num).arg(battery[iBatteryIndex].i_uutbb_resist_num));
+        ui->cbInsulationResistanceUUTBB->setModel(modelInsulationResistanceUUTBB);
+        ui->cbInsulationResistanceUUTBB->setItemData(0, "DISABLE", Qt::UserRole-1);
+        ui->cbInsulationResistanceUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].i_uutbb_resist_num).arg(battery[iBatteryIndex].i_uutbb_resist_num));
         //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
-        connect(modelInsulationResistanceMeasuringBoardUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem*)));
+        connect(modelInsulationResistanceUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceUUTBB(QStandardItem*)));
 
         /// 7. Напряжение разомкнутой цепи БП
         ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
@@ -384,21 +385,18 @@ void MainWindow::on_rbVoltageOnTheHousing_toggled(bool checked)
 {
     ui->btnVoltageOnTheHousing->setEnabled(checked);
     ui->cbVoltageOnTheHousing->setEnabled(checked);
-    //ui->btnVoltageOnTheHousing_2->setEnabled((checked and iStepVoltageOnTheHousing > 1) ? true : false);
 }
 
 void MainWindow::on_rbInsulationResistance_toggled(bool checked)
 {
     ui->btnInsulationResistance->setEnabled(checked);
     ui->cbInsulationResistance->setEnabled(checked);
-    //ui->btnInsulationResistance_2->setEnabled((checked and iStepInsulationResistance > 1) ? true : false);
 }
 
 void MainWindow::on_rbOpenCircuitVoltageGroup_toggled(bool checked)
 {
     ui->btnOpenCircuitVoltageGroup->setEnabled(checked);
     ui->cbOpenCircuitVoltageGroup->setEnabled(checked);
-    //ui->btnOpenCircuitVoltageGroup_2->setEnabled((checked and iStepOpenCircuitVoltageGroup > 1) ? true : false);
 }
 
 void MainWindow::on_rbOpenCircuitVoltageBattery_toggled(bool checked)
@@ -411,28 +409,24 @@ void MainWindow::on_rbClosedCircuitVoltageGroup_toggled(bool checked)
 {
     ui->btnClosedCircuitVoltageGroup->setEnabled(checked);
     ui->cbClosedCircuitVoltageGroup->setEnabled(checked);
-    //ui->btnClosedCircuitVoltageGroup_2->setEnabled((checked and iStepClosedCircuitVoltageGroup > 1) ? true : false);
 }
 
 void MainWindow::on_rbDepassivation_toggled(bool checked)
 {
     ui->btnDepassivation->setEnabled(checked);
     ui->cbDepassivation->setEnabled(checked);
-    //ui->btnDepassivation_2->setEnabled((checked and iStepDepassivation > 1) ? true : false);
 }
 
 void MainWindow::on_rbClosedCircuitVoltageBattery_toggled(bool checked)
 {
     ui->btnClosedCircuitVoltageBattery->setEnabled(checked);
     ui->cbClosedCircuitVoltageBattery->setEnabled(checked);
-    //ui->btnClosedCircuitVoltageBattery_2->setEnabled((checked and iStepClosedCircuitVoltageBattery > 1) ? true : false);
 }
 
-void MainWindow::on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked)
+void MainWindow::on_rbInsulationResistanceUUTBB_toggled(bool checked)
 {
-    ui->btnInsulationResistanceMeasuringBoardUUTBB->setEnabled(checked);
-    ui->cbInsulationResistanceMeasuringBoardUUTBB->setEnabled(checked);
-    //ui->btnInsulationResistanceMeasuringBoardUUTBB_2->setEnabled((checked and iStepInsulationResistanceMeasuringBoardUUTBB > 1) ? true : false);
+    ui->btnInsulationResistanceUUTBB->setEnabled(checked);
+    ui->cbInsulationResistanceUUTBB->setEnabled(checked);
 }
 
 void MainWindow::on_rbOpenCircuitVoltagePowerSupply_toggled(bool checked)
@@ -450,33 +444,26 @@ void MainWindow::on_rbClosedCircuitVoltagePowerSupply_toggled(bool checked)
 void MainWindow::on_cbIsUUTBB_toggled(bool checked)
 {
     if (checked) {
-        ui->rbInsulationResistanceMeasuringBoardUUTBB->show();
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->show();
-        ui->btnInsulationResistanceMeasuringBoardUUTBB->show();
-        //ui->btnInsulationResistanceMeasuringBoardUUTBB_2->show();
+        ui->rbInsulationResistanceUUTBB->show();
+        ui->cbInsulationResistanceUUTBB->show();
+        ui->btnInsulationResistanceUUTBB->show();
         ui->rbOpenCircuitVoltagePowerSupply->show();
         ui->cbOpenCircuitVoltagePowerSupply->show();
         ui->btnOpenCircuitVoltagePowerSupply->show();
-        //ui->btnOpenCircuitVoltagePowerSupply_2->show();
         ui->rbClosedCircuitVoltagePowerSupply->show();
         ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
-        //ui->btnClosedCircuitVoltagePowerSupply_2->show();
     } else {
-        ui->rbInsulationResistanceMeasuringBoardUUTBB->hide();
-        ui->cbInsulationResistanceMeasuringBoardUUTBB->hide();
-        ui->btnInsulationResistanceMeasuringBoardUUTBB->hide();
-        //ui->btnInsulationResistanceMeasuringBoardUUTBB_2->hide();
+        ui->rbInsulationResistanceUUTBB->hide();
+        ui->cbInsulationResistanceUUTBB->hide();
+        ui->btnInsulationResistanceUUTBB->hide();
         ui->rbOpenCircuitVoltagePowerSupply->hide();
         ui->cbOpenCircuitVoltagePowerSupply->hide();
         ui->btnOpenCircuitVoltagePowerSupply->hide();
-        //ui->btnOpenCircuitVoltagePowerSupply_2->hide();
         ui->rbClosedCircuitVoltagePowerSupply->hide();
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
-        //ui->btnClosedCircuitVoltagePowerSupply_2->hide();
     }
-    comboxSetData();
 }
 
 void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
@@ -487,7 +474,7 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
         ui->cbIsUUTBB->setEnabled(false);
         ui->cbIsUUTBB->setChecked(false);
     }
-    iBatteryIndex = index; /// QString::number(index).toInt();
+    iBatteryIndex = index;
     comboxSetData();
 }
 
@@ -525,7 +512,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 Log("checkClosedCircuitVoltageBattery()", "blue");
                 break;
             case 6:
-                Log("checkInsulationResistanceMeasuringBoardUUTBB()", "blue");
+                Log("checkInsulationResistanceUUTBB()", "blue");
                 break;
             case 7:
                 Log("checkOpenCircuitVoltagePowerSupply()", "blue");

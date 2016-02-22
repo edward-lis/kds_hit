@@ -379,7 +379,7 @@
           <string>Сопротивление изоляции</string>
          </property>
         </widget>
-        <widget class="QRadioButton" name="rbInsulationResistanceMeasuringBoardUUTBB">
+        <widget class="QRadioButton" name="rbInsulationResistanceUUTBB">
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -619,7 +619,7 @@
           </size>
          </property>
         </widget>
-        <widget class="QComboBox" name="cbInsulationResistanceMeasuringBoardUUTBB">
+        <widget class="QComboBox" name="cbInsulationResistanceUUTBB">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -840,7 +840,7 @@
           <string>Пуск</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="btnInsulationResistanceMeasuringBoardUUTBB">
+        <widget class="QPushButton" name="btnInsulationResistanceUUTBB">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -1926,7 +1926,7 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="tabInsulationResistanceMeasuringBoardUUTBB">
+      <widget class="QWidget" name="tabInsulationResistanceUUTBB">
        <attribute name="title">
         <string>Сопротивление изоляции платы измерительной УУТББ</string>
        </attribute>

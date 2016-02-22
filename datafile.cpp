@@ -18,9 +18,11 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.icbSubParamsAutoMode
             << data.icbVoltageOnTheHousing
             << data.icbInsulationResistance
-            //<< data.modelClosedCircuitVoltageGroup
+            << data.itemsOpenCircuitVoltageGroup
+            << data.itemsClosedCircuitVoltageGroup
             << data.imDepassivation
             << data.icbDepassivation
+            << data.itemsInsulationResistanceUUTBB
             << data.icbClosedCircuitVoltagePowerSupply;
 }
 
@@ -38,9 +40,11 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.icbSubParamsAutoMode
             >> data.icbVoltageOnTheHousing
             >> data.icbInsulationResistance
-            //>> data.modelClosedCircuitVoltageGroup
+            >> data.itemsOpenCircuitVoltageGroup
+            >> data.itemsClosedCircuitVoltageGroup
             >> data.imDepassivation
             >> data.icbDepassivation
+            >> data.itemsInsulationResistanceUUTBB
             >> data.icbClosedCircuitVoltagePowerSupply;
 }
 
@@ -61,13 +65,39 @@ void MainWindow::on_actionCheckSave_triggered()
     data.bModeDiagnosticManual = ui->rbModeDiagnosticManual->isChecked();
     data.icbParamsAutoMode = ui->cbParamsAutoMode->currentIndex();
     data.icbSubParamsAutoMode = ui->cbSubParamsAutoMode->currentIndex();
+
+    /// Напряжение на корпусе
     data.icbVoltageOnTheHousing = ui->cbVoltageOnTheHousing->currentIndex();
+
+    /// Сопротивление изоляции
     data.icbInsulationResistance = ui->cbInsulationResistance->currentIndex();
-    //data.modelClosedCircuitVoltageGroup = modelClosedCircuitVoltageGroup;
-    //imDepassivation.append(0); /// для отладки удалить потом
-    //imDepassivation.append(19); /// для отладки удалить потом
+
+    /// Напряжение разомкнутой цепи группы
+    for (int r = 0; r < ui->cbOpenCircuitVoltageGroup->count(); r++)
+    {
+        QModelIndex index = ui->cbOpenCircuitVoltageGroup->model()->index(r, 0);
+        data.itemsOpenCircuitVoltageGroup.append(index.data(Qt::CheckStateRole));
+    }
+
+    /// Напряжение замкнутой цепи группы
+    for (int r = 0; r < ui->cbClosedCircuitVoltageGroup->count(); r++)
+    {
+        QModelIndex index = ui->cbClosedCircuitVoltageGroup->model()->index(r, 0);
+        data.itemsClosedCircuitVoltageGroup.append(index.data(Qt::CheckStateRole));
+    }
+
+    /// Распассивация
     data.imDepassivation = imDepassivation;
     data.icbDepassivation = ui->cbDepassivation->currentIndex();
+
+    /// Сопротивление изоляции УУТББ
+    for (int r = 0; r < ui->cbInsulationResistanceUUTBB->count(); r++)
+    {
+        QModelIndex index = ui->cbInsulationResistanceUUTBB->model()->index(r, 0);
+        data.itemsInsulationResistanceUUTBB.append(index.data(Qt::CheckStateRole));
+    }
+
+    /// Напряжение замкнутой цепи БП
     data.icbClosedCircuitVoltagePowerSupply = ui->cbClosedCircuitVoltagePowerSupply->currentIndex();
     list << data;
 
@@ -116,19 +146,51 @@ void MainWindow::on_actionCheckLoad_triggered()
         ui->rbModeDiagnosticManual->setChecked(data.bModeDiagnosticManual);
         ui->cbParamsAutoMode->setCurrentIndex(data.icbParamsAutoMode);
         ui->cbSubParamsAutoMode->setCurrentIndex(data.icbSubParamsAutoMode);
+
+        /// Напряжение на корпусе
         ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);
+
+        /// Сопротивление изоляции
         ui->cbInsulationResistance->setCurrentIndex(data.icbInsulationResistance);
+
+        /// Напряжение разомкнутой цепи группы
+        for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
+        {
+            QStandardItem* item;
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(data.itemsOpenCircuitVoltageGroup[r+1], Qt::CheckStateRole);
+            modelOpenCircuitVoltageGroup->setItem(r+1, 0, item);
+        }
+
+        /// Напряжение замкнутой цепи группы
+        for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
+        {
+            QStandardItem* item;
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(data.itemsClosedCircuitVoltageGroup[r+1], Qt::CheckStateRole);
+            modelClosedCircuitVoltageGroup->setItem(r+1, 0, item);
+        }
+
         /// Распассивация
         ui->cbDepassivation->clear();
         int i;
         foreach (i, data.imDepassivation)
             ui->cbDepassivation->addItem(battery[data.iBatteryIndex].circuitgroup[i]);
         ui->cbDepassivation->setCurrentIndex(data.icbDepassivation);
-        /*ui->cbClosedCircuitVoltageGroup->clear();
-        ui->cbClosedCircuitVoltageGroup->setModel(data.modelClosedCircuitVoltageGroup);
-        ui->cbClosedCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
-        ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));*/
 
+        /// Сопротивление изоляции УУТББ
+        for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
+        {
+            QStandardItem* item;
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[r]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(data.itemsInsulationResistanceUUTBB[r+1], Qt::CheckStateRole);
+            modelInsulationResistanceUUTBB->setItem(r+1, 0, item);
+        }
+
+        /// Напряжение замкнутой цепи БП
         ui->cbClosedCircuitVoltagePowerSupply->setCurrentIndex(data.icbClosedCircuitVoltagePowerSupply);
     }
 

@@ -8,7 +8,7 @@
 extern QVector<Battery> battery;
 
 // Нажата кнопка проверки сопротивления изоляции УУТББ
-void MainWindow::on_btnInsulationResistanceMeasuringBoardUUTBB_clicked()
+void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 {
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
@@ -29,9 +29,9 @@ void MainWindow::on_btnInsulationResistanceMeasuringBoardUUTBB_clicked()
     Log(tr("Проверка сопротивления изоляции"), "blue");
 
     // Пробежимся по списку точек измерения сопротивлений изоляции
-    for(int i=1; i < modelInsulationResistanceMeasuringBoardUUTBB->rowCount(); i++)
+    for(int i=1; i < modelInsulationResistanceUUTBB->rowCount(); i++)
     {
-        QStandardItem *sitm = modelInsulationResistanceMeasuringBoardUUTBB->item(i, 0);
+        QStandardItem *sitm = modelInsulationResistanceUUTBB->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState != Qt::Checked) continue;
 
@@ -115,40 +115,40 @@ stop:
 }
 
 // слот вызывается при изменении чекбоксов элементов списка комбобокса
-void MainWindow::itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem* itm)
+void MainWindow::itemChangedInsulationResistanceUUTBB(QStandardItem* itm)
 {
-    qDebug() << "modelInsulationResistanceMeasuringBoardUUTBB->rowCount()=" << modelInsulationResistanceMeasuringBoardUUTBB->rowCount();
+    qDebug() << "modelInsulationResistanceUUTBB->rowCount()=" << modelInsulationResistanceUUTBB->rowCount();
     int count = 0;
-    for(int i=1; i < modelInsulationResistanceMeasuringBoardUUTBB->rowCount(); i++)
+    for(int i=1; i < modelInsulationResistanceUUTBB->rowCount(); i++)
     {
-        QStandardItem *sitm = modelInsulationResistanceMeasuringBoardUUTBB->item(i, 0);
+        QStandardItem *sitm = modelInsulationResistanceUUTBB->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState == Qt::Checked)
             count++;
     }
-    qDebug() << "countInsulationResistanceMeasuringBoardUUTBB=" << count;
-    ui->cbInsulationResistanceMeasuringBoardUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelInsulationResistanceMeasuringBoardUUTBB->rowCount()-1));
-    ui->cbInsulationResistanceMeasuringBoardUUTBB->setCurrentIndex(0);
+    qDebug() << "countInsulationResistanceUUTBB=" << count;
+    ui->cbInsulationResistanceUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelInsulationResistanceUUTBB->rowCount()-1));
+    ui->cbInsulationResistanceUUTBB->setCurrentIndex(0);
 }
 
 /*
  * Сопротивление изоляции платы измерительной УУТББ
  */
-void MainWindow::checkInsulationResistanceMeasuringBoardUUTBB()
+void MainWindow::checkInsulationResistanceUUTBB()
 {
     //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
     if (!bState) return;
     ui->groupBoxCOMPort->setEnabled(false);
     ui->groupBoxDiagnosticDevice->setEnabled(false);
     ui->groupBoxDiagnosticMode->setEnabled(false);
-    ui->tabWidget->addTab(ui->tabInsulationResistanceMeasuringBoardUUTBB, ui->rbInsulationResistanceMeasuringBoardUUTBB->text());
+    ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()), "blue");
+    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        while (iStepInsulationResistanceMeasuringBoardUUTBB <= 1) {
+        while (iStepInsulationResistanceUUTBB <= 1) {
             if (!bState) return;
-            switch (iStepInsulationResistanceMeasuringBoardUUTBB) {
+            switch (iStepInsulationResistanceUUTBB) {
             case 1:
                 delay(1000);
                 //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
@@ -156,10 +156,10 @@ void MainWindow::checkInsulationResistanceMeasuringBoardUUTBB()
             default:
                 break;
             }
-            iStepInsulationResistanceMeasuringBoardUUTBB++;
+            iStepInsulationResistanceUUTBB++;
         }
         if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteInsulationResistanceMeasuringBoardUUTBB = true;
+            bCheckCompleteInsulationResistanceUUTBB = true;
         break;
     case 1:
         if (!bState) return;
@@ -180,8 +180,8 @@ void MainWindow::checkInsulationResistanceMeasuringBoardUUTBB()
         break;
     }
 
-    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceMeasuringBoardUUTBB->text()), "blue");
-    iStepInsulationResistanceMeasuringBoardUUTBB = 1;
+    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
+    iStepInsulationResistanceUUTBB = 1;
     ui->rbOpenCircuitVoltagePowerSupply->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);

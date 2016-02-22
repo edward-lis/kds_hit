@@ -151,7 +151,7 @@ void MainWindow::checkClosedCircuitVoltageBattery()
     }
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
     iStepClosedCircuitVoltageBattery = 1;
-    ui->rbInsulationResistanceMeasuringBoardUUTBB->setEnabled(true);
+    ui->rbInsulationResistanceUUTBB->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);
     ui->groupBoxDiagnosticMode->setEnabled(true);

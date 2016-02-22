@@ -11,11 +11,8 @@ void MainWindow::on_btnBuildReport_clicked()
     QDateTime dateTime = QDateTime::currentDateTime();
     QString textDateTime = dateTime.toString("yyyy-MM-dd-hh-mm-ss-zzz");
     QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранение отчет проверки в PDF-файл"), tr("%0_%1.pdf").arg(ui->comboBoxBatteryList->currentText()).arg(textDateTime), "*.pdf");
-    if (QFileInfo(fileName).suffix().isEmpty())
-        fileName.append(".pdf");
     if (fileName.length() < 5) /// без имени файла не сохраняем
         return;
-
     QPrinter printer(QPrinter::PrinterResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPaperSize(QPrinter::A4);
