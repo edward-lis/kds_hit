@@ -88,3 +88,12 @@ stop:
     baRecvArray.clear();
 
 }
+
+/*
+ * Напряжение разомкнутой цепи батареи
+ */
+void MainWindow::checkOpenCircuitVoltageBattery()
+{
+    qDebug() << "checkOpenCircuitVoltageBattery()";
+    ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+}

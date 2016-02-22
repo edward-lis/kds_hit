@@ -98,3 +98,184 @@ stop:
     baRecvArray.clear();
 
 }
+
+// слот вызывается при изменении чекбоксов элементов списка комбобокса
+void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
+{
+    qDebug() << "modelOpenCircuitVoltageGroup->rowCount()=" << modelOpenCircuitVoltageGroup->rowCount();
+    int count = 0;
+    for(int i=1; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+    qDebug() << "countOpenCircuitVoltageGroup=" << count;
+    ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelOpenCircuitVoltageGroup->rowCount()-1));
+    ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
+}
+
+/*
+ * Напряжение разомкнутой цепи группы
+ */
+void MainWindow::checkOpenCircuitVoltageGroup()
+{
+    /*if (((QPushButton*)sender())->objectName() == "btnOpenCircuitVoltageGroup") {
+        iStepOpenCircuitVoltageGroup = 1;
+        bState = false;
+        ui->btnOpenCircuitVoltageGroup_2->setEnabled(false);
+    }
+    if (((QPushButton*)sender())->objectName() == "btnOpenCircuitVoltageGroup_2")
+        bState = false;*/
+    if (!bState) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbOpenCircuitVoltageGroup->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbOpenCircuitVoltageGroup->count();
+    ui->progressBar->setMaximum(iMaxSteps);
+    ui->progressBar->setValue(iCurrentStep);
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        for (int i = iCurrentStep; i < iMaxSteps; i++) {
+            if (!bState) return;
+            switch (i) {
+            case 0:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 1:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 2:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 3:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 4:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 5:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 6:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 7:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 8:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 9:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 10:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 11:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 12:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 13:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 14:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 15:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 16:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 17:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 18:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            case 19:
+                delay(1000);
+                param = qrand()%40+10; //число полученное с COM-порта
+                break;
+            default:
+                //return;
+                break;
+            }
+            str = tr("%0 = <b>%1</b> В").arg(battery[iBatteryIndex].circuitgroup[i]).arg(QString::number(param));
+            QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+            color = (param > settings.closecircuitgroup_limit) ? "red" : "green";
+            label->setText(str);
+            label->setStyleSheet("QLabel { color : "+color+"; }");
+            Log(str, color);
+            ui->btnBuildReport->setEnabled(true);
+            if (param > settings.closecircuitgroup_limit) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    bState = false;
+                    return;
+                } /*else {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->btnVoltageOnTheHousing_2->setEnabled(true);
+                }*/
+            }
+            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->progressBar->setValue(i+1);
+            //iStepVoltageOnTheHousing++;
+        }
+        if (ui->rbModeDiagnosticAuto->isChecked())
+             bCheckCompleteInsulationResistance = true;
+        break;
+    case 1:
+        if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 2:
+        if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 3:
+        if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    default:
+        break;
+    }
+
+    Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
+    iStepOpenCircuitVoltageGroup = 1;
+    ui->rbClosedCircuitVoltageGroup->setEnabled(true);
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->groupBoxDiagnosticDevice->setEnabled(true);
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+    ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+}

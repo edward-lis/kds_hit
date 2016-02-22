@@ -192,7 +192,7 @@ private slots:
    void on_btnVoltageOnTheHousing_clicked();
    void on_comboBoxBatteryList_currentIndexChanged(int index);
    void on_btnStartStopAutoModeDiagnostic_clicked();
-   void on_btnContinueAutoModeDiagnostic_clicked();
+// уже не нужно, нет кнопки   void on_btnContinueAutoModeDiagnostic_clicked();
    void on_cbParamsAutoMode_currentIndexChanged(int index);
    void on_btnInsulationResistance_clicked();
    void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();

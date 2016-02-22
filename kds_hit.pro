@@ -24,7 +24,12 @@ SOURCES += main.cpp\
     opencircuitgroup.cpp \
     opencircuitbattery.cpp \
     closecircuitgroup.cpp \
-    datafile.cpp
+    datafile.cpp \
+    serialportcommunication.cpp \
+    depassivation.cpp \
+    closecircuitbattery.cpp \
+    voltageopencircuitpoweruutbb.cpp \
+    voltageclosecircuitpoweruutbb.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \

@@ -27,7 +27,7 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     quint16 U2=settings.voltage_power_uutbb/settings.coefADC1 + settings.offsetADC1; // код наличия напряжения БП.
     int x=0, y=0; // индексы в матрице
     quint16 polar; // полярность батареи
-    quint16 typeb; // напряжение цепи 28
+    quint16 typeb=0; // напряжение цепи 28
     quint16 uocpb; // напряжение БП УУТББ
     //int ret=0;
 

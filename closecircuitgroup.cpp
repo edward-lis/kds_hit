@@ -191,6 +191,24 @@ stop:
     ui->groupBoxDiagnosticDevice->setEnabled(true);
     ui->groupBoxDiagnosticMode->setEnabled(true);
 }
+
+// слот вызывается при изменении чекбоксов элементов списка комбобокса
+void MainWindow::itemChangedClosedCircuitVoltageGroup(QStandardItem* itm)
+{
+    qDebug() << "modelClosedCircuitVoltageGroup->rowCount()=" << modelClosedCircuitVoltageGroup->rowCount();
+    int count = 0;
+    for(int i=1; i < modelClosedCircuitVoltageGroup->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelClosedCircuitVoltageGroup->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+    qDebug() << "countClosedCircuitVoltageGroup=" << count;
+    ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelClosedCircuitVoltageGroup->rowCount()-1));
+    ui->cbClosedCircuitVoltageGroup->setCurrentIndex(0);
+}
+
 #if 0
 switch (iBatteryIndex) {
 case 0: //9ER20P-20 // !!! ваще кейс не нужен, кол-во цепей брать из структуры.

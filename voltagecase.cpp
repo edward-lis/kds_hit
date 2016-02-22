@@ -112,9 +112,102 @@ stop:
     baRecvArray.clear();
 // !!! сбросить прогрессбар
 }
-#if 0
-on_btnVoltageOnTheHousing_clicked
-true false 1 1872
-Incorrect reply. Should be  "IDLE and OK"  but got:  "PING"
-recvSerialData "IDLE#OK" command: ""
-#endif
+
+/*
+ * Напряжение на корпусе батареи
+ */
+void MainWindow::checkVoltageOnTheHousing()
+{
+    /*if (((QPushButton*)sender())->objectName() == "btnVoltageOnTheHousing") {
+        if (bState) {
+            ((QPushButton*)sender())->setText(tr("Стоп"));
+        } else {
+            ((QPushButton*)sender())->setText(tr("Пуск"));
+        }
+        iStepVoltageOnTheHousing = 1;
+        bState = false;
+        ui->btnVoltageOnTheHousing_2->setEnabled(false);
+    }*/
+    /*if (((QPushButton*)sender())->objectName() == "btnVoltageOnTheHousing_2")
+        bState = false;*/
+    //if (!bState) return;
+    ui->groupBoxCOMPort->setEnabled(false);
+    ui->groupBoxDiagnosticDevice->setEnabled(false);
+    ui->groupBoxDiagnosticMode->setEnabled(false);
+    ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbVoltageOnTheHousing->count();
+    ui->progressBar->setMaximum(iMaxSteps);
+    ui->progressBar->setValue(iCurrentStep);
+    switch (iBatteryIndex) {
+    case 0: //9ER20P-20
+        for (int i = iCurrentStep; i < iMaxSteps; i++) {
+            if (!bState) return;
+            switch (i) {
+            case 0:
+                delay(1000);
+                param = qrand()%3; //число полученное с COM-порта
+                break;
+            case 1:
+                delay(1000);
+                param = qrand()%3;; //число полученное с COM-порта
+                break;
+            default:
+                return;
+                break;
+            }
+            str = tr("%0 = <b>%1</b> В").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(QString::number(param));
+            QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
+            color = (param > settings.voltage_corpus_limit) ? "red" : "green";
+            label->setText(str);
+            label->setStyleSheet("QLabel { color : "+color+"; }");
+            Log(str, color);
+            ui->btnBuildReport->setEnabled(true);
+            if (param > settings.voltage_corpus_limit) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    bState = false;
+                    return;
+                } /*else {
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    ui->rbModeDiagnosticAuto->setEnabled(false);
+                    ui->btnVoltageOnTheHousing_2->setEnabled(true);
+                }*/
+            }
+            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->progressBar->setValue(i+1);
+            //iStepVoltageOnTheHousing++;
+        }
+        /*if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteVoltageOnTheHousing = true;
+        return true;*/
+        break;
+    case 1:
+        //if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 2:
+        //if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 3:
+        //if (!bState) return;
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    default:
+        break;
+    }
+    Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    //iStepVoltageOnTheHousing = 1;
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        ui->rbInsulationResistance->setEnabled(true);
+        ui->groupBoxCOMPort->setEnabled(true);
+        ui->groupBoxDiagnosticDevice->setEnabled(true);
+        ui->groupBoxDiagnosticMode->setEnabled(true);
+    }
+    ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+}
