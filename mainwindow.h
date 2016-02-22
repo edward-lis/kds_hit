@@ -67,7 +67,7 @@ private:
     int iStepOpenCircuitVoltagePowerSupply;
     int iStepClosedCircuitVoltagePowerSupply;
     int iParamsNumberChecked;
-    QVector<int> imDepassivation;
+    QList<int> imDepassivation;
     QString str;
     QString color;
     QString paramMsg;
@@ -127,7 +127,6 @@ private:
     //+++
 
 public slots:
-    //void checkAutoModeDiagnostic();
     void Log(QString message, QString color);
     void delay(int millisecondsToWait);
     void checkVoltageOnTheHousing();
@@ -165,10 +164,13 @@ private slots:
    void on_rbVoltageOnTheHousing_toggled(bool checked);
    void on_rbInsulationResistance_toggled(bool checked);
    void on_rbOpenCircuitVoltageGroup_toggled(bool checked);
+   void on_rbOpenCircuitVoltageBattery_toggled(bool checked);
    void on_rbClosedCircuitVoltageGroup_toggled(bool checked);
    void on_rbDepassivation_toggled(bool checked);
    void on_rbClosedCircuitVoltageBattery_toggled(bool checked);
    void on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked);
+   void on_rbOpenCircuitVoltagePowerSupply_toggled(bool checked);
+   void on_rbClosedCircuitVoltagePowerSupply_toggled(bool checked);
    void on_cbIsUUTBB_toggled(bool checked);
 
    //+++ Edward
@@ -192,16 +194,15 @@ private slots:
    void on_btnVoltageOnTheHousing_clicked();
    void on_comboBoxBatteryList_currentIndexChanged(int index);
    void on_btnStartStopAutoModeDiagnostic_clicked();
-   void on_btnContinueAutoModeDiagnostic_clicked();
    void on_cbParamsAutoMode_currentIndexChanged(int index);
    void on_btnInsulationResistance_clicked();
    void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
    void on_btnClosedCircuitVoltageGroup_clicked();
-   void on_actionSave_triggered();
-   void on_actionLoad_triggered();
-   void on_actionExit_triggered();
+   void on_actionCheckSave_triggered();
+   void on_actionCheckLoad_triggered();
+   void on_btnBuildReport_clicked();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна

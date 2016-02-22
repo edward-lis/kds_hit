@@ -459,7 +459,6 @@ void MainWindow::delay( int millisecondsToWait )
  * Входные параметры: int iBatteryIndex
  */
 void MainWindow::comboxSetData() {
-    qDebug() << "comboxSetData()= " << iBatteryIndex;
     ui->cbParamsAutoMode->clear();
 
     /// 1. Напряжения на корпусе
@@ -596,8 +595,8 @@ void MainWindow::checkVoltageOnTheHousing()
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbVoltageOnTheHousing->count();
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
     ui->progressBar->setMaximum(iMaxSteps);
     ui->progressBar->setValue(iCurrentStep);
     switch (iBatteryIndex) {
@@ -634,7 +633,7 @@ void MainWindow::checkVoltageOnTheHousing()
                     ui->btnVoltageOnTheHousing_2->setEnabled(true);
                 }*/
             }
-            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->cbSubParamsAutoMode->setCurrentIndex(i+1);
             ui->progressBar->setValue(i+1);
             //iStepVoltageOnTheHousing++;
         }
@@ -690,8 +689,8 @@ void MainWindow::checkInsulationResistance()
     ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbInsulationResistance->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbInsulationResistance->count();
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbInsulationResistance->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbInsulationResistance->count();
     ui->progressBar->setMaximum(iMaxSteps);
     ui->progressBar->setValue(iCurrentStep);
     switch (iBatteryIndex) {
@@ -736,7 +735,7 @@ void MainWindow::checkInsulationResistance()
                     ui->btnVoltageOnTheHousing_2->setEnabled(true);
                 }*/
             }
-            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->cbSubParamsAutoMode->setCurrentIndex(i+1);
             ui->progressBar->setValue(i+1);
             //iStepVoltageOnTheHousing++;
         }
@@ -789,8 +788,8 @@ void MainWindow::checkOpenCircuitVoltageGroup()
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbOpenCircuitVoltageGroup->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbOpenCircuitVoltageGroup->count();
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbOpenCircuitVoltageGroup->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbOpenCircuitVoltageGroup->count();
     ui->progressBar->setMaximum(iMaxSteps);
     ui->progressBar->setValue(iCurrentStep);
     switch (iBatteryIndex) {
@@ -899,7 +898,7 @@ void MainWindow::checkOpenCircuitVoltageGroup()
                     ui->btnVoltageOnTheHousing_2->setEnabled(true);
                 }*/
             }
-            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->cbSubParamsAutoMode->setCurrentIndex(i+1);
             ui->progressBar->setValue(i+1);
             //iStepVoltageOnTheHousing++;
         }
@@ -1262,6 +1261,12 @@ void MainWindow::on_rbOpenCircuitVoltageGroup_toggled(bool checked)
     //ui->btnOpenCircuitVoltageGroup_2->setEnabled((checked and iStepOpenCircuitVoltageGroup > 1) ? true : false);
 }
 
+void MainWindow::on_rbOpenCircuitVoltageBattery_toggled(bool checked)
+{
+    ui->btnOpenCircuitVoltageBattery->setEnabled(checked);
+    ui->cbOpenCircuitVoltageBattery->setEnabled(checked);
+}
+
 void MainWindow::on_rbClosedCircuitVoltageGroup_toggled(bool checked)
 {
     ui->btnClosedCircuitVoltageGroup->setEnabled(checked);
@@ -1288,6 +1293,18 @@ void MainWindow::on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool check
     ui->btnInsulationResistanceMeasuringBoardUUTBB->setEnabled(checked);
     ui->cbInsulationResistanceMeasuringBoardUUTBB->setEnabled(checked);
     //ui->btnInsulationResistanceMeasuringBoardUUTBB_2->setEnabled((checked and iStepInsulationResistanceMeasuringBoardUUTBB > 1) ? true : false);
+}
+
+void MainWindow::on_rbOpenCircuitVoltagePowerSupply_toggled(bool checked)
+{
+    ui->btnOpenCircuitVoltagePowerSupply->setEnabled(checked);
+    ui->cbOpenCircuitVoltagePowerSupply->setEnabled(checked);
+}
+
+void MainWindow::on_rbClosedCircuitVoltagePowerSupply_toggled(bool checked)
+{
+    ui->btnClosedCircuitVoltagePowerSupply->setEnabled(checked);
+    ui->cbClosedCircuitVoltagePowerSupply->setEnabled(checked);
 }
 
 void MainWindow::on_cbIsUUTBB_toggled(bool checked)
@@ -1346,7 +1363,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbStartSubParametrAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Стоп");
         ui->cbParamsAutoMode->currentIndex();
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
@@ -1388,7 +1405,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbStartSubParametrAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Старт");
     } else {
         bState = false;
@@ -1396,76 +1413,63 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbStartSubParametrAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Старт");
     }
 }
 
-void MainWindow::on_btnContinueAutoModeDiagnostic_clicked()
-{
-    qDebug() << ((QPushButton*)sender())->objectName();
-}
 
 void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
 {
-    ui->cbStartSubParametrAutoMode->clear();
+    ui->cbSubParamsAutoMode->clear();
     switch (index) {
     case 0:
         /// 1. Напряжения на корпусе
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_voltage_corpus[0]);
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_voltage_corpus[1]);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].str_voltage_corpus[0]));
+        ui->cbSubParamsAutoMode->addItem(tr("2. %0").arg(battery[iBatteryIndex].str_voltage_corpus[1]));
         break;
     case 1:
         /// 2. Сопротивление изоляции
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_isolation_resistance[0]);
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_isolation_resistance[1]);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].str_isolation_resistance[0]));
+        ui->cbSubParamsAutoMode->addItem(tr("2. %0").arg(battery[iBatteryIndex].str_isolation_resistance[1]));
         if (iBatteryIndex == 0 or iBatteryIndex == 3) { /// еще две пары если батарея 9ER20P_20 или 9ER20P_28
-            ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_isolation_resistance[2]);
-            ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].str_isolation_resistance[3]);
+            ui->cbSubParamsAutoMode->addItem(tr("3. %0").arg(battery[iBatteryIndex].str_isolation_resistance[2]));
+            ui->cbSubParamsAutoMode->addItem(tr("4. %0").arg(battery[iBatteryIndex].str_isolation_resistance[3]));
         }
         break;
     case 2:
         /// 3. Напряжение разомкнутой цепи группы
         for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
-            ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].circuitgroup[r]);
+            ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].circuitgroup[r]));
         break;
     case 3:
         /// 3а. Напряжение разомкнутой цепи батареи
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].circuitbattery);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].circuitbattery));
         break;
     case 4:
         /// 4. Напряжение замкнутой цепи группы
         for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
-            ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].circuitgroup[r]);
+            ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].circuitgroup[r]));
         break;
     case 5:
         /// 5. Напряжение замкнутой цепи батареи
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].circuitbattery);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].circuitbattery));
         break;
     case 6:
         /// 6. Сопротивление изоляции УУТББ
         for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
-            ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_resist[r]);
+            ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].uutbb_resist[r]));
         break;
     case 7:
         /// 7. Напряжение разомкнутой цепи БП
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         break;
     case 8:
         /// 8. Напряжение замкнутой цепи БП
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
-        ui->cbStartSubParametrAutoMode->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[1]);
+        ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
+        ui->cbSubParamsAutoMode->addItem(tr("2. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[1]));
         break;
     default:
         break;
     }
-}
-
-
-/*!
- * \brief MainWindow::on_actionExit_triggered
- */
-void MainWindow::on_actionExit_triggered()
-{
-    qDebug() << "on_actionExit_triggered()";
 }

@@ -24,14 +24,16 @@ SOURCES += main.cpp\
     opencircuitgroup.cpp \
     opencircuitbattery.cpp \
     closecircuitgroup.cpp \
-    datafile.cpp
+    datafile.cpp \
+    report.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
     qcustomplot.h \
     settings.h \
     battery.h \
-    datafile.h
+    datafile.h \
+    report.h
 
 FORMS    += mainwindow.ui
 
