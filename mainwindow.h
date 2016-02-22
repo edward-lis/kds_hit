@@ -204,9 +204,15 @@ private slots:
    void on_actionCheckLoad_triggered();
    void on_btnBuildReport_clicked();
 
+   void on_btnClosedCircuitVoltageBattery_clicked();
+
+   void on_btnOpenCircuitVoltagePowerSupply_clicked();
+
+   void on_btnClosedCircuitVoltagePowerSupply_clicked();
+
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна
-    //перегруз для закрытия крестиком
+    //перегруз события закрытия главного окна
     virtual void closeEvent(QCloseEvent *e);
 };
 

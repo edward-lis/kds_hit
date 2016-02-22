@@ -1013,7 +1013,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>10</number>
       </property>
       <widget class="QWidget" name="tabEventLog">
        <attribute name="title">
@@ -1940,6 +1940,16 @@
        <attribute name="title">
         <string>Напряжение замкнутой цепи блока питания</string>
        </attribute>
+       <widget class="QCustomPlot" name="widgetClosedCircuitVoltagePowerUUTBB" native="true">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>10</y>
+          <width>627</width>
+          <height>528</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>

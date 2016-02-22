@@ -213,7 +213,7 @@ void Settings::loadSettings()
     uutbb_opencircuitpower_limit_min = settings.value("uutbb_opencircuitpower_limit_min", 6.9).toFloat();
     uutbb_opencircuitpower_limit_max = settings.value("uutbb_opencircuitpower_limit_max", 7.2).toFloat();
     // предельное напряжение замкнутой цепи блока питания УУТББ, при токе 0.1А, вольт
-    uutbb_closecircuitpower_limit = settings.value("uutbb_opencircuitpower_limit_max", 5.7).toFloat();
+    uutbb_closecircuitpower_limit = settings.value("uutbb_closecircuitpower_limit", 5.7).toFloat();
     // время подключения нагрузки на БП УУТББ, секунды
     uutbb_time_ccp = settings.value("uutbb_time_ccp", 10).toInt();
 

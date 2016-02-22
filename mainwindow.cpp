@@ -217,7 +217,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// перегруз крестика закрытия и Alt-F4
+// перегруз события закрытия главного окна (крестик закрытия, Alt-F4 и close())
 void MainWindow::closeEvent(QCloseEvent *event)
  {
     // по умолчанию в месседжбоксе кнопка Нет и по Esc она тоже.
@@ -610,3 +610,5 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
         break;
     }
 }
+
+

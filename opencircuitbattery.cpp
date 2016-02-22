@@ -24,7 +24,7 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
-    ui->statusBar->showMessage(tr("Проверка напряжения разомкнутых цепей групп ..."));
+    ui->statusBar->showMessage(tr("Проверка напряжения разомкнутой цепи батареи ..."));
     Log(tr("Проверка напряжения разомкнутой цепи батареи"), "blue");
 
     // сбросить коробочку

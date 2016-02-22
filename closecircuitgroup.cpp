@@ -22,6 +22,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     QDateTime dt; // текущее время очередного измерения
     double x; // текущая координата Х
     int cycleTimeSec=settings.time_depassivation[2]; // длительность цикла проверки в секундах
+    bool firstMeasurement=true; // первое измерение
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
@@ -44,10 +45,10 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
     ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
     ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(cycleTimeSec, settings.closecircuitgroup_limit);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(cycleTimeSec+1, settings.closecircuitgroup_limit);
 
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, cycleTimeSec);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, cycleTimeSec+1);
     ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
 
@@ -82,7 +83,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         if (checkState != Qt::Checked) continue;
 
         // собрать режим
-        str_num.sprintf(" %02i", i); // напечатать номер цепи
+        str_num.sprintf(" %02i %1i", i, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
         baSendArray=(baSendCommand="UccG")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
         QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
@@ -90,21 +91,8 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         if(ret) goto stop;
 
         starttime = QDateTime::currentDateTime(); // время начала измерения
-        // опросить
-        baSendArray=baSendCommand+"?#";
-        QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
-        ret=loop.exec();
-        if(ret) goto stop;
-        codeADC = getRecvData(baRecvArray); // напряжение в коде
-        fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
-
-        // нарисуем график
-        dt = QDateTime::currentDateTime();
-        x= -dt.secsTo(starttime);
-        ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
-        ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если за пределами
-        ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x, (double)fU);
-        ui->widgetClosedCircuitVoltageGroup->replot();
+        dt = QDateTime::currentDateTime(); // текущее время
+        ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData(); // очистить график
 
         while(-dt.msecsTo(starttime) < cycleTimeSec*1000) // пока время цикла проверки не вышло, продолжим измерять
         {
@@ -116,9 +104,14 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             codeADC = getRecvData(baRecvArray); // напряжение в коде
             fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
             // нарисуем график
-            dt = QDateTime::currentDateTime();
-            x= -dt.msecsTo(starttime);// .secsTo(starttime);
-            ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true);
+            if(firstMeasurement)
+            {
+                firstMeasurement = false;
+                starttime = QDateTime::currentDateTime(); // время начала измерения начнём считать после получения первого ответа (чтобы график рисовался с нуля)
+            }
+            dt = QDateTime::currentDateTime(); // текущее время
+            x= -dt.msecsTo(starttime); // кол-во миллисекунд, прошедших с начала измерения
+            ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
             ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x/1000, (double)fU);
             ui->widgetClosedCircuitVoltageGroup->replot();
         }
