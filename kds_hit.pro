@@ -26,17 +26,19 @@ SOURCES += main.cpp\
     closecircuitgroup.cpp \
     datafile.cpp \
     serialportcommunication.cpp \
-    depassivation.cpp \
-    closecircuitbattery.cpp \
+    report.cpp \
+    voltageclosecircuitpoweruutbb.cpp \
     voltageopencircuitpoweruutbb.cpp \
-    voltageclosecircuitpoweruutbb.cpp
+    depassivation.cpp \
+    closecircuitbattery.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
     qcustomplot.h \
     settings.h \
     battery.h \
-    datafile.h
+    datafile.h \
+    report.h
 
 FORMS    += mainwindow.ui
 

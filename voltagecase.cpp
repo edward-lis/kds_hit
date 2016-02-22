@@ -137,8 +137,8 @@ void MainWindow::checkVoltageOnTheHousing()
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbStartSubParametrAutoMode->count() : ui->cbVoltageOnTheHousing->count();
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
     ui->progressBar->setMaximum(iMaxSteps);
     ui->progressBar->setValue(iCurrentStep);
     switch (iBatteryIndex) {
@@ -175,7 +175,7 @@ void MainWindow::checkVoltageOnTheHousing()
                     ui->btnVoltageOnTheHousing_2->setEnabled(true);
                 }*/
             }
-            ui->cbStartSubParametrAutoMode->setCurrentIndex(i+1);
+            ui->cbSubParamsAutoMode->setCurrentIndex(i+1);
             ui->progressBar->setValue(i+1);
             //iStepVoltageOnTheHousing++;
         }

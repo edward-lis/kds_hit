@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1275</width>
-    <height>698</height>
+    <height>719</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -24,7 +24,7 @@
     <item>
      <layout class="QGridLayout" name="gridLayout">
       <item row="4" column="1" colspan="2">
-       <widget class="QComboBox" name="cbStartSubParametrAutoMode">
+       <widget class="QComboBox" name="cbSubParamsAutoMode">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -313,9 +313,6 @@
       </item>
       <item row="3" column="0" colspan="3">
        <widget class="QGroupBox" name="groupBoxCheckParams">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -338,9 +335,6 @@
          <string>Проверяемый параметр</string>
         </property>
         <widget class="QRadioButton" name="rbClosedCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -355,7 +349,7 @@
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltageGroup">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
@@ -371,7 +365,7 @@
         </widget>
         <widget class="QRadioButton" name="rbInsulationResistance">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
@@ -386,9 +380,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbInsulationResistanceMeasuringBoardUUTBB">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -402,9 +393,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltagePowerSupply">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -418,9 +406,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbClosedCircuitVoltageGroup">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -434,9 +419,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbDepassivation">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -450,9 +432,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbClosedCircuitVoltageBattery">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -984,9 +963,6 @@
          </property>
         </widget>
         <widget class="QRadioButton" name="rbOpenCircuitVoltageBattery">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <property name="geometry">
           <rect>
            <x>7</x>
@@ -1979,15 +1955,14 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuCheck">
     <property name="title">
-     <string>Ф&amp;айл</string>
+     <string>Проверка</string>
     </property>
-    <addaction name="actionSave"/>
-    <addaction name="actionLoad"/>
-    <addaction name="actionExit"/>
+    <addaction name="actionCheckSave"/>
+    <addaction name="actionCheckLoad"/>
    </widget>
-   <addaction name="menuFile"/>
+   <addaction name="menuCheck"/>
   </widget>
   <action name="menuExit">
    <property name="text">
@@ -2009,17 +1984,17 @@
     <string>Сформировать файл-отчет</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="actionCheckSave">
    <property name="text">
     <string>Сохранить</string>
    </property>
   </action>
-  <action name="actionLoad">
+  <action name="actionCheckLoad">
    <property name="text">
     <string>Загрузить</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="action_2">
    <property name="text">
     <string>Выход</string>
    </property>
