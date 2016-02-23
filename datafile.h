@@ -23,9 +23,11 @@ struct dataBattery {
     int icbSubParamsAutoMode; /// индекс комбокса подпараметра проверки в автоматического режима
     int icbVoltageOnTheHousing; //// индекс комбкса "Напряжения на корпусе"
     int icbInsulationResistance; //// индекс комбокса "Сопротивления изоляции"
-    //QStandardItemModel *modelClosedCircuitVoltageGroup;
-    QList<int> imDepassivation;
+    QList<QVariant> itemsOpenCircuitVoltageGroup; //// состояние чекбоксов "Напряжение разомкнутой цепи группы"
+    QList<QVariant> itemsClosedCircuitVoltageGroup; //// состояние чекбоксов "Напряжение замкнутой цепи группы"
+    QList<int> imDepassivation; //// состояние чекбоксов "Расспасивация"
     int icbDepassivation; //// индекс комбокса "Расспасивация"
+    QList<QVariant> itemsInsulationResistanceUUTBB; //// состояние чекбоксов "Сопротивления изоляции УУТББ"
     int icbClosedCircuitVoltagePowerSupply; //// индекс "Напряжение замкнутой цепи БП"
 };
 

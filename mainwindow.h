@@ -50,7 +50,7 @@ private:
     Ui::MainWindow *ui;
     QStandardItemModel *modelClosedCircuitVoltageGroup;
     QStandardItemModel *modelOpenCircuitVoltageGroup;
-    QStandardItemModel *modelInsulationResistanceMeasuringBoardUUTBB;
+    QStandardItemModel *modelInsulationResistanceUUTBB;
     QStandardItemModel *modelDepassivation;
     int iStartCheck;
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
@@ -64,7 +64,7 @@ private:
     int iStepClosedCircuitVoltageGroup;
     int iStepDepassivation;
     int iStepClosedCircuitVoltageBattery;
-    int iStepInsulationResistanceMeasuringBoardUUTBB;
+    int iStepInsulationResistanceUUTBB;
     int iStepOpenCircuitVoltagePowerSupply;
     int iStepClosedCircuitVoltagePowerSupply;
     int iParamsNumberChecked;
@@ -78,7 +78,7 @@ private:
     bool bCheckCompleteOpenCircuitVoltageGroup;
     bool bCheckCompleteClosedCircuitVoltageGroup;
     bool bCheckCompleteClosedCircuitVoltageBattery;
-    bool bCheckCompleteInsulationResistanceMeasuringBoardUUTBB;
+    bool bCheckCompleteInsulationResistanceUUTBB;
     bool bCheckCompleteOpenCircuitVoltagePowerSupply;
     bool bCheckCompleteClosedCircuitVoltagePowerSupply;
     void getCOMPorts();
@@ -137,7 +137,7 @@ public slots:
     //void checkClosedCircuitVoltageGroup();
     void checkClosedCircuitVoltageBattery();
     void checkDepassivation();
-    void checkInsulationResistanceMeasuringBoardUUTBB();
+    void checkInsulationResistanceUUTBB();
     void checkOpenCircuitVoltagePowerSupply();
     void checkClosedCircuitVoltagePowerSupply();
 
@@ -159,7 +159,7 @@ signals:
 private slots:
    void itemChangedOpenCircuitVoltageGroup(QStandardItem* itm);
    void itemChangedClosedCircuitVoltageGroup(QStandardItem* itm);
-   void itemChangedInsulationResistanceMeasuringBoardUUTBB(QStandardItem* itm);
+   void itemChangedInsulationResistanceUUTBB(QStandardItem* itm);
    void on_rbModeDiagnosticAuto_toggled(bool checked);
    void on_rbModeDiagnosticManual_toggled(bool checked);
    void on_rbVoltageOnTheHousing_toggled(bool checked);
@@ -169,7 +169,7 @@ private slots:
    void on_rbClosedCircuitVoltageGroup_toggled(bool checked);
    void on_rbDepassivation_toggled(bool checked);
    void on_rbClosedCircuitVoltageBattery_toggled(bool checked);
-   void on_rbInsulationResistanceMeasuringBoardUUTBB_toggled(bool checked);
+   void on_rbInsulationResistanceUUTBB_toggled(bool checked);
    void on_rbOpenCircuitVoltagePowerSupply_toggled(bool checked);
    void on_rbClosedCircuitVoltagePowerSupply_toggled(bool checked);
    void on_cbIsUUTBB_toggled(bool checked);
@@ -197,7 +197,7 @@ private slots:
    void on_btnStartStopAutoModeDiagnostic_clicked();
    void on_cbParamsAutoMode_currentIndexChanged(int index);
    void on_btnInsulationResistance_clicked();
-   void on_btnInsulationResistanceMeasuringBoardUUTBB_clicked();
+   void on_btnInsulationResistanceUUTBB_clicked();
    void on_btnOpenCircuitVoltageGroup_clicked();
    void on_btnOpenCircuitVoltageBattery_clicked();
    void on_btnClosedCircuitVoltageGroup_clicked();
