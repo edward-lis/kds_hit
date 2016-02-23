@@ -210,6 +210,36 @@ MainWindow::MainWindow(QWidget *parent) :
     this->Item1->setData(Qt::Unchecked, Qt::CheckStateRole);
     this->Model->insertRow(0, this->Item1);
     ui->cbInsulationResistance->setModel(&Model);*/
+
+    //==== !!! Для отладки распассивации заглушка
+    // добавить цепи в комбобокс распассивации
+    battery[iBatteryIndex].b_flag_circuit[0] |= CIRCUIT_DEPASS;
+    battery[iBatteryIndex].b_flag_circuit[1] |= CIRCUIT_DEPASS;
+    battery[iBatteryIndex].b_flag_circuit[2] |= CIRCUIT_DEPASS;
+
+    modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+        if(battery[iBatteryIndex].b_flag_circuit[r] & CIRCUIT_DEPASS)
+        {
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+        }
+        else
+        {
+            item->setFlags(Qt::NoItemFlags);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        }
+        modelDepassivation->setItem(r+1, 0, item);
+    }
+    ui->cbDepassivation->setModel(modelDepassivation);
+    ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(3).arg(battery[iBatteryIndex].group_num));
+
+    //==== конец заглушки
+
 }
 
 MainWindow::~MainWindow()
@@ -610,5 +640,6 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
         break;
     }
 }
+
 
 

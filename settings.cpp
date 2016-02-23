@@ -85,7 +85,7 @@ void Settings::loadSettings()
     // value(,): первый параметр - ключ. второй параметр - параметр по умолчанию (допустим, если нет запрашиваемого ключа в тексте файла)
     // ключ - секция/ключ.   если без секции, то секция по умолчанию [General]
 
-    // int - кол-во цепей/групп
+    // int - кол-во цепей/групп (!!! взять из размера массивов измерения напряжения цепей групп, этот ключ убрать из файла, и везде поменять на )
     battery[0].group_num = settings.value("9ER20P_20/group_num", 20).toInt();
     battery[1].group_num = settings.value("9ER14PS_24/group_num", 24).toInt();
     battery[2].group_num = settings.value("9ER14P_24/group_num", 24).toInt();
@@ -254,6 +254,15 @@ void Settings::loadSettings()
         functionResist[i].codeADC = settings.value("codeADC", 0).toString().toUInt(&ok, 16); // hex
     }
 
+    // флаги и признаки цепей групп
+    for(int i=0; i<4; i++)
+    {
+        battery[i].b_flag_circuit.resize(battery[i].group_num);
+        for(int j=0; j<battery[i].group_num; j++)
+        {
+            battery[i].b_flag_circuit[j] |= CIRCUIT_FAULT; // пусть по умолчанию все цепи будут неисправными
+        }
+    }
 
     //printSettings();
 

@@ -51,6 +51,7 @@ private:
     QStandardItemModel *modelClosedCircuitVoltageGroup;
     QStandardItemModel *modelOpenCircuitVoltageGroup;
     QStandardItemModel *modelInsulationResistanceMeasuringBoardUUTBB;
+    QStandardItemModel *modelDepassivation;
     int iStartCheck;
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     //int iStep;
@@ -209,6 +210,8 @@ private slots:
    void on_btnOpenCircuitVoltagePowerSupply_clicked();
 
    void on_btnClosedCircuitVoltagePowerSupply_clicked();
+
+   void on_btnDepassivation_clicked();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна

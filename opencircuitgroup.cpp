@@ -19,7 +19,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
-
+    // очистить массивы посылки/приёма
     baSendArray.clear();
     baSendCommand.clear();
     baRecvArray.clear();
@@ -59,6 +59,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
 
         fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
 
+        battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась
         if(bDeveloperState)
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
@@ -68,14 +69,19 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
             if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
+            // добавить цепь в список исправных
+            battery[iBatteryIndex].b_flag_circuit[i-1] &= ~CIRCUIT_FAULT; // снять флаг - цепь неисправна
         }
         else // напряжение меньше (не норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
+            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма! Проверка группы под нагрузкой запрещена.", "red");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
             if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-            // !!! добавить цепь в список неисправных, запрет проверки цепи под нагрузкой
+            // установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
+            battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_FAULT;
         }
+
+        qDebug()<<"battery[iBatteryIndex].b_flag_circuit[i-1]"<<battery[iBatteryIndex].b_flag_circuit[i-1];
 
         // разобрать режим
         baSendArray = (baSendCommand="IDLE")+"#";
@@ -92,10 +98,35 @@ stop:
         else if(ret==2) Log(tr("Incorrect reply!"), "red");
     }
 
+    // разобрать режим (если, например, вывалились сюда по неверному ответу)
+    baSendArray = (baSendCommand="IDLE")+"#";
+    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+    ret=loop.exec();
+    if(ret) goto stop;
+
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
     baSendCommand.clear();
     baRecvArray.clear();
+
+    // оформить комбобокс НЗЦг в соответствии с полученными данными, запретить выбор просевших групп
+    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+        if(!(battery[iBatteryIndex].b_flag_circuit[r] & CIRCUIT_FAULT))
+        {
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+        }
+        else
+        {
+            item->setFlags(Qt::NoItemFlags);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        }
+        modelClosedCircuitVoltageGroup->setItem(r+1, 0, item);
+    }
+    ui->cbClosedCircuitVoltageGroup->setModel(modelClosedCircuitVoltageGroup);
 
 }
 

@@ -31,7 +31,25 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
-    //double x, y;
+    // написать про группы, в зависимости от признаков и флагов. !!! если НРЦг не проверялось, то и НЗЦг не проверять, во избежание.
+    for(int i=1; i<battery[iBatteryIndex].group_num+1; i++)
+    {
+        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
+        if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_OCG_TESTED))
+        {
+            label->setText(tr("%1) НРЦг не проверялось.").arg(i));
+        }
+        else if(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_FAULT)
+        {
+            label->setText(tr("%1) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i));
+        }
+        else
+        {
+            label->setText(tr("%1)").arg(i));
+        }
+    }
+    // !!! лишние label вообще стереть.
+    // подготовить график
     ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
     ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
@@ -82,6 +100,8 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         Qt::CheckState checkState = sitm->checkState();
         if (checkState != Qt::Checked) continue;
 
+        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
+        label->setText(tr("%1) Идёт проверка ...").arg(i));
         // собрать режим
         str_num.sprintf(" %02i %1i", i, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
         baSendArray=(baSendCommand="UccG")+str_num.toLocal8Bit()+"#";
@@ -116,39 +136,47 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->widgetClosedCircuitVoltageGroup->replot();
         }
 
-        if(bDeveloperState)
+        if(bDeveloperState) // если отладочный режим, написать в лог код АЦП
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
-        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
-        label->setText(tr("%1) %2").arg(i).arg(QString::number(fU)));
-        str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));
-        Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green");
-        // проанализировать результаты
+        // по окончанию цикла снять нагрузку, разобрать режим (!!! даже в ручном режиме)
+        baSendArray = (baSendCommand="IDLE")+"#";
+        QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+        ret=loop.exec();
+        if(ret) goto stop;
+
+        str = tr("%1) Напряжение цепи 1 Х3 «Х3-» - %1 Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU, 'f', 2));
+        Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green"); // !!! анализ рез-та в вольтах. переделать в коды, как ниже.
+        // проанализировать результаты, в кодах
         if(codeADC >= codeLimit) // напряжение больше (норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
+            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Норма.", "blue");
+            label->setText(tr("%1) %2 В. Норма.").arg(i).arg(QString::number(fU, 'f', 2)));
+            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения. !!! под нагрузкой???
             if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
         }
         else // напряжение меньше (не норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
+            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Не норма!", "red");
+            label->setText(tr("%1) %2 В. Не норма!").arg(i).arg(QString::number(fU, 'f', 2)));
+            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения. !!! под нагрузкой???
             if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
             // !!! добавить цепь в список распассивируемых
             //int rett = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
-            switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
+            switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 В. Не норма! \nПродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
             case 0:
                 break;
             case 1:
-                imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
-                ui->cbDepassivation->addItem(battery[iBatteryIndex].circuitgroup[iStepClosedCircuitVoltageGroup-1]);
-                Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
+                //imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
+                //ui->cbDepassivation->addItem(battery[iBatteryIndex].circuitgroup[iStepClosedCircuitVoltageGroup-1]);
+                // !!! Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
+                battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_DEPASS; // добавить признак, что группе нужна депассивация
                 break;
             case 2:
                 //ui->btnClosedCircuitVoltageGroup_2->setEnabled(true);
                 bState = true;
-                return; // !!! тут как-то надо выйти из цикла, чтобы разобрать режим
+                // выйти из цикла, разобрать режим
+                goto stop;
                 break;
             default:
                 break;
@@ -171,6 +199,29 @@ stop:
     QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
     ret=loop.exec();
     if(ret) goto stop;
+
+    // добавить цепи в комбобокс распассивации
+    modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
+        if(battery[iBatteryIndex].b_flag_circuit[r] & CIRCUIT_DEPASS)
+        {
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+        }
+        else
+        {
+            item->setFlags(Qt::NoItemFlags);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        }
+        modelDepassivation->setItem(r+1, 0, item);
+    }
+    ui->cbDepassivation->setModel(modelDepassivation);
+    ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
+
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.

@@ -3,6 +3,11 @@
 
 #include <QString>
 
+// признаки и флаги
+#define CIRCUIT_FAULT           0x01        // неисправность цепи (НРЦг меньше предела)
+#define CIRCUIT_DEPASS          0x02        // требуется распассивация
+#define CIRCUIT_OCG_TESTED      0x04        // цепь проверялась без нагрузки
+
 struct Battery
 {
     /// количество групп/цепей groupe/circle
@@ -33,7 +38,8 @@ struct Battery
     int i_uutbb_resist_num;
     /// точки измерения напряжения цепи БП УУТББ (точка, в принципе, одна.  только вторая - с контролем тока нагрузки)
     QString uutbb_closecircuitpower[2];
-
+    /// флаги и признаки цепей групп
+    QVector<quint8> b_flag_circuit;
 };
 
 #endif // BATTERY_H
