@@ -68,12 +68,11 @@ MainWindow::MainWindow(QWidget *parent) :
     baRecvArray(0),
     baSendArray(0), baSendCommand(0),
     bDeveloperState(true), // признак режим разработчика, временно тру, потом поменять на фолс!!!
-    bModeManual(true) // признак ручной режим. менять при выборе радиобаттонов !!!
+    bModeManual(true) // признак ручной режим.
 
 {
     ui->setupUi(this);
 
-    //+++ Edward
     // загрузить конфигурационные установки и параметры батарей из ini-файла.
     // файл находится в том же каталоге, что и исполняемый.
     settings.loadSettings();
@@ -110,7 +109,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timerPing, SIGNAL(timeout()), this, SLOT(sendPing())); // по окончанию паузы между пингами - послать следующий
 
     ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
-    //+++
 
     ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления связи с коробком
     ui->groupBoxDiagnosticMode->setDisabled(false); //
@@ -127,6 +125,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cbClosedCircuitVoltagePowerSupply->hide();
     ui->btnClosedCircuitVoltagePowerSupply->hide();
     //ui->btnClosedCircuitVoltagePowerSupply_2->hide();
+
+    bModeManual = ui->rbModeDiagnosticManual->isChecked(); // ручной/авто режим
 
     /// удаляем все вкладки кроме первой - журнала событий(0), каждый раз удаляем вторую(1)
     int tab_count = ui->tabWidget->count();
@@ -404,11 +404,13 @@ void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 {
     ui->groupBoxCheckParams->setDisabled(checked);
     ui->btnStartStopAutoModeDiagnostic->setEnabled(checked);
+    bModeManual = false;
 }
 
 void MainWindow::on_rbModeDiagnosticManual_toggled(bool checked)
 {
     ui->rbVoltageOnTheHousing->setEnabled(checked);
+    bModeManual = true;
 }
 
 void MainWindow::on_rbVoltageOnTheHousing_toggled(bool checked)

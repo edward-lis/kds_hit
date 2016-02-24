@@ -1013,7 +1013,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="tabEventLog">
        <attribute name="title">
@@ -2311,6 +2311,16 @@
          <string>paramClosedCircuitVoltageBattery</string>
         </property>
        </widget>
+       <widget class="QCustomPlot" name="widgetClosedCircuitBattery" native="true">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>30</y>
+          <width>611</width>
+          <height>528</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabInsulationResistanceUUTBB">
        <attribute name="title">
@@ -2329,9 +2339,9 @@
        <widget class="QCustomPlot" name="widgetClosedCircuitVoltagePowerUUTBB" native="true">
         <property name="geometry">
          <rect>
-          <x>90</x>
+          <x>106</x>
           <y>10</y>
-          <width>627</width>
+          <width>611</width>
           <height>528</height>
          </rect>
         </property>

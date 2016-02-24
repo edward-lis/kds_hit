@@ -16,6 +16,35 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
     quint16 codeLimit=settings.closecircuitbattery_limit/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
+    QDateTime starttime; // время начала измерения
+    QDateTime dt; // текущее время очередного измерения
+    double x; // текущая координата Х
+    int cycleTimeSec=settings.time_closecircuitbattery; // длительность цикла проверки в секундах
+    bool firstMeasurement=true; // первое измерение
+
+    // Подготовка графика
+    ui->widgetClosedCircuitBattery->addGraph(); // blue line
+    ui->widgetClosedCircuitBattery->graph(0)->setPen(QPen(Qt::blue));
+    ui->widgetClosedCircuitBattery->graph(0)->clearData();
+    ui->widgetClosedCircuitBattery->addGraph(); // blue dot
+    ui->widgetClosedCircuitBattery->graph(1)->clearData();
+    ui->widgetClosedCircuitBattery->graph(1)->setLineStyle(QCPGraph::lsNone);
+    //ui->widgetClosedCircuitVoltagePowerUUTBB->graph(1)->setPen(QPen(Qt::green));
+    ui->widgetClosedCircuitBattery->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetClosedCircuitBattery->addGraph(); // red line
+    ui->widgetClosedCircuitBattery->graph(2)->setPen(QPen(Qt::red));
+    ui->widgetClosedCircuitBattery->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
+    ui->widgetClosedCircuitBattery->graph(2)->clearData();
+    ui->widgetClosedCircuitBattery->graph(2)->addData(0, settings.closecircuitbattery_limit);
+    ui->widgetClosedCircuitBattery->graph(2)->addData(cycleTimeSec+2, settings.closecircuitbattery_limit);
+
+    ui->widgetClosedCircuitBattery->xAxis->setLabel(tr("Время, c"));
+    ui->widgetClosedCircuitBattery->xAxis->setRange(0, cycleTimeSec+2);
+    ui->widgetClosedCircuitBattery->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);
+    // показать закладку на экране
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
@@ -26,6 +55,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
 
     ui->statusBar->showMessage(tr("Проверка напряжения замкнутой цепи батареи ..."));
     Log(tr("Проверка напряжения замкнутой цепи батареи"), "blue");
+    ui->labelClosedCircuitVoltageBattery->setText("Идёт измерение...");
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -41,14 +71,31 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     ret=loop.exec();
     if(ret) goto stop;
 
-    // опросить
-    baSendArray=baSendCommand+"?#";
-    QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
-    ret=loop.exec();
-    if(ret) goto stop;
-    codeADC = getRecvData(baRecvArray);
+    starttime = QDateTime::currentDateTime(); // время начала измерения
+    dt = QDateTime::currentDateTime(); // текущее время
+    ui->widgetClosedCircuitBattery->graph(0)->clearData(); // очистить график
 
-    fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+    while(-dt.msecsTo(starttime) < cycleTimeSec*1000) // пока время цикла проверки не вышло, продолжим измерять
+    {
+        // опросить
+        baSendArray=baSendCommand+"?#";
+        QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+        ret=loop.exec();
+        if(ret) goto stop;
+        codeADC = getRecvData(baRecvArray); // напряжение в коде
+        fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+        // нарисуем график
+        if(firstMeasurement)
+        {
+            firstMeasurement = false;
+            starttime = QDateTime::currentDateTime(); // время начала измерения начнём считать после получения первого ответа (чтобы график рисовался с нуля)
+        }
+        dt = QDateTime::currentDateTime(); // текущее время
+        x= -dt.msecsTo(starttime); // кол-во миллисекунд, прошедших с начала измерения
+        ui->widgetClosedCircuitBattery->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
+        ui->widgetClosedCircuitBattery->graph(0)->addData((double)x/1000, (double)fU);
+        ui->widgetClosedCircuitBattery->replot();
+    }
 
     if(bDeveloperState)
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
@@ -57,12 +104,14 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     if(codeADC >= codeLimit) // напряжение больше (норма)
     {
         Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
+        ui->labelClosedCircuitVoltageBattery->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Норма.");
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
     }
     else // напряжение меньше (не норма)
     {
         Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
+        ui->labelClosedCircuitVoltageBattery->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Не норма!");
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
         // !!! добавить цепь в список неисправных, запрет проверки батареи под нагрузкой

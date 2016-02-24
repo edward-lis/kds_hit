@@ -195,7 +195,8 @@ void Settings::loadSettings()
     closecircuitgroup_limit = settings.value("closecircuitgroup_limit", 27.0).toFloat();
     // предельное напряжение замкнутой цепи батареи, вольты
     closecircuitbattery_limit = settings.value("closecircuitbattery_limit", 30.0).toFloat();
-
+    // время проверки замкнутой цепи батареи
+    time_closecircuitbattery = settings.value("time_closecircuitbattery", 30).toInt();
     // кол-во ступеней проверки замкнутых цепей групп под нагрузкой
     number_depassivation_stage = settings.value("number_depassivation_stage", 3).toInt();
     // токи распассивации замкнутых цепей групп по ступеням, амперы
