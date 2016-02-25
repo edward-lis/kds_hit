@@ -299,7 +299,7 @@ void MainWindow::checkOpenCircuitVoltageGroup()
                 Log(str, color);
                 ui->btnBuildReport->setEnabled(true);
                 if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                    if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 Не норма, продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
                         bState = false;
                         ui->groupBoxCOMPort->setDisabled(bState);
                         ui->groupBoxDiagnosticMode->setDisabled(bState);
