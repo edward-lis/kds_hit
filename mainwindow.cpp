@@ -568,7 +568,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        //((QPushButton*)sender())->setText("Старт");
+        ((QPushButton*)sender())->setText("Старт");
     } else {
         bState = false;
         ui->groupBoxCOMPort->setDisabled(bState);

@@ -193,7 +193,7 @@ void MainWindow::checkOpenCircuitVoltageGroup()
 
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        for (int i = 0; i < iMaxSteps; i++) {
+        for (int i = iCurrentStep; i < iMaxSteps; i++) {
             if (!bState) return; /// если прожали Стоп выходим из цикла
             QModelIndex index = ui->cbOpenCircuitVoltageGroup->model()->index(i+1, 0);
             if(index.data(Qt::CheckStateRole) == 2) { /// проходимся только по выбранным
