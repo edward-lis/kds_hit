@@ -146,7 +146,7 @@ void MainWindow::checkInsulationResistanceUUTBB()
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        while (iStepInsulationResistanceUUTBB <= 1) {
+        /*while (iStepInsulationResistanceUUTBB <= 1) {
             if (!bState) return;
             switch (iStepInsulationResistanceUUTBB) {
             case 1:
@@ -157,9 +157,9 @@ void MainWindow::checkInsulationResistanceUUTBB()
                 break;
             }
             iStepInsulationResistanceUUTBB++;
-        }
-        if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteInsulationResistanceUUTBB = true;
+        }*/
+        /*if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteInsulationResistanceUUTBB = true;*/
         break;
     case 1:
         if (!bState) return;
@@ -181,7 +181,7 @@ void MainWindow::checkInsulationResistanceUUTBB()
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
-    iStepInsulationResistanceUUTBB = 1;
+    //iStepInsulationResistanceUUTBB = 1;
     ui->rbOpenCircuitVoltagePowerSupply->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);

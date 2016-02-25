@@ -135,20 +135,24 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     bState = false;
-    bCheckCompleteVoltageOnTheHousing = false;
-    bCheckCompleteInsulationResistance = false;
-    bCheckCompleteOpenCircuitVoltageGroup = false;
-    bCheckCompleteClosedCircuitVoltageGroup = false;
-    bCheckCompleteClosedCircuitVoltageBattery = false;
-    bCheckCompleteInsulationResistanceUUTBB = false;
-    bCheckCompleteOpenCircuitVoltagePowerSupply = false;
-    bCheckCompleteClosedCircuitVoltagePowerSupply = false;
+    for (int i = 0; i < 2; i++)
+        dArrayVoltageOnTheHousing.append(0);
+    for (int i = 0; i < 4; i++)
+        dArrayInsulationResistance.append(0);
+    for (int i = 0; i < 21; i++)
+        dArrayOpenCircuitVoltageGroup.append(0);
+    /*
+    dArrayClosedCircuitVoltageGroup
+    dArrayClosedCircuitVoltageBattery << QVector<double>();
+    dArrayInsulationResistanceUUTBB << QVector<double>();
+    dArrayOpenCircuitVoltagePowerSupply << QVector<double>();
+    dArrayClosedCircuitVoltagePowerSupply << QVector<double>();*/
     iBatteryIndex = 0;
     //iStep = 0;
     //iAllSteps = 0;
     //iStepVoltageOnTheHousing = 0;
     //iStepInsulationResistance = 0;
-    iStepOpenCircuitVoltageGroup = 0;
+    //iStepOpenCircuitVoltageGroup = 0;
 
     getCOMPorts();
     comboxSetData();
@@ -516,13 +520,14 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
     if (!bState) {
         Log("Начало проверки - Автоматический режим", "blue");
         bState = true;
+
         ui->groupBoxCOMPort->setDisabled(bState);
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Стоп");
-        ui->cbParamsAutoMode->currentIndex();
+
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
             switch (i) {
             case 0:
@@ -563,7 +568,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
+        //((QPushButton*)sender())->setText("Старт");
     } else {
         bState = false;
         ui->groupBoxCOMPort->setDisabled(bState);

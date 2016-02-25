@@ -143,7 +143,7 @@ stop:
 void MainWindow::checkClosedCircuitVoltageBattery()
 {
     if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageBattery") {
-        iStepClosedCircuitVoltageBattery = 1;
+        //iStepClosedCircuitVoltageBattery = 1;
         bState = false;
         //ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
     }
@@ -174,8 +174,8 @@ void MainWindow::checkClosedCircuitVoltageBattery()
             }
         }
         //ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
-        if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteClosedCircuitVoltageBattery = true;
+        /*if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteClosedCircuitVoltageBattery = true;*/
         break;
     case 1:
         if (!bState) return;
@@ -199,7 +199,7 @@ void MainWindow::checkClosedCircuitVoltageBattery()
         break;
     }
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
-    iStepClosedCircuitVoltageBattery = 1;
+    //iStepClosedCircuitVoltageBattery = 1;
     ui->rbInsulationResistanceUUTBB->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);

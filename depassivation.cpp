@@ -206,7 +206,7 @@ stop:
     baRecvArray.clear();
 
     Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
-    iStepClosedCircuitVoltageGroup = 1;
+    //iStepClosedCircuitVoltageGroup = 1;
     ui->rbDepassivation->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);
@@ -219,7 +219,7 @@ stop:
 void MainWindow::checkDepassivation()
 {
     if (((QPushButton*)sender())->objectName() == "btnDepassivation") {
-        iStepDepassivation = 1;
+        //iStepDepassivation = 1;
         bState = false;
         //ui->btnDepassivation_2->setEnabled(false);
     }
@@ -233,21 +233,21 @@ void MainWindow::checkDepassivation()
     Log(tr("Проверка начата - %1").arg(ui->rbDepassivation->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        ui->progressBar->setValue(iStepDepassivation-1);
-        ui->progressBar->setMaximum(imDepassivation.count());
-        while (iStepDepassivation <= imDepassivation.count()) {
+        //ui->progressBar->setValue(iStepDepassivation-1);
+        //ui->progressBar->setMaximum(imDepassivation.count());
+        /*while (iStepDepassivation <= imDepassivation.count()) {
             if (!bState) return;
             delay(1000);
             Log(tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4»").arg(imDepassivation.at(iStepDepassivation-1)), "green");
 
             iStepDepassivation++;
-        }
+        }*/
         break;
     default:
         break;
     }
     Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
-    iStepDepassivation = 1;
+    //iStepDepassivation = 1;
     //ui->rbDepassivation->setEnabled(false);
     //ui->btnDepassivation_2->setEnabled(false);
     ui->groupBoxCOMPort->setEnabled(true);

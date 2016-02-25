@@ -29,6 +29,15 @@ struct dataBattery {
     int icbDepassivation; //// индекс комбокса "Расспасивация"
     QList<QVariant> itemsInsulationResistanceUUTBB; //// состояние чекбоксов "Сопротивления изоляции УУТББ"
     int icbClosedCircuitVoltagePowerSupply; //// индекс "Напряжение замкнутой цепи БП"
+    QList<double> dArrayVoltageOnTheHousing;
+    QList<double> dArrayInsulationResistance;
+    QList<double> dArrayOpenCircuitVoltageGroup;
+    /*QList<double> dArrayOpenCircuitVoltageBattery;
+    QList<double> dArrayClosedCircuitVoltageGroup;
+    QList<double> dArrayClosedCircuitVoltageBattery;
+    QList<double> dArrayInsulationResistanceUUTBB;
+    QList<double> dArrayOpenCircuitVoltagePowerSupply;
+    QList<double> dArrayClosedCircuitVoltagePowerSupply;*/
 };
 
 #endif // DATAFILE_H

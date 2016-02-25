@@ -102,7 +102,7 @@ void MainWindow::checkOpenCircuitVoltagePowerSupply()
     Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        while (iStepOpenCircuitVoltagePowerSupply <= 1) {
+        /*while (iStepOpenCircuitVoltagePowerSupply <= 1) {
             if (!bState) return;
             switch (iStepOpenCircuitVoltagePowerSupply) {
             case 1:
@@ -113,9 +113,9 @@ void MainWindow::checkOpenCircuitVoltagePowerSupply()
                 break;
             }
             iStepOpenCircuitVoltagePowerSupply++;
-        }
-        if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteOpenCircuitVoltagePowerSupply = true;
+        }*/
+        /*if (ui->rbModeDiagnosticAuto->isChecked())
+            bCheckCompleteOpenCircuitVoltagePowerSupply = true;*/
         break;
     case 1:
         if (!bState) return;
@@ -136,7 +136,7 @@ void MainWindow::checkOpenCircuitVoltagePowerSupply()
         break;
     }
     Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");
-    iStepOpenCircuitVoltagePowerSupply = 1;
+    //iStepOpenCircuitVoltagePowerSupply = 1;
     ui->rbClosedCircuitVoltagePowerSupply->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);

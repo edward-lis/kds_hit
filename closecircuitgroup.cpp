@@ -71,7 +71,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
 
     if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
-        iStepClosedCircuitVoltageGroup = 1;
+        //iStepClosedCircuitVoltageGroup = 1;
         bState = false;
         //ui->btnClosedCircuitVoltageGroup_2->setEnabled(false);
     }
@@ -229,7 +229,7 @@ stop:
     baRecvArray.clear();
 
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
-    iStepClosedCircuitVoltageGroup = 1;
+    //iStepClosedCircuitVoltageGroup = 1;
     ui->rbClosedCircuitVoltageBattery->setEnabled(true);
     ui->groupBoxCOMPort->setEnabled(true);
     ui->groupBoxDiagnosticDevice->setEnabled(true);
