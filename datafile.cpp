@@ -158,7 +158,7 @@ void MainWindow::on_actionCheckLoad_triggered()
 
         /// Напряжение на корпусе
         ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);
-        for (int i = 0; i < data.dArrayVoltageOnTheHousing.size(); i++) {
+        for (int i = 0; i < 2; i++) {
             dArrayVoltageOnTheHousing[i] = data.dArrayVoltageOnTheHousing[i];
             str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i]);
             QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
