@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent) :
         dArrayVoltageOnTheHousing.append(0);
     for (int i = 0; i < 4; i++)
         dArrayInsulationResistance.append(0);
-    for (int i = 0; i < 21; i++)
+    for (int i = 0; i < 30; i++)
         dArrayOpenCircuitVoltageGroup.append(0);
     /*
     dArrayClosedCircuitVoltageGroup

@@ -175,7 +175,7 @@ void MainWindow::on_actionCheckLoad_triggered()
 
         /// Сопротивление изоляции
         ui->cbInsulationResistance->setCurrentIndex(data.icbInsulationResistance);
-        for (int i = 0; i < data.dArrayInsulationResistance.size(); i++) {
+        for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
             str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]);
             QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
@@ -210,20 +210,6 @@ void MainWindow::on_actionCheckLoad_triggered()
             label->setText(str);
             label->setStyleSheet("QLabel { color : "+color+"; }");
         }
-        //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(data.icbOpenCircuitVoltageGroup);
-        /*qDebug() << "data.dArrayOpenCircuitVoltageGroup.size()=" << data.dArrayOpenCircuitVoltageGroup.size();
-        for (int i = 0; i < data.dArrayOpenCircuitVoltageGroup.size(); i++) {
-            dArrayOpenCircuitVoltageGroup[i] = data.dArrayOpenCircuitVoltageGroup[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-            if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
-        }*/
         ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
 
         /// Напряжение замкнутой цепи группы
