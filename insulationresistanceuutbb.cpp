@@ -117,7 +117,7 @@ stop:
 // слот вызывается при изменении чекбоксов элементов списка комбобокса
 void MainWindow::itemChangedInsulationResistanceUUTBB(QStandardItem* itm)
 {
-    qDebug() << "modelInsulationResistanceUUTBB->rowCount()=" << modelInsulationResistanceUUTBB->rowCount();
+    itm->text(); /// чтобы небыло варнинга при компиляции на неиспользование itm
     int count = 0;
     for(int i=1; i < modelInsulationResistanceUUTBB->rowCount(); i++)
     {
@@ -126,7 +126,6 @@ void MainWindow::itemChangedInsulationResistanceUUTBB(QStandardItem* itm)
         if (checkState == Qt::Checked)
             count++;
     }
-    qDebug() << "countInsulationResistanceUUTBB=" << count;
     ui->cbInsulationResistanceUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelInsulationResistanceUUTBB->rowCount()-1));
     ui->cbInsulationResistanceUUTBB->setCurrentIndex(0);
 }

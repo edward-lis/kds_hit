@@ -20,13 +20,19 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.icbInsulationResistance
             << data.itemsOpenCircuitVoltageGroup
             << data.itemsClosedCircuitVoltageGroup
-            << data.imDepassivation
-            << data.icbDepassivation
+            << data.itemsDepassivation
             << data.itemsInsulationResistanceUUTBB
             << data.icbClosedCircuitVoltagePowerSupply
             << data.dArrayVoltageOnTheHousing
             << data.dArrayInsulationResistance
-            << data.dArrayOpenCircuitVoltageGroup;
+            << data.dArrayOpenCircuitVoltageGroup
+            << data.dArrayOpenCircuitVoltageBattery
+            << data.dArrayDepassivation
+            << data.dArrayClosedCircuitVoltageGroup
+            << data.dArrayClosedCircuitVoltageBattery
+            << data.dArrayInsulationResistanceUUTBB
+            << data.dArrayOpenCircuitVoltagePowerSupply
+            << data.dArrayClosedCircuitVoltagePowerSupply;
 }
 
 QDataStream &operator>>( QDataStream &stream, dataBattery &data )
@@ -45,13 +51,19 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.icbInsulationResistance
             >> data.itemsOpenCircuitVoltageGroup
             >> data.itemsClosedCircuitVoltageGroup
-            >> data.imDepassivation
-            >> data.icbDepassivation
+            >> data.itemsDepassivation
             >> data.itemsInsulationResistanceUUTBB
             >> data.icbClosedCircuitVoltagePowerSupply
             >> data.dArrayVoltageOnTheHousing
             >> data.dArrayInsulationResistance
-            >> data.dArrayOpenCircuitVoltageGroup;
+            >> data.dArrayOpenCircuitVoltageGroup
+            >> data.dArrayOpenCircuitVoltageBattery
+            >> data.dArrayDepassivation
+            >> data.dArrayClosedCircuitVoltageGroup
+            >> data.dArrayClosedCircuitVoltageBattery
+            >> data.dArrayInsulationResistanceUUTBB
+            >> data.dArrayOpenCircuitVoltagePowerSupply
+            >> data.dArrayClosedCircuitVoltagePowerSupply;
 }
 
 /*!
@@ -94,10 +106,15 @@ void MainWindow::on_actionCheckSave_triggered()
         QModelIndex index = ui->cbClosedCircuitVoltageGroup->model()->index(r, 0);
         data.itemsClosedCircuitVoltageGroup.append(index.data(Qt::CheckStateRole));
     }
+    data.dArrayClosedCircuitVoltageGroup = dArrayClosedCircuitVoltageGroup;
 
     /// Распассивация
-    data.imDepassivation = imDepassivation;
-    data.icbDepassivation = ui->cbDepassivation->currentIndex();
+    for (int i = 0; i < ui->cbDepassivation->count(); i++)
+    {
+        QModelIndex index = ui->cbDepassivation->model()->index(i, 0);
+        data.itemsDepassivation.append(index.data(Qt::CheckStateRole));
+    }
+    data.dArrayDepassivation = dArrayDepassivation;
 
     /// Сопротивление изоляции УУТББ
     for (int r = 0; r < ui->cbInsulationResistanceUUTBB->count(); r++)
@@ -190,7 +207,6 @@ void MainWindow::on_actionCheckLoad_triggered()
         ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
 
         /// Напряжение разомкнутой цепи группы
-        qDebug() << "battery[iBatteryIndex].group_num=" << battery[iBatteryIndex].group_num;
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             QStandardItem* item;
@@ -223,10 +239,29 @@ void MainWindow::on_actionCheckLoad_triggered()
         }
 
         /// Распассивация
-        ui->cbDepassivation->clear();
-        foreach (int i, data.imDepassivation)
-            ui->cbDepassivation->addItem(battery[data.iBatteryIndex].circuitgroup[i]);
-        ui->cbDepassivation->setCurrentIndex(data.icbDepassivation);
+        for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
+        {
+            QStandardItem* item;
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+            if (data.itemsDepassivation[i+1] == 2)
+                item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            else
+                item->setFlags(Qt::NoItemFlags);
+            item->setData(data.itemsDepassivation[i+1], Qt::CheckStateRole);
+            modelDepassivation->setItem(i+1, 0, item);
+
+            dArrayDepassivation[i] = data.dArrayDepassivation[i];
+            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
+            QLabel * label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+            if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
+                str += " Не норма.";
+                color = "red";
+            } else
+                color = "green";
+            label->setText(str);
+            label->setStyleSheet("QLabel { color : "+color+"; }");
+        }
+        ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
 
         /// Сопротивление изоляции УУТББ
         for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)

@@ -49,9 +49,9 @@ public:
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *modelClosedCircuitVoltageGroup;
+    QStandardItemModel *modelDepassivation;
     QStandardItemModel *modelOpenCircuitVoltageGroup;
     QStandardItemModel *modelInsulationResistanceUUTBB;
-    QStandardItemModel *modelDepassivation;
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     int iCurrentStep;
     int iMaxSteps;
@@ -60,8 +60,8 @@ private:
     QList<double> dArrayInsulationResistance;
     QList<double> dArrayOpenCircuitVoltageGroup;
     QList<double> dArrayOpenCircuitVoltageBattery;
-    QList<double> dArrayClosedCircuitVoltageGroup;
     QList<double> dArrayDepassivation;
+    QList<double> dArrayClosedCircuitVoltageGroup;
     QList<double> dArrayClosedCircuitVoltageBattery;
     QList<double> dArrayInsulationResistanceUUTBB;
     QList<double> dArrayOpenCircuitVoltagePowerSupply;
@@ -123,9 +123,9 @@ public slots:
     void checkInsulationResistance();
     void checkOpenCircuitVoltageGroup();
     void checkOpenCircuitVoltageBattery();
-    //void checkClosedCircuitVoltageGroup();
-    void checkClosedCircuitVoltageBattery();
+    void checkClosedCircuitVoltageGroup();
     void checkDepassivation();
+    void checkClosedCircuitVoltageBattery();
     void checkInsulationResistanceUUTBB();
     void checkOpenCircuitVoltagePowerSupply();
     void checkClosedCircuitVoltagePowerSupply();
@@ -148,6 +148,7 @@ signals:
 private slots:
    void itemChangedOpenCircuitVoltageGroup(QStandardItem* itm);
    void itemChangedClosedCircuitVoltageGroup(QStandardItem* itm);
+   void itemChangedDepassivation(QStandardItem* itm);
    void itemChangedInsulationResistanceUUTBB(QStandardItem* itm);
    void on_rbModeDiagnosticAuto_toggled(bool checked);
    void on_rbModeDiagnosticManual_toggled(bool checked);
@@ -162,6 +163,10 @@ private slots:
    void on_rbOpenCircuitVoltagePowerSupply_toggled(bool checked);
    void on_rbClosedCircuitVoltagePowerSupply_toggled(bool checked);
    void on_cbIsUUTBB_toggled(bool checked);
+   void on_btnClosedCircuitVoltageBattery_clicked();
+   void on_btnOpenCircuitVoltagePowerSupply_clicked();
+   void on_btnClosedCircuitVoltagePowerSupply_clicked();
+   void on_btnDepassivation_clicked();
 
    //+++ Edward
    /// Приём массива из последовательного порта
@@ -193,14 +198,6 @@ private slots:
    void on_actionCheckSave_triggered();
    void on_actionCheckLoad_triggered();
    void on_btnBuildReport_clicked();
-
-   void on_btnClosedCircuitVoltageBattery_clicked();
-
-   void on_btnOpenCircuitVoltagePowerSupply_clicked();
-
-   void on_btnClosedCircuitVoltagePowerSupply_clicked();
-
-   void on_btnDepassivation_clicked();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна
