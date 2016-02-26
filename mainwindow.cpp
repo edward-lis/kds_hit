@@ -108,23 +108,20 @@ MainWindow::MainWindow(QWidget *parent) :
     timerPing->setSingleShot(true);
     connect(timerPing, SIGNAL(timeout()), this, SLOT(sendPing())); // по окончанию паузы между пингами - послать следующий
 
-    ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
+    //ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
 
-    ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления связи с коробком
-    ui->groupBoxDiagnosticMode->setDisabled(false); //
-    ui->groupBoxCheckParams->setDisabled(false);// !!!
+    //ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления связи с коробком
+    //ui->groupBoxDiagnosticMode->setDisabled(false); //
+    //ui->groupBoxCheckParams->setDisabled(false);// !!!
     ui->rbInsulationResistanceUUTBB->hide();
     ui->cbInsulationResistanceUUTBB->hide();
     ui->btnInsulationResistanceUUTBB->hide();
-    //ui->btnInsulationResistanceUUTBB_2->hide();
     ui->rbOpenCircuitVoltagePowerSupply->hide();
     ui->cbOpenCircuitVoltagePowerSupply->hide();
     ui->btnOpenCircuitVoltagePowerSupply->hide();
-    //ui->btnOpenCircuitVoltagePowerSupply_2->hide();
     ui->rbClosedCircuitVoltagePowerSupply->hide();
     ui->cbClosedCircuitVoltagePowerSupply->hide();
     ui->btnClosedCircuitVoltagePowerSupply->hide();
-    //ui->btnClosedCircuitVoltagePowerSupply_2->hide();
 
     bModeManual = ui->rbModeDiagnosticManual->isChecked(); // ручной/авто режим
 
@@ -135,85 +132,24 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     bState = false;
-    for (int i = 0; i < 2; i++)
+    /// Заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
+    for (int i = 0; i < 30; i++) {
         dArrayVoltageOnTheHousing.append(0);
-    for (int i = 0; i < 4; i++)
         dArrayInsulationResistance.append(0);
-    for (int i = 0; i < 30; i++)
         dArrayOpenCircuitVoltageGroup.append(0);
-    /*
-    dArrayClosedCircuitVoltageGroup
-    dArrayClosedCircuitVoltageBattery << QVector<double>();
-    dArrayInsulationResistanceUUTBB << QVector<double>();
-    dArrayOpenCircuitVoltagePowerSupply << QVector<double>();
-    dArrayClosedCircuitVoltagePowerSupply << QVector<double>();*/
+        dArrayClosedCircuitVoltageGroup.append(0);
+        dArrayDepassivation.append(0);
+        dArrayClosedCircuitVoltageBattery.append(0);
+        dArrayInsulationResistanceUUTBB.append(0);
+        dArrayOpenCircuitVoltagePowerSupply.append(0);
+        dArrayClosedCircuitVoltagePowerSupply.append(0);
+    }
+
     iBatteryIndex = 0;
-    //iStep = 0;
-    //iAllSteps = 0;
-    //iStepVoltageOnTheHousing = 0;
-    //iStepInsulationResistance = 0;
     //iStepOpenCircuitVoltageGroup = 0;
 
     getCOMPorts();
     comboxSetData();
-    //Ed connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
-    //connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->groupBoxCheckParams, SLOT(setDisabled(bool)));
-    //connect(ui->rbModeDiagnosticAuto, SIGNAL(toggled(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
-    //connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->rbVoltageOnTheHousing, SLOT(setEnabled(bool)));
-    //connect(ui->rbModeDiagnosticManual, SIGNAL(toggled(bool)), ui->btnPauseAutoModeDiagnostic, SLOT(setDisabled(bool)));
-    //connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->btnVoltageOnTheHousing, SLOT(setEnabled(bool)));
-    //connect(ui->rbVoltageOnTheHousing, SIGNAL(toggled(bool)), ui->cbVoltageOnTheHousing, SLOT(setEnabled(bool)));
-    //connect(ui->rbInsulationResistance, SIGNAL(toggled(bool)), ui->btnInsulationResistance, SLOT(setEnabled(bool)));
-    /*connect(ui->rbOpenCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltageGroup, SLOT(setEnabled(bool)));
-    connect(ui->rbClosedCircuitVoltageGroup, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageGroup, SLOT(setEnabled(bool)));
-    connect(ui->rbClosedCircuitVoltageBattery, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltageBattery, SLOT(setEnabled(bool)));
-    connect(ui->rbDepassivation, SIGNAL(toggled(bool)), ui->btnDepassivation, SLOT(setEnabled(bool)));
-    connect(ui->rbInsulationResistanceUUTBB, SIGNAL(toggled(bool)), ui->btnInsulationResistanceUUTBB, SLOT(setEnabled(bool)));
-    connect(ui->rbOpenCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnOpenCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));
-    connect(ui->rbClosedCircuitVoltagePowerSupply, SIGNAL(toggled(bool)), ui->btnClosedCircuitVoltagePowerSupply, SLOT(setEnabled(bool)));*/
-    //connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(int)), this, SLOT(checkVoltageOnTheHousing(iBatteryIndex, iStepVoltageOnTheHousing)));
-//Ed remove    connect(ui->btnVoltageOnTheHousing, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
-    /*connect(ui->btnInsulationResistance, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
-    connect(ui->btnOpenCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
-    connect(ui->btnClosedCircuitVoltageGroup, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
-    connect(ui->btnDepassivation, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
-    connect(ui->btnClosedCircuitVoltageBattery, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
-    connect(ui->btnInsulationResistanceUUTBB, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceUUTBB()));
-    connect(ui->btnOpenCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
-    connect(ui->btnClosedCircuitVoltagePowerSupply, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
-    connect(ui->btnVoltageOnTheHousing_2, SIGNAL(clicked(bool)), this, SLOT(checkVoltageOnTheHousing()));
-    connect(ui->btnInsulationResistance_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistance()));
-    connect(ui->btnOpenCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltageGroup()));
-    connect(ui->btnClosedCircuitVoltageGroup_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageGroup()));
-    connect(ui->btnClosedCircuitVoltageBattery_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltageBattery()));
-    connect(ui->btnDepassivation_2, SIGNAL(clicked(bool)), this, SLOT(checkDepassivation()));
-    connect(ui->btnInsulationResistanceUUTBB_2, SIGNAL(clicked(bool)), this, SLOT(checkInsulationResistanceUUTBB()));
-    connect(ui->btnOpenCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkOpenCircuitVoltagePowerSupply()));
-    connect(ui->btnClosedCircuitVoltagePowerSupply_2, SIGNAL(clicked(bool)), this, SLOT(checkClosedCircuitVoltagePowerSupply()));
-    connect(ui->btnStartAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(checkAutoModeDiagnostic()));*/
-    //connect(ui->btnPauseAutoModeDiagnostic, SIGNAL(clicked(bool)), this, SLOT(setPause()));
-    //connect(ui->btnCOMPortDisconnect, SIGNAL(clicked(bool)), ui->btnStartAutoModeDiagnostic, SLOT(setEnabled(bool)));
-
-    /*QStandardItemModel model(3, 1); // 3 rows, 1 col
-    for (int r = 0; r < 3; r++)
-    {
-        QStandardItem* item = new QStandardItem(QString("Item %0").arg(r));
-        item->setText("test");
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(Qt::Unchecked, Qt::CheckStateRole);
-        model.setItem(r, 0, item);
-    }
-    ui->cbInsulationResistance->setModel(&model);*/
-
-
-    /*connect(model, SIGNAL(dataChanged ( const QModelIndex&, const QModelIndex&)), this, SLOT(slot_changed(const QModelIndex&, const QModelIndex&)));*/
-    /*Model = new QStandardItemModel;
-    this->Item1 = new QStandardItem;
-    this->Item1->setText("test");
-    this->Item1->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-    this->Item1->setData(Qt::Unchecked, Qt::CheckStateRole);
-    this->Model->insertRow(0, this->Item1);
-    ui->cbInsulationResistance->setModel(&Model);*/
 
     //==== !!! Для отладки распассивации заглушка
     // добавить цепи в комбобокс распассивации
@@ -635,5 +571,63 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
     }
 }
 
+void MainWindow::triggerDeveloperState() {
+    bDeveloperState=!bDeveloperState;
+    qDebug() << "bDeveloperState =" << bDeveloperState;
+    ui->btnCheckConnectedBattery->setEnabled(bDeveloperState);
+    ui->groupBoxDiagnosticDevice->setEnabled(bDeveloperState);
+    ui->groupBoxDiagnosticMode->setEnabled(bDeveloperState);
+    ui->groupBoxCheckParams->setEnabled(bDeveloperState);
+    ui->rbVoltageOnTheHousing->setEnabled(bDeveloperState);
+    ui->rbInsulationResistance->setEnabled(bDeveloperState);
+    ui->rbOpenCircuitVoltageGroup->setEnabled(bDeveloperState);
+    ui->rbOpenCircuitVoltageBattery->setEnabled(bDeveloperState);
+    ui->rbClosedCircuitVoltageGroup->setEnabled(bDeveloperState);
+    ui->rbDepassivation->setEnabled(bDeveloperState);
+    ui->rbClosedCircuitVoltageBattery->setEnabled(bDeveloperState);
+    ui->rbInsulationResistanceUUTBB->setEnabled(bDeveloperState);
+    ui->rbOpenCircuitVoltagePowerSupply->setEnabled(bDeveloperState);
+    ui->rbClosedCircuitVoltagePowerSupply->setEnabled(bDeveloperState);
+    ui->cbParamsAutoMode->setEnabled(bDeveloperState);
+    ui->cbSubParamsAutoMode->setEnabled(bDeveloperState);
+    ui->btnStartStopAutoModeDiagnostic->setEnabled(bDeveloperState);
+    ui->btnBuildReport->setEnabled(bDeveloperState);
+    if (bDeveloperState) {
+        ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
+        ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
+        ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+        ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
+        ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
+        ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+        ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+        ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
+        ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+        ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
 
+        ui->rbInsulationResistanceUUTBB->show();
+        ui->cbInsulationResistanceUUTBB->show();
+        ui->btnInsulationResistanceUUTBB->show();
+        ui->rbOpenCircuitVoltagePowerSupply->show();
+        ui->cbOpenCircuitVoltagePowerSupply->show();
+        ui->btnOpenCircuitVoltagePowerSupply->show();
+        ui->rbClosedCircuitVoltagePowerSupply->show();
+        ui->cbClosedCircuitVoltagePowerSupply->show();
+        ui->btnClosedCircuitVoltagePowerSupply->show();
+    } else {
+        ui->rbInsulationResistanceUUTBB->hide();
+        ui->cbInsulationResistanceUUTBB->hide();
+        ui->btnInsulationResistanceUUTBB->hide();
+        ui->rbOpenCircuitVoltagePowerSupply->hide();
+        ui->cbOpenCircuitVoltagePowerSupply->hide();
+        ui->btnOpenCircuitVoltagePowerSupply->hide();
+        ui->rbClosedCircuitVoltagePowerSupply->hide();
+        ui->cbClosedCircuitVoltagePowerSupply->hide();
+        ui->btnClosedCircuitVoltagePowerSupply->hide();
+
+        int tab_count = ui->tabWidget->count();
+        for (int i = 1; i < tab_count; i++) {
+            ui->tabWidget->removeTab(1);
+        }
+    }
+}
 

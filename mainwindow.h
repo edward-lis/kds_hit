@@ -59,21 +59,21 @@ private:
     QList<double> dArrayVoltageOnTheHousing;
     QList<double> dArrayInsulationResistance;
     QList<double> dArrayOpenCircuitVoltageGroup;
-    /*QList<double> dArrayOpenCircuitVoltageBattery;
+    QList<double> dArrayOpenCircuitVoltageBattery;
     QList<double> dArrayClosedCircuitVoltageGroup;
     QList<double> dArrayDepassivation;
     QList<double> dArrayClosedCircuitVoltageBattery;
     QList<double> dArrayInsulationResistanceUUTBB;
     QList<double> dArrayOpenCircuitVoltagePowerSupply;
-    QList<double> dArrayClosedCircuitVoltagePowerSupply;*/
+    QList<double> dArrayClosedCircuitVoltagePowerSupply;
     QString str;
     QString color;
     QString paramMsg;
     bool bState;
     void getCOMPorts();
     void comboxSetData();
-    float param;
-    double randMToN(double M, double N);
+    float param; /// для отладки, потом убрать
+    double randMToN(double M, double N); /// для отладки, потом убрать
     //+++ Edward
     /// Установки из ini-файла
     Settings settings;
@@ -177,7 +177,7 @@ private slots:
    void sendPing();
 
    /// Переключение комбинацией клавиш Ctrl+D DeveloperState
-   void triggerDeveloperState() { bDeveloperState=!bDeveloperState; }
+   void triggerDeveloperState();// { bDeveloperState=!bDeveloperState; }
    //+++
    void on_btnCOMPortOpenClose_clicked();
    void on_btnCheckConnectedBattery_clicked();

@@ -12,6 +12,8 @@ void MainWindow::on_btnBuildReport_clicked()
     qDebug() << "on_btnBuildReport_clicked()";
     QDateTime dateTime = QDateTime::currentDateTime();
     QString textDateTime = dateTime.toString("yyyy-MM-dd-hh-mm-ss-zzz");
+    QString textDate = dateTime.toString("dd.MM.yyyy");
+    QString textTime = dateTime.toString("hh:mm:ss");
     QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранение отчет проверки в PDF-файл"), tr("%0_%1.pdf").arg(ui->comboBoxBatteryList->currentText()).arg(textDateTime), "*.pdf");
     if (fileName.length() < 5) /// без имени файла не сохраняем
         return;
@@ -20,9 +22,11 @@ void MainWindow::on_btnBuildReport_clicked()
     printer.setPaperSize(QPrinter::A4);
     printer.setOutputFileName(fileName);
 
+
     /// шапка отчета
     sHtml = "<h1 style=\"text-align: center;\">Отчет проверки батареи: <b>"+ui->comboBoxBatteryList->currentText()+"</b></h1>"\
-    "<p align=\"center\">Дата производства: <b>"+ui->dateEditBatteryBuild->text()+"</b> Номер батареи: <b>"+ui->lineEditBatteryNumber->text()+"</b></p>";
+    "<p align=\"center\">Дата производства: <b>"+ui->dateEditBatteryBuild->text()+"</b> Номер батареи: <b>"+ui->lineEditBatteryNumber->text()+"</b></p>"\
+    "<p align=\"center\">Дата: <b>"+textDate+"</b> Время: <b>"+textTime+"</b></p>";
 
 
     /// Напряжение на корпусе
