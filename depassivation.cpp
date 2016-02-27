@@ -11,6 +11,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка распассивации
 void MainWindow::on_btnDepassivation_clicked()
 {
+    checkDepassivation(); return;
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
@@ -213,44 +214,219 @@ stop:
     ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
+// слот вызывается при изменении чекбоксов элементов списка комбобокса
+void MainWindow::itemChangedDepassivation(QStandardItem* itm)
+{
+    itm->text(); /// чтобы небыло варнинга при компиляции на неиспользование itm
+    int count = 0;
+    for(int i=1; i < modelDepassivation->rowCount(); i++)
+    {
+        QStandardItem *sitm = modelDepassivation->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelDepassivation->rowCount()-1));
+    ui->cbDepassivation->setCurrentIndex(0);
+}
+
 /*
  * Распассивация
  */
 void MainWindow::checkDepassivation()
 {
-    if (((QPushButton*)sender())->objectName() == "btnDepassivation") {
-        //iStepDepassivation = 1;
-        bState = false;
-        //ui->btnDepassivation_2->setEnabled(false);
-    }
-    if (((QPushButton*)sender())->objectName() == "btnDepassivation_2")
-        bState = false;
-    if (!bState) return;
-    ui->groupBoxCOMPort->setEnabled(false);
-    ui->groupBoxDiagnosticDevice->setEnabled(false);
-    ui->groupBoxDiagnosticMode->setEnabled(false);
-    //ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+    int x = 10; /// затычка
+    ui->widgetDepassivation->graph(0)->clearData(); // очистить график
+    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
+    ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbDepassivation->text()), "blue");
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Старт");
+        }
+    }
+
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
+
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : 0;
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbDepassivation->count();
+
+    if (ui->rbModeDiagnosticManual->isChecked()) { /// для ручного режима свой максимум для прогресс бара
+        int count = 0;
+        for(int i = 0; i < iMaxSteps; i++) {
+            QModelIndex index = ui->cbDepassivation->model()->index(i+1, 0);
+            if(index.data(Qt::CheckStateRole) == 2) /// проходимся только по выбранным
+                count++;
+        }
+        ui->progressBar->setMaximum(count);
+    } else {
+        ui->progressBar->setMaximum(iMaxSteps);
+    }
+    ui->progressBar->setValue(iCurrentStep);
+
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        //ui->progressBar->setValue(iStepDepassivation-1);
-        //ui->progressBar->setMaximum(imDepassivation.count());
-        /*while (iStepDepassivation <= imDepassivation.count()) {
-            if (!bState) return;
-            delay(1000);
-            Log(tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4»").arg(imDepassivation.at(iStepDepassivation-1)), "green");
+        for (int i = iCurrentStep; i < iMaxSteps; i++) {
+            if (!bState) return; /// если прожали Стоп выходим из цикла
+            QModelIndex index = ui->cbDepassivation->model()->index(i+1, 0);
+            if(index.data(Qt::CheckStateRole) == 2) { /// проходимся только по выбранным
+                switch (i) {
+                case 0:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 1:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 2:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 3:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 4:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 5:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 6:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 7:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 8:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 9:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 10:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 11:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 12:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 13:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 14:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 15:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 16:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 17:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 18:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                case 19:
+                    delay(1000);
+                    dArrayDepassivation[i] = randMToN(26, 28); //число полученное с COM-порта
+                    break;
+                default:
+                    return;
+                    break;
+                }
+                qDebug() << "dArrayDepassivation[" << i << "]=" << dArrayDepassivation[i];
+                if(ui->rbModeDiagnosticAuto->isChecked())
+                    ui->cbSubParamsAutoMode->setCurrentIndex(i);
 
-            iStepDepassivation++;
-        }*/
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+                if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+                Log(str, color);
+                /// рисуем график
+                ui->widgetDepassivation->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
+                ui->widgetDepassivation->graph(0)->addData((double)x/100, (double)dArrayDepassivation[i]);
+                ui->widgetDepassivation->replot();
+                x *=2; /// затычка
+                ui->btnBuildReport->setEnabled(true);
+                if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
+                    if (QMessageBox::question(this, "Внимание - "+ui->rbDepassivation->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                        bState = false;
+                        ui->groupBoxCOMPort->setDisabled(bState);
+                        ui->groupBoxDiagnosticMode->setDisabled(bState);
+                        ui->cbParamsAutoMode->setDisabled(bState);
+                        ui->cbSubParamsAutoMode->setDisabled(bState);
+                        ((QPushButton*)sender())->setText("Старт");
+                        return;
+                    }
+                }
+                ui->progressBar->setValue(ui->progressBar->value()+1);
+            }
+        }
+        break;
+    case 1:
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 2:
+        Log("Действия проверки.", "green");
+        delay(1000);
+        break;
+    case 3:
+        Log("Действия проверки.", "green");
+        delay(1000);
         break;
     default:
         break;
     }
+
     Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
-    //iStepDepassivation = 1;
-    //ui->rbDepassivation->setEnabled(false);
-    //ui->btnDepassivation_2->setEnabled(false);
-    ui->groupBoxCOMPort->setEnabled(true);
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        bState = false;
+        ui->groupBoxCOMPort->setEnabled(bState);
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);
+        ui->groupBoxDiagnosticMode->setDisabled(bState);
+        ui->cbParamsAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ((QPushButton*)sender())->setText("Старт");
+    }
 }

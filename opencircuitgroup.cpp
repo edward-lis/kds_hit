@@ -134,7 +134,7 @@ stop:
 // слот вызывается при изменении чекбоксов элементов списка комбобокса
 void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
 {
-    qDebug() << "modelOpenCircuitVoltageGroup->rowCount()=" << modelOpenCircuitVoltageGroup->rowCount();
+    itm->text(); /// чтобы небыло варнинга при компиляции на неиспользование itm
     int count = 0;
     for(int i=1; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
     {
@@ -143,7 +143,6 @@ void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
         if (checkState == Qt::Checked)
             count++;
     }
-    qDebug() << "countOpenCircuitVoltageGroup=" << count;
     ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelOpenCircuitVoltageGroup->rowCount()-1));
     ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
 }

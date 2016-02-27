@@ -125,6 +125,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bModeManual = ui->rbModeDiagnosticManual->isChecked(); // ручной/авто режим
 
+    /// описание графика для "Распассивации"
+    ui->widgetDepassivation->addGraph(); // blue line
+    ui->widgetDepassivation->graph(0)->setPen(QPen(Qt::blue));
+    ui->widgetDepassivation->graph(0)->clearData();
+    ui->widgetDepassivation->addGraph(); // blue dot
+    ui->widgetDepassivation->graph(1)->clearData();
+    ui->widgetDepassivation->graph(1)->setLineStyle(QCPGraph::lsNone);
+    ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
+    ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetDepassivation->yAxis->setRange(24, 33);
+
     /// удаляем все вкладки кроме первой - журнала событий(0), каждый раз удаляем вторую(1)
     int tab_count = ui->tabWidget->count();
     for (int i = 1; i < tab_count; i++) {
@@ -137,6 +149,7 @@ MainWindow::MainWindow(QWidget *parent) :
         dArrayVoltageOnTheHousing.append(0);
         dArrayInsulationResistance.append(0);
         dArrayOpenCircuitVoltageGroup.append(0);
+        dArrayOpenCircuitVoltageBattery.append(0);
         dArrayClosedCircuitVoltageGroup.append(0);
         dArrayDepassivation.append(0);
         dArrayClosedCircuitVoltageBattery.append(0);
@@ -150,36 +163,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     getCOMPorts();
     comboxSetData();
-
-    //==== !!! Для отладки распассивации заглушка
-    // добавить цепи в комбобокс распассивации
-    battery[iBatteryIndex].b_flag_circuit[0] |= CIRCUIT_DEPASS;
-    battery[iBatteryIndex].b_flag_circuit[1] |= CIRCUIT_DEPASS;
-    battery[iBatteryIndex].b_flag_circuit[2] |= CIRCUIT_DEPASS;
-
-    modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
-    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
-    {
-        QStandardItem* item;
-        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
-        if(battery[iBatteryIndex].b_flag_circuit[r] & CIRCUIT_DEPASS)
-        {
-            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-            item->setData(Qt::Checked, Qt::CheckStateRole);
-        }
-        else
-        {
-            item->setFlags(Qt::NoItemFlags);
-            item->setData(Qt::Unchecked, Qt::CheckStateRole);
-        }
-        modelDepassivation->setItem(r+1, 0, item);
-    }
-    ui->cbDepassivation->setModel(modelDepassivation);
-    ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
-    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(3).arg(battery[iBatteryIndex].group_num));
-
-    //==== конец заглушки
-
 }
 
 MainWindow::~MainWindow()
@@ -289,7 +272,19 @@ void MainWindow::comboxSetData() {
     connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
 
     /// 4а. Распассивация
-    ui->cbDepassivation->clear();
+    modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+        item->setFlags(Qt::NoItemFlags);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        modelDepassivation->setItem(i+1, 0, item);
+    }
+    ui->cbDepassivation->setModel(modelDepassivation);
+    ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(0).arg(battery[iBatteryIndex].group_num));
+    connect(modelDepassivation, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedDepassivation(QStandardItem*)));
 
     /// 5. Напряжение замкнутой цепи батареи
     ui->cbParamsAutoMode->addItem(tr("5. %0").arg(ui->rbClosedCircuitVoltageBattery->text()));
@@ -628,6 +623,18 @@ void MainWindow::triggerDeveloperState() {
         for (int i = 1; i < tab_count; i++) {
             ui->tabWidget->removeTab(1);
         }
+    }
+
+    for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
+    {
+        QStandardItem* item;
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+        if(bDeveloperState)
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        else
+            item->setFlags(Qt::NoItemFlags);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        modelDepassivation->setItem(i+1, 0, item);
     }
 }
 

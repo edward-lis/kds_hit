@@ -23,21 +23,21 @@ struct dataBattery {
     int icbSubParamsAutoMode; /// индекс комбокса подпараметра проверки в автоматического режима
     int icbVoltageOnTheHousing; //// индекс комбкса "Напряжения на корпусе"
     int icbInsulationResistance; //// индекс комбокса "Сопротивления изоляции"
+    int icbClosedCircuitVoltagePowerSupply; //// индекс "Напряжение замкнутой цепи БП"
     QList<QVariant> itemsOpenCircuitVoltageGroup; //// состояние чекбоксов "Напряжение разомкнутой цепи группы"
     QList<QVariant> itemsClosedCircuitVoltageGroup; //// состояние чекбоксов "Напряжение замкнутой цепи группы"
-    QList<int> imDepassivation; //// состояние чекбоксов "Расспасивация"
-    int icbDepassivation; //// индекс комбокса "Расспасивация"
+    QList<QVariant> itemsDepassivation; //// состояние чекбоксов "Распассивация"
     QList<QVariant> itemsInsulationResistanceUUTBB; //// состояние чекбоксов "Сопротивления изоляции УУТББ"
-    int icbClosedCircuitVoltagePowerSupply; //// индекс "Напряжение замкнутой цепи БП"
     QList<double> dArrayVoltageOnTheHousing;
     QList<double> dArrayInsulationResistance;
     QList<double> dArrayOpenCircuitVoltageGroup;
-    /*QList<double> dArrayOpenCircuitVoltageBattery;
+    QList<double> dArrayOpenCircuitVoltageBattery;
     QList<double> dArrayClosedCircuitVoltageGroup;
+    QList<double> dArrayDepassivation;
     QList<double> dArrayClosedCircuitVoltageBattery;
     QList<double> dArrayInsulationResistanceUUTBB;
     QList<double> dArrayOpenCircuitVoltagePowerSupply;
-    QList<double> dArrayClosedCircuitVoltagePowerSupply;*/
+    QList<double> dArrayClosedCircuitVoltagePowerSupply;
 };
 
 #endif // DATAFILE_H
