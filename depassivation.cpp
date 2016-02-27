@@ -249,7 +249,7 @@ void MainWindow::checkDepassivation()
             ((QPushButton*)sender())->setText("Стоп");
         } else {
             bState = false;
-            ((QPushButton*)sender())->setText("Старт");
+            ((QPushButton*)sender())->setText("Пуск");
         }
     }
 
@@ -385,7 +385,7 @@ void MainWindow::checkDepassivation()
                 ui->widgetDepassivation->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
                 ui->widgetDepassivation->graph(0)->addData((double)x/100, (double)dArrayDepassivation[i]);
                 ui->widgetDepassivation->replot();
-                x *=2; /// затычка
+                x +=40; /// затычка
                 ui->btnBuildReport->setEnabled(true);
                 if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
                     if (QMessageBox::question(this, "Внимание - "+ui->rbDepassivation->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
@@ -394,7 +394,7 @@ void MainWindow::checkDepassivation()
                         ui->groupBoxDiagnosticMode->setDisabled(bState);
                         ui->cbParamsAutoMode->setDisabled(bState);
                         ui->cbSubParamsAutoMode->setDisabled(bState);
-                        ((QPushButton*)sender())->setText("Старт");
+                        ((QPushButton*)sender())->setText("Пуск");
                         return;
                     }
                 }
@@ -427,6 +427,6 @@ void MainWindow::checkDepassivation()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
+        ((QPushButton*)sender())->setText("Пуск");
     }
 }

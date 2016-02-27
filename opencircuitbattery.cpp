@@ -94,6 +94,69 @@ stop:
  */
 void MainWindow::checkOpenCircuitVoltageBattery()
 {
-    qDebug() << "checkOpenCircuitVoltageBattery()";
-    ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageBattery->text()), "blue");
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
+        }
+    } else
+        ui->cbParamsAutoMode->setCurrentIndex(3); // переключаем режим комбокса на наш
+
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
+
+    ui->progressBar->setMaximum(1);
+    ui->progressBar->setValue(0);
+
+
+    if (!bState) return;
+    dArrayOpenCircuitVoltageBattery[0] = randMToN(31,33); //число полученное с COM-порта
+
+    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[0]);
+    if (dArrayOpenCircuitVoltageBattery[0] > settings.opencircuitbattery_limit) {
+        str += " Не норма.";
+        color = "red";
+    } else
+        color = "green";
+    ui->labelOpenCircuitVoltageBattery0->setText(str);
+    ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
+    Log(str, color);
+    ui->btnBuildReport->setEnabled(true);
+    if (dArrayOpenCircuitVoltageBattery[0] > settings.opencircuitbattery_limit) {
+        if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+            bState = false;
+            ui->groupBoxCOMPort->setDisabled(bState);
+            ui->groupBoxDiagnosticMode->setDisabled(bState);
+            ui->cbParamsAutoMode->setDisabled(bState);
+            ui->cbSubParamsAutoMode->setDisabled(bState);
+            ((QPushButton*)sender())->setText("Пуск");
+            return;
+        }
+    }
+
+    ui->progressBar->setValue(1);
+
+    Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltageBattery->text()), "blue");
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        bState = false;
+        ui->groupBoxCOMPort->setEnabled(bState);
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);
+        ui->groupBoxDiagnosticMode->setDisabled(bState);
+        ui->cbParamsAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ((QPushButton*)sender())->setText("Пуск");
+    }
 }

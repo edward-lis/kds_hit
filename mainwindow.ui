@@ -43,7 +43,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Старт</string>
+           <string>Пуск</string>
           </property>
          </widget>
         </item>
@@ -1368,6 +1368,19 @@
        <attribute name="title">
         <string>Напряжение разомкнутой цепи батареи</string>
        </attribute>
+       <widget class="QLabel" name="labelOpenCircuitVoltageBattery0">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>341</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabClosedCircuitVoltageGroup">
        <attribute name="title">
@@ -1926,13 +1939,13 @@
            <widget class="QLabel" name="labelDepassivation0">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1945,13 +1958,13 @@
            <widget class="QLabel" name="labelDepassivation1">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1964,13 +1977,13 @@
            <widget class="QLabel" name="labelDepassivation2">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1983,13 +1996,13 @@
            <widget class="QLabel" name="labelDepassivation3">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2002,13 +2015,13 @@
            <widget class="QLabel" name="labelDepassivation4">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2021,13 +2034,13 @@
            <widget class="QLabel" name="labelDepassivation5">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2040,13 +2053,13 @@
            <widget class="QLabel" name="labelDepassivation6">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2059,13 +2072,13 @@
            <widget class="QLabel" name="labelDepassivation7">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2078,13 +2091,13 @@
            <widget class="QLabel" name="labelDepassivation8">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2097,13 +2110,13 @@
            <widget class="QLabel" name="labelDepassivation9">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2116,13 +2129,13 @@
            <widget class="QLabel" name="labelDepassivation10">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2135,13 +2148,13 @@
            <widget class="QLabel" name="labelDepassivation11">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2154,13 +2167,13 @@
            <widget class="QLabel" name="labelDepassivation12">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2173,13 +2186,13 @@
            <widget class="QLabel" name="labelDepassivation13">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2192,13 +2205,13 @@
            <widget class="QLabel" name="labelDepassivation14">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2211,13 +2224,13 @@
            <widget class="QLabel" name="labelDepassivation15">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2230,13 +2243,13 @@
            <widget class="QLabel" name="labelDepassivation16">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2249,13 +2262,13 @@
            <widget class="QLabel" name="labelDepassivation17">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2268,13 +2281,13 @@
            <widget class="QLabel" name="labelDepassivation18">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2287,13 +2300,13 @@
            <widget class="QLabel" name="labelDepassivation19">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2306,13 +2319,13 @@
            <widget class="QLabel" name="labelDepassivation20">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2325,13 +2338,13 @@
            <widget class="QLabel" name="labelDepassivation21">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2344,13 +2357,13 @@
            <widget class="QLabel" name="labelDepassivation22">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2363,13 +2376,13 @@
            <widget class="QLabel" name="labelDepassivation23">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2382,13 +2395,13 @@
            <widget class="QLabel" name="labelDepassivation24">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2401,13 +2414,13 @@
            <widget class="QLabel" name="labelDepassivation25">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2420,13 +2433,13 @@
            <widget class="QLabel" name="labelDepassivation26">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2439,13 +2452,13 @@
            <widget class="QLabel" name="labelDepassivation27">
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>280</width>
               <height>16777215</height>
              </size>
             </property>
@@ -2467,7 +2480,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <widget class="QLabel" name="labelClosedCircuitVoltageBattery">
+         <widget class="QLabel" name="labelClosedCircuitVoltageBattery0">
           <property name="minimumSize">
            <size>
             <width>300</width>
@@ -2494,11 +2507,274 @@
        <attribute name="title">
         <string>Сопротивление изоляции платы измерительной УУТББ</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="7" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB7">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB8">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB9">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB10">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB0">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB1">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB2">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB3">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB4">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB6">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB5">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="18" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB18">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="19" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB19">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="20" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB20">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB11">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB12">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB14">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="15" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB15">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB13">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="16" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB16">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="17" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB17">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="21" column="0">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB21">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB22">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB23">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB24">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB25">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB26">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB27">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB28">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB29">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB30">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB31">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLabel" name="labelInsulationResistanceUUTBB32">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>193</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tabOpenCircuitVoltagePowerSupply">
        <attribute name="title">
         <string>Напряжение разомкнутой цепи блока питания</string>
        </attribute>
+       <widget class="QLabel" name="labelOpenCircuitVoltagePowerSupply0">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>351</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabClosedCircuitVoltagePowerSupply">
        <attribute name="title">
@@ -2509,13 +2785,13 @@
          <widget class="QLabel" name="labelClosedCircuitVoltagePowerSupply0">
           <property name="minimumSize">
            <size>
-            <width>300</width>
+            <width>450</width>
             <height>15</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>300</width>
+            <width>450</width>
             <height>15</height>
            </size>
           </property>
@@ -2528,13 +2804,13 @@
          <widget class="QLabel" name="labelClosedCircuitVoltagePowerSupply1">
           <property name="minimumSize">
            <size>
-            <width>300</width>
+            <width>450</width>
             <height>15</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>300</width>
+            <width>450</width>
             <height>15</height>
            </size>
           </property>

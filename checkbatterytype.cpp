@@ -169,6 +169,11 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     }
 stop:
     ui->btnCheckConnectedBattery->setEnabled(true); // по окончанию проверки разрешить кнопку
+    ui->groupBoxDiagnosticMode->setEnabled(true);
+    ui->groupBoxCheckParams->setEnabled(true);
+    ui->cbParamsAutoMode->setEnabled(true);
+    ui->cbSubParamsAutoMode->setEnabled(true);
+    ui->btnStartStopAutoModeDiagnostic->setEnabled(true);
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();

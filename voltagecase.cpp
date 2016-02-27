@@ -131,9 +131,10 @@ void MainWindow::checkVoltageOnTheHousing()
             ((QPushButton*)sender())->setText("Стоп");
         } else {
             bState = false;
-            ((QPushButton*)sender())->setText("Старт");
+            ((QPushButton*)sender())->setText("Пуск");
         }
-    }
+    } else
+        ui->cbParamsAutoMode->setCurrentIndex(0); // переключаем режим комбокса на наш
 
     ui->groupBoxCOMPort->setDisabled(bState);
     ui->groupBoxDiagnosticDevice->setDisabled(bState);
@@ -187,7 +188,7 @@ void MainWindow::checkVoltageOnTheHousing()
                     ui->groupBoxDiagnosticMode->setDisabled(bState);
                     ui->cbParamsAutoMode->setDisabled(bState);
                     ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Старт");
+                    ((QPushButton*)sender())->setText("Пуск");
                     return;
                 }
             }
@@ -220,7 +221,6 @@ void MainWindow::checkVoltageOnTheHousing()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
-    } else
-        ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+        ((QPushButton*)sender())->setText("Пуск");
+    }
 }

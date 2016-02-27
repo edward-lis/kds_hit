@@ -123,7 +123,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
             baSendArray.clear(); baSendCommand.clear(); // очистить буфера
             baRecvArray.clear();
             bPortOpen = true;
-            //ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
+            ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
         }
         else // если порт не открылся
         {
