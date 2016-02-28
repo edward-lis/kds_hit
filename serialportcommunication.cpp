@@ -47,12 +47,13 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
                 bFirstPing = false;
                 sendPing();
                 ui->btnCheckConnectedBattery->setEnabled(true); // т.к. коробочка на связи и сбросилась в исходное, то разрешим кнопочку "Проверить батарею"
+                ui->groupBoxDiagnosticMode->setEnabled(true); // разрешить выбор режима
             }
         }
         else // пришла какая-то другая посылка
         {
             qDebug()<<"Incorrect reply. Should be "<<(baSendCommand + " and OK")<<" but got: "<<data;
-            loop.exit(KDS_INCORRECT_REPLY); // вывалиться из цикла ожидания приёма с кодом ошибки неправильной команды
+            if(loop.isRunning()) loop.exit(KDS_INCORRECT_REPLY); // вывалиться из цикла ожидания приёма с кодом ошибки неправильной команды
         }
     }
 }
@@ -64,7 +65,7 @@ void MainWindow::sendSerialData()
     //qDebug()<<"sendSerialData"<<baSendArray;
     timerPing->stop(); // остановим таймеры. отключим пинг и предыдущий таймаут (если вдруг он был)
     timeoutResponse->stop();
-    signalSendSerialData(8, baSendArray);
+    signalSendSerialData(8, baSendArray); // 8 - код операции, по протоколу.  здесь - всегда 8.
     timeoutResponse->start(delay_timeOut); // заведём тайм-аут на неответ
 }
 
@@ -96,7 +97,7 @@ void MainWindow::sendPing()
     if(!bPortOpen) return;
     baSendCommand.clear();
     baSendCommand="PING";
-    //qDebug()<<"sendPing"<<baSendCommand;
+    if(settings.verbose > 1) qDebug()<<"sendPing"<<baSendCommand;
     signalSendSerialData(1, baSendCommand);//PING);
     timeoutResponse->start(delay_timeOut); // заведём тайм-аут на неответ
     timerPing->start(delay_timerPing); // цикл между пингами
@@ -123,7 +124,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
             baSendArray.clear(); baSendCommand.clear(); // очистить буфера
             baRecvArray.clear();
             bPortOpen = true;
-            //ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
+            ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
         }
         else // если порт не открылся
         {
@@ -139,6 +140,8 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
         ui->statusBar->showMessage(tr("Порт закрыт"));
         timerPing->stop();// остановить пинг
         ui->btnCheckConnectedBattery->setEnabled(false); // закрыть кнопку проверки батареи
+        ui->groupBoxDiagnosticDevice->setEnabled(false); // закрыть группу выбора батареи
+        ui->groupBoxDiagnosticMode->setEnabled(false); // закрыть группу выбора режима проверки
         bPortOpen = false;
         loop.exit(-1); // закончить цикл ожидания ответа
     }

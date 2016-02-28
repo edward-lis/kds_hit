@@ -22,6 +22,8 @@ void Settings::saveSettings()
 {
     QSettings settings(m_sSettingsFile, QSettings::IniFormat);
     settings.setValue("battery/text", "sText");
+    //bool test=true;
+    //settings.setValue("bDeveloperState", test);
     settings.sync();
 }
 
@@ -48,6 +50,11 @@ void Settings::loadSettings()
 
     QString str;
     bool ok;
+
+    // режим разработчика
+    bDeveloperState = settings.value("bDeveloperState", false).toBool();
+    // уровень печати отладочной инф-ии
+    verbose = settings.value("verbose", 1).toInt();
 
     // Задержки
     delay_after_start_before_request_ADC1 = settings.value("delay_after_start_before_request_ADC1", 400).toInt();

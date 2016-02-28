@@ -23,11 +23,15 @@
 
 #define OFFLINE     "Нет связи"             // забить в ини-файл, сделать строкой
 #define ONLINE      "Связь установлена"
+
 // КОМАНДА PING доступна всегда, но лучше в пассивном/IDLE режиме устройства.
 #define PING    "PING"  // некая строка пинга.  длина до 240 байт
 //#define PING    "123456789012345678901234567890123456789012345678901234567890"  // некая строка пинга.  длина до 240 байт
-#define KDS_TIMEOUT           1           // код ошибки таймаут
-#define KDS_INCORRECT_REPLY   2           // код ошибки неверный ответ
+
+// коды выхода из цикла ожидания приёма данных от коробочки
+#define KDS_TIMEOUT             1           // код ошибки таймаут
+#define KDS_INCORRECT_REPLY     2           // код ошибки неверный ответ
+#define KDS_STOP                3           // код преждевременного принудительного останова цикла
 
 #define delay_timeOut                               500     //ms    // таймаут ответа на запрос
 #define delay_timerPing                             1000     //ms    // пауза между пингами должна быть больше, чем таймаут!
@@ -45,6 +49,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QCustomPlot *customPlot;
+
+    /// Установки из ini-файла
+    Settings settings;
 
 private:
     Ui::MainWindow *ui;
@@ -75,8 +82,6 @@ private:
     float param; /// для отладки, потом убрать
     double randMToN(double M, double N); /// для отладки, потом убрать
     //+++ Edward
-    /// Установки из ini-файла
-    Settings settings;
 
     /// Экземпляр класса последовательный порт
     SerialPort *serialPort;
@@ -89,6 +94,9 @@ private:
 
     /// Таймер между пингами
     QTimer *timerPing;
+
+    /// Таймер посылки в последовательный порт команды для коробочки, с некоторой задержкой от текущего времени.
+    QTimer *timerSend;
 
     /// Пустой цикл для ожидания ответа от коробочки
     QEventLoop loop;
@@ -113,6 +121,12 @@ private:
 	
     /// Признак ручного режима
     bool bModeManual;
+
+    /// Признак - некая проверка идёт.
+    bool bCheckInProgress;
+
+    /// Уровень печати отладочной инф-ии в консоль
+    int verbose;
 
     //+++
 

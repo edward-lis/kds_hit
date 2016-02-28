@@ -1,6 +1,8 @@
 #include "serialport.h"
 #include <QtCore>
 #include <QErrorMessage>
+#include "settings.h"
+
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
@@ -82,6 +84,7 @@ void SerialPort::writeSerialPort(quint8 operation_code, const QByteArray &data)
         ba+=crc;
         ba.insert(0,request_pfx); // всунули вначало префикс запросного пакета
         serial->write(ba); // собственно передача в порт
+        /* !!! сделать человеческую печать if(::Settings.verbose > 1)*/
         //qDebug() << "serialport.cpp writeSerialPort(): " << ba.length() << " bytes " << ba.toHex() << " text " << qPrintable(ba);
     }
 }

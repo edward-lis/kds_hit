@@ -60,15 +60,15 @@ QVector<Battery> battery; ///< массив типов батарей, с нас
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
     settings(0),
+    ui(new Ui::MainWindow),
     serialPort(new SerialPort), bPortOpen(false),
-    timeoutResponse(NULL), timerPing(NULL),
+    timeoutResponse(NULL), timerPing(NULL), timerSend(NULL),
     loop(0),
     baRecvArray(0),
     baSendArray(0), baSendCommand(0),
-    bDeveloperState(true), // признак режим разработчика, временно тру, потом поменять на фолс!!!
-    bModeManual(true) // признак ручной режим.
+    bModeManual(true), // признак ручной режим.
+    bCheckInProgress(false) // признак - в состоянии проверки
 
 {
     ui->setupUi(this);
@@ -107,6 +107,10 @@ MainWindow::MainWindow(QWidget *parent) :
     timerPing = new QTimer;
     timerPing->setSingleShot(true);
     connect(timerPing, SIGNAL(timeout()), this, SLOT(sendPing())); // по окончанию паузы между пингами - послать следующий
+    //  Таймер посылки в последовательный порт команды для коробочки, с некоторой задержкой от текущего времени. непериодический
+    timerSend = new QTimer;
+    timerSend->setSingleShot(true);
+    connect(timerSend, SIGNAL(timeout()), this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
 
     //ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
 
@@ -163,6 +167,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     getCOMPorts();
     comboxSetData();
+
+    // состояния виджетов в зависимости от признака отладки
+    bDeveloperState = !settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
+    triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.
 }
 
 MainWindow::~MainWindow()
@@ -335,6 +343,7 @@ void MainWindow::Log(QString message, QString color)
     ui->EventLog->appendHtml(tr("%1").arg(text));
 }
 
+// нажата радиокнопка режим Авто
 void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 {
     ui->groupBoxCheckParams->setDisabled(checked);
@@ -342,6 +351,7 @@ void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
     bModeManual = false;
 }
 
+// нажата радиокнопка режим Ручной
 void MainWindow::on_rbModeDiagnosticManual_toggled(bool checked)
 {
     ui->rbVoltageOnTheHousing->setEnabled(checked);
@@ -445,9 +455,25 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     comboxSetData();
 }
 
+// yажата кнопка Старт(Стоп) автоматического режима диагностики
 void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
 {
     qDebug() << ((QPushButton*)sender())->objectName();
+
+    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnStartStopAutoModeDiagnostic ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
+    {
+        // остановить текущую проверку, выход
+        bCheckInProgress = false;
+        timerSend->stop(); // остановить посылку очередной команды в порт
+        timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
+        qDebug()<<"loop.isRunning()"<<loop.isRunning();
+        if(loop.isRunning())
+        {
+            loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
+        }
+        return;
+    }
+
     if (!bState) {
         Log("Начало проверки - Автоматический режим", "blue");
         bState = true;
@@ -462,13 +488,16 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
             switch (i) {
             case 0:
-                checkVoltageOnTheHousing();
+                //checkVoltageOnTheHousing();
+                on_btnVoltageOnTheHousing_clicked();
                 break;
             case 1:
-                checkInsulationResistance();
+                //checkInsulationResistance();
+                Log("checkInsulationResistance()", "blue");
                 break;
             case 2:
-                checkOpenCircuitVoltageGroup();
+                //checkOpenCircuitVoltageGroup();
+                Log("checkOpenCircuitVoltageGroup()", "blue");
                 break;
             case 3:
                 Log("checkOpenCircuitVoltageBattery()", "blue");
@@ -568,7 +597,7 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
 
 void MainWindow::triggerDeveloperState() {
     bDeveloperState=!bDeveloperState;
-    qDebug() << "bDeveloperState =" << bDeveloperState;
+    //qDebug() << "bDeveloperState =" << bDeveloperState;
     ui->btnCheckConnectedBattery->setEnabled(bDeveloperState);
     ui->groupBoxDiagnosticDevice->setEnabled(bDeveloperState);
     ui->groupBoxDiagnosticMode->setEnabled(bDeveloperState);

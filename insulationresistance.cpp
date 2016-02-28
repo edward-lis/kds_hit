@@ -10,7 +10,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки сопротивления изоляции
 void MainWindow::on_btnInsulationResistance_clicked()
 {
-    checkInsulationResistance(); return;
+    //checkInsulationResistance(); return;
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
     float resist=0; // получившееся сопротивление
@@ -37,7 +37,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
 
-    str_num.sprintf(" %02i", battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]); // напечатать номер точки измерения изоляции
+    str_num.sprintf(" %02i", battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]-1); // напечатать номер точки измерения изоляции
     baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
     if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
     QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
@@ -59,6 +59,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
         //qDebug()<<"u"<<qPrintable(QString::number(u, 16))<<qPrintable(QString::number(settings.functionResist[j].codeADC, 16))<<qPrintable(QString::number(settings.functionResist[j+1].codeADC, 16));
         if((u > settings.functionResist[j].codeADC) && (u <= settings.functionResist[j+1].codeADC))
         {
+            //qDebug()<<"resist=(-("<<settings.functionResist[j].codeADC<<"*"<<settings.functionResist[j+1].resist<<"-"<<settings.functionResist[j+1].codeADC<<"*"<<settings.functionResist[j].resist<<")-("<<settings.functionResist[j].resist<<"-"<<settings.functionResist[j+1].resist<<")*"<<u<<")/("<<settings.functionResist[j+1].codeADC<<"-"<<settings.functionResist[j].codeADC<<")";
             resist = ( -(settings.functionResist[j].codeADC * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC - settings.functionResist[j].codeADC);
             break;
         }
@@ -77,7 +78,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
     }
     // если меньше нуля, то обнулим
     if(resist<0) resist=0; // не бывает отрицательного сопротивления
-    if(resist > 1000000)
+    /*if(resist > 1000000)
     {
         // переведём в мегаомы
         resist = resist/1000000;
@@ -92,10 +93,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
     else
     {
         // омы
-        resist = resist/1000;
-        strResist = QString::number(resist, 'f', 2) + "Ом, ";
-    }
-
+        strResist = QString::number(resist, 'f', 0) + "Ом, ";
+    }*/
+    strResist = QString::number(resist, 'f', 0) + " Ом, ";
 
     qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
