@@ -517,7 +517,8 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 break;
             case 1:
                 //checkInsulationResistance();
-                Log("checkInsulationResistance()", "blue");
+                //Log("checkInsulationResistance()", "blue");
+                on_btnInsulationResistance_clicked();
                 break;
             case 2:
                 //checkOpenCircuitVoltageGroup();

@@ -37,8 +37,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     timerPing->stop(); // остановить пинг
     bCheckInProgress = true; // вошли в состояние проверки
 
-    // закроем виджеты, чтоб не нажимались
-    //ui->btnVoltageOnTheHousing->setEnabled(false); // на время проверки запретить кнопку
+    // запретим виджеты, чтоб не нажимались
     ui->groupBoxCOMPort->setDisabled(bState);
     ui->groupBoxDiagnosticDevice->setDisabled(bState);
     ui->groupBoxDiagnosticMode->setDisabled(bState);
@@ -47,8 +46,8 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    ui->statusBar->showMessage(tr("Проверка ")+ui->rbVoltageOnTheHousing->text()+" ...");
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
+    ui->statusBar->showMessage(tr("Проверка ")+ui->rbVoltageOnTheHousing->text()+" ...");
     ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
     ui->progressBar->reset();
 
@@ -83,7 +82,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         baRecvArray.clear();
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
-        sendSerialData(); // послать baSendArray в порт
+        timerSend->start(settings.delay_after_request_before_next_ADC2); //sendSerialData(); // послать baSendArray в порт
         // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
         ret=loop.exec();
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
