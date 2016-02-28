@@ -478,7 +478,7 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     comboxSetData();
 }
 
-// yажата кнопка Старт(Стоп) автоматического режима диагностики
+// нажата кнопка Старт(Стоп) автоматического режима диагностики
 void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
 {
     qDebug() << ((QPushButton*)sender())->objectName();

@@ -47,8 +47,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    ui->statusBar->showMessage(tr("Проверка напряжения на корпусе ..."));
-    Log(tr("Проверка напряжения на корпусе"), "blue");
+    ui->statusBar->showMessage(tr("Проверка ")+ui->rbVoltageOnTheHousing->text()+" ...");
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
     ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
     ui->progressBar->reset();
@@ -62,7 +61,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             ((QPushButton*)sender())->setText("Стоп");
         } else {
             bState = false;
-            ((QPushButton*)sender())->setText("Старт");
+            ((QPushButton*)sender())->setText("Пуск");
         }
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
@@ -72,6 +71,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     }
     else
     {
+        ui->cbParamsAutoMode->setCurrentIndex(0); // переключаем режим комбокса на наш
         iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
         iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
     }
@@ -152,12 +152,13 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                 if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет")))
                 {
                     qDebug()<<"переход в ручной режим";
+                    Log("Останов проверки - переход в ручной режим", "blue");
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState); // разрешить кнопку ком-порта???
                     ui->groupBoxDiagnosticMode->setDisabled(bState); // разрешить группу выбора режима диагностики
                     ui->cbParamsAutoMode->setDisabled(bState); // разрешить комбобокс пунктов автомата
                     ui->cbSubParamsAutoMode->setDisabled(bState); // разрешать комбобокс подпунктов автомата
-                    ((QPushButton*)sender())->setText("Старт");
+                    ((QPushButton*)sender())->setText("Пуск");
                     // остановить текущую проверку, выход
                     bCheckInProgress = false;
                     emit ui->rbModeDiagnosticManual->setChecked(true);
@@ -187,17 +188,18 @@ stop:
     }
     if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
 
-    if(bModeManual) {
+    if(bModeManual)
+    {
         bState = false;
         //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
         ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
         ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
         ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
         ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
-        ((QPushButton*)sender())->setText("Старт");         // поменять текст на кнопке
-    } else
+        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
+    } //else
         // !!! а если выход из автомата в ручное???
-        ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+        //ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
 
     ui->progressBar->reset();
 
