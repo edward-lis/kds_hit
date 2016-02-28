@@ -143,8 +143,12 @@ void MainWindow::on_actionCheckSave_triggered()
     QString textDateTime = dateTime.toString("yyyy-MM-dd-hh-mm-ss-zzz");
     QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранить проверку"), tr("%0_%1.dat").arg(ui->comboBoxBatteryList->currentText()).arg(textDateTime), tr("Проверка (*.dat)"));
     QFile file(fileName);
-    if(!file.open(QIODevice::WriteOnly) and fileName.length() < 5) /// без имени файла не сохраняем
+    if(!file.open(QIODevice::WriteOnly))
         return;
+    if (QFileInfo(fileName).baseName().length() <= 0) /// без имени файла не сохраняем
+        return;
+    if(QFileInfo(fileName).suffix().isEmpty())
+        fileName.append(".dat");
 
     QDataStream stream(&file);
     stream.setVersion(QDataStream::Qt_DefaultCompiledVersion); /// устанвливаем версию нашего компилятора
@@ -165,7 +169,7 @@ void MainWindow::on_actionCheckLoad_triggered()
 
     QString fileName = QFileDialog::getOpenFileName(this, tr("Загрузить проверку"), "", tr("Проверка (*.dat)"));
     QFile file(fileName);
-    if(!file.open(QIODevice::ReadOnly) and fileName.length() < 5) /// без имени файла не сохраняем
+    if(!file.open(QIODevice::ReadOnly))
       return;
 
     QDataStream stream(&file);
