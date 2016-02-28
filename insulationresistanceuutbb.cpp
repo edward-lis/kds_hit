@@ -10,6 +10,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки сопротивления изоляции УУТББ
 void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 {
+    checkInsulationResistanceUUTBB(); return;
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
     float resist=0; // получившееся сопротивление
@@ -135,43 +136,232 @@ void MainWindow::itemChangedInsulationResistanceUUTBB(QStandardItem* itm)
  */
 void MainWindow::checkInsulationResistanceUUTBB()
 {
-    //if (ui->rbModeDiagnosticAuto->isChecked() and bStop) return;
-    if (!bState) return;
-    ui->groupBoxCOMPort->setEnabled(false);
-    ui->groupBoxDiagnosticDevice->setEnabled(false);
-    ui->groupBoxDiagnosticMode->setEnabled(false);
+    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
+        }
+    } else
+        ui->cbParamsAutoMode->setCurrentIndex(6); // переключаем режим комбокса на наш
+
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
+
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : 0;
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbInsulationResistanceUUTBB->count();
+
+    if (ui->rbModeDiagnosticManual->isChecked()) { /// для ручного режима свой максимум для прогресс бара
+        int count = 0;
+        for(int i = 0; i < iMaxSteps; i++) {
+            QModelIndex index = ui->cbInsulationResistanceUUTBB->model()->index(i+1, 0);
+            if(index.data(Qt::CheckStateRole) == 2) /// проходимся только по выбранным
+                count++;
+        }
+        ui->progressBar->setMaximum(count);
+    } else {
+        ui->progressBar->setMaximum(iMaxSteps);
+    }
+    ui->progressBar->setValue(iCurrentStep);
+
     switch (iBatteryIndex) {
     case 0: //9ER20P-20
-        /*while (iStepInsulationResistanceUUTBB <= 1) {
-            if (!bState) return;
-            switch (iStepInsulationResistanceUUTBB) {
-            case 1:
-                delay(1000);
-                //Log(tr("1) между точкой металлизации и контактом 1 соединителя Х1 «Х1+» = <b>%1</b>").arg(QString::number(paramInsulationResistance1)), color);
-                break;
-            default:
-                break;
+        for (int i = iCurrentStep; i < iMaxSteps; i++) {
+            if (!bState) return; /// если прожали Стоп выходим из цикла
+            QModelIndex index = ui->cbInsulationResistanceUUTBB->model()->index(i+1, 0);
+            if(index.data(Qt::CheckStateRole) == 2) { /// проходимся только по выбранным
+                switch (i) {
+                case 0:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 1:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 2:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 3:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 4:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 5:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 6:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 7:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 8:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 9:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 10:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 11:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 12:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 13:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 14:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 15:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 16:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 17:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 18:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 19:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 20:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 21:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 22:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 23:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 24:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 25:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 26:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 27:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 28:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 29:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 30:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 31:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                case 32:
+                    delay(1000);
+                    dArrayInsulationResistanceUUTBB[i] = randMToN(4, 6); //число полученное с COM-порта
+                    break;
+                default:
+                    return;
+                    break;
+                }
+                qDebug() << "dArrayInsulationResistanceUUTBB[" << i << "]=" << dArrayInsulationResistanceUUTBB[i];
+                if(ui->rbModeDiagnosticAuto->isChecked())
+                    ui->cbSubParamsAutoMode->setCurrentIndex(i);
+
+                str = tr("\"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+                if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+                Log(str, color);
+                ui->btnBuildReport->setEnabled(true);
+                if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
+                    switch (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("Сопротивление цепи %0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    case 2:
+                        bState = false;
+                        ui->groupBoxCOMPort->setDisabled(bState);
+                        ui->groupBoxDiagnosticMode->setDisabled(bState);
+                        ui->cbParamsAutoMode->setDisabled(bState);
+                        ui->cbSubParamsAutoMode->setDisabled(bState);
+                        ((QPushButton*)sender())->setText("Пуск");
+                        return;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                ui->progressBar->setValue(ui->progressBar->value()+1);
             }
-            iStepInsulationResistanceUUTBB++;
-        }*/
-        /*if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteInsulationResistanceUUTBB = true;*/
+        }
         break;
     case 1:
-        if (!bState) return;
         Log("Действия проверки.", "green");
         delay(1000);
         break;
     case 2:
-        if (!bState) return;
         Log("Действия проверки.", "green");
         delay(1000);
         break;
     case 3:
-        if (!bState) return;
         Log("Действия проверки.", "green");
         delay(1000);
         break;
@@ -180,9 +370,14 @@ void MainWindow::checkInsulationResistanceUUTBB()
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");
-    //iStepInsulationResistanceUUTBB = 1;
-    ui->rbOpenCircuitVoltagePowerSupply->setEnabled(true);
-    ui->groupBoxCOMPort->setEnabled(true);
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        bState = false;
+        ui->groupBoxCOMPort->setEnabled(bState);
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);
+        ui->groupBoxDiagnosticMode->setDisabled(bState);
+        ui->cbParamsAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ((QPushButton*)sender())->setText("Пуск");
+    }
 }

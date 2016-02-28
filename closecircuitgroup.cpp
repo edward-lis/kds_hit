@@ -259,6 +259,8 @@ void MainWindow::itemChangedClosedCircuitVoltageGroup(QStandardItem* itm)
 void MainWindow::checkClosedCircuitVoltageGroup()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
+    int x = 10; /// затычка
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData(); // очистить график
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
@@ -270,9 +272,10 @@ void MainWindow::checkClosedCircuitVoltageGroup()
             ((QPushButton*)sender())->setText("Стоп");
         } else {
             bState = false;
-            ((QPushButton*)sender())->setText("Старт");
+            ((QPushButton*)sender())->setText("Пуск");
         }
-    }
+    } else
+        ui->cbParamsAutoMode->setCurrentIndex(4); // переключаем режим комбокса на наш
 
     ui->groupBoxCOMPort->setDisabled(bState);
     ui->groupBoxDiagnosticDevice->setDisabled(bState);
@@ -402,6 +405,11 @@ void MainWindow::checkClosedCircuitVoltageGroup()
                 label->setText(str);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
                 Log(str, color);
+                /// рисуем график
+                ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
+                ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x/100, (double)dArrayClosedCircuitVoltageGroup[i]);
+                ui->widgetClosedCircuitVoltageGroup->replot();
+                x +=40; /// затычка
                 ui->btnBuildReport->setEnabled(true);
                 if (dArrayClosedCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
                     switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
@@ -412,7 +420,7 @@ void MainWindow::checkClosedCircuitVoltageGroup()
                         item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
                         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
                         item->setData(Qt::Checked, Qt::CheckStateRole);
-                        modelDepassivation->setItem(i, 0, item);
+                        modelDepassivation->setItem(i+1, 0, item);
                         break;
                     case 2:
                         bState = false;
@@ -420,7 +428,7 @@ void MainWindow::checkClosedCircuitVoltageGroup()
                         ui->groupBoxDiagnosticMode->setDisabled(bState);
                         ui->cbParamsAutoMode->setDisabled(bState);
                         ui->cbSubParamsAutoMode->setDisabled(bState);
-                        ((QPushButton*)sender())->setText("Старт");
+                        ((QPushButton*)sender())->setText("Пуск");
                         return;
                         break;
                     default:
@@ -456,9 +464,8 @@ void MainWindow::checkClosedCircuitVoltageGroup()
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
-    } else
-        ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+        ((QPushButton*)sender())->setText("Пуск");
+    }
 }
 
 #if 0

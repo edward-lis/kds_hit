@@ -129,6 +129,26 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bModeManual = ui->rbModeDiagnosticManual->isChecked(); // ручной/авто режим
 
+    /// описание графика для "Напряжения замкнутой цепи группы"
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
+    ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue dot
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setLineStyle(QCPGraph::lsNone);
+    //ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::green));
+    ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetClosedCircuitVoltageGroup->addGraph(); // red line
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(settings.time_depassivation[2]+1, settings.closecircuitgroup_limit);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, settings.time_depassivation[2]+1);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
+
     /// описание графика для "Распассивации"
     ui->widgetDepassivation->addGraph(); // blue line
     ui->widgetDepassivation->graph(0)->setPen(QPen(Qt::blue));
@@ -149,7 +169,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bState = false;
     /// Заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 35; i++) {
         dArrayVoltageOnTheHousing.append(0);
         dArrayInsulationResistance.append(0);
         dArrayOpenCircuitVoltageGroup.append(0);
@@ -196,7 +216,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 double MainWindow::randMToN(double M, double N)
 {
-    return M + (rand() / ( RAND_MAX / (N-M) ) ) ;
+    double val = M + (rand() / ( RAND_MAX / (N-M) ) ) ;
+    QString str= QString::number(val, 'f', 1);
+    return str.toDouble();
 }
 
 /*
@@ -300,7 +322,7 @@ void MainWindow::comboxSetData() {
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
-    if (iBatteryIndex == 0 or iBatteryIndex == 1) {
+    if (ui->cbIsUUTBB->isChecked()) {
         /// 6. Сопротивление изоляции УУТББ
         ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbInsulationResistanceUUTBB->clear();
@@ -441,6 +463,7 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
     }
+    comboxSetData();
 }
 
 void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
@@ -486,6 +509,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ((QPushButton*)sender())->setText("Стоп");
 
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
+            if (!bState) return; /// если прожали Стоп выходим из цикла
             switch (i) {
             case 0:
                 //checkVoltageOnTheHousing();
@@ -500,44 +524,44 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 Log("checkOpenCircuitVoltageGroup()", "blue");
                 break;
             case 3:
-                Log("checkOpenCircuitVoltageBattery()", "blue");
+                checkOpenCircuitVoltageBattery();
                 break;
             case 4:
-                Log("checkClosedCircuitVoltageGroup()", "blue");
+                checkClosedCircuitVoltageGroup();
                 break;
             case 5:
-                Log("checkClosedCircuitVoltageBattery()", "blue");
+                checkClosedCircuitVoltageBattery();
                 break;
             case 6:
-                Log("checkInsulationResistanceUUTBB()", "blue");
+                checkInsulationResistanceUUTBB();
                 break;
             case 7:
-                Log("checkOpenCircuitVoltagePowerSupply()", "blue");
+                checkOpenCircuitVoltagePowerSupply();
                 break;
             case 8:
-                Log("rbClosedCircuitVoltagePowerSupply()", "blue");
+                checkClosedCircuitVoltagePowerSupply();
                 break;
             default:
                 break;
             }
         }
         Log("Проверка завершена - Автоматический режим", "blue");
+        /*bState = false;
+        ui->groupBoxCOMPort->setDisabled(bState);
+        ui->groupBoxDiagnosticMode->setDisabled(bState);
+        ui->groupBoxCheckParams->setDisabled(bState);
+        ui->cbParamsAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ((QPushButton*)sender())->setText("Пуск");*/
+    } //else {
         bState = false;
         ui->groupBoxCOMPort->setDisabled(bState);
         ui->groupBoxDiagnosticMode->setDisabled(bState);
         ui->groupBoxCheckParams->setDisabled(bState);
         ui->cbParamsAutoMode->setDisabled(bState);
         ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
-    } else {
-        bState = false;
-        ui->groupBoxCOMPort->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->groupBoxCheckParams->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Старт");
-    }
+        ((QPushButton*)sender())->setText("Пуск");
+    //}
 }
 
 void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)

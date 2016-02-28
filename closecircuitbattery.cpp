@@ -55,7 +55,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
 
     ui->statusBar->showMessage(tr("Проверка напряжения замкнутой цепи батареи ..."));
     Log(tr("Проверка напряжения замкнутой цепи батареи"), "blue");
-    ui->labelClosedCircuitVoltageBattery->setText("Идёт измерение...");
+    ui->labelClosedCircuitVoltageBattery0->setText("Идёт измерение...");
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -104,14 +104,14 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     if(codeADC >= codeLimit) // напряжение больше (норма)
     {
         Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-        ui->labelClosedCircuitVoltageBattery->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Норма.");
+        ui->labelClosedCircuitVoltageBattery0->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Норма.");
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
     }
     else // напряжение меньше (не норма)
     {
         Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-        ui->labelClosedCircuitVoltageBattery->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Не норма!");
+        ui->labelClosedCircuitVoltageBattery0->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Не норма!");
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
         // !!! добавить цепь в список неисправных, запрет проверки батареи под нагрузкой
@@ -142,66 +142,69 @@ stop:
  */
 void MainWindow::checkClosedCircuitVoltageBattery()
 {
-    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageBattery") {
-        //iStepClosedCircuitVoltageBattery = 1;
-        bState = false;
-        //ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
-    }
-    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageBattery_2")
-        bState = false;
-    if (!bState) return;
-    ui->groupBoxCOMPort->setEnabled(false);
-    ui->groupBoxDiagnosticDevice->setEnabled(false);
-    ui->groupBoxDiagnosticMode->setEnabled(false);
+    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
-    switch (iBatteryIndex) {
-    case 0: //9ER20P-20
-        if (!bState) return;
-        delay(1000);
-        ui->labelClosedCircuitVoltageBattery->setText(tr("1) %2").arg(QString::number(param)));
-        str = tr("1) между контактом 1 соединителя Х1 «1+» и контактом 1 соединителя Х3 «3-» = <b>%2</b>").arg(QString::number(param));
-        Log(str, (param > 30.0) ? "red" : "green");
 
-        if (param > 30.0) {
-            ui->rbModeDiagnosticManual->setChecked(true);
-            ui->rbModeDiagnosticAuto->setEnabled(false);
-            if (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageBattery->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Нет"))) {
-                //ui->btnClosedCircuitVoltageBattery_2->setEnabled(true);
-                bState = true;
-                return;
-            }
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
         }
-        //ui->btnClosedCircuitVoltageBattery_2->setEnabled(false);
-        /*if (ui->rbModeDiagnosticAuto->isChecked())
-            bCheckCompleteClosedCircuitVoltageBattery = true;*/
-        break;
-    case 1:
-        if (!bState) return;
-        Log("Действия проверки.", "green");
-        delay(1000);
+    } else
+        ui->cbParamsAutoMode->setCurrentIndex(5); // переключаем режим комбокса на наш
 
-        break;
-    case 2:
-        if (!bState) return;
-        Log("Действия проверки.", "green");
-        delay(1000);
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
 
-        break;
-    case 3:
-        if (!bState) return;
-        Log("Действия проверки.", "green");
-        delay(1000);
+    ui->progressBar->setMaximum(1);
+    ui->progressBar->setValue(0);
 
-        break;
-    default:
-        break;
+
+    if (!bState) return;
+    dArrayClosedCircuitVoltageBattery[0] = randMToN(29, 31); //число полученное с COM-порта
+
+    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0]);
+    if (dArrayClosedCircuitVoltageBattery[0] > settings.closecircuitbattery_limit) {
+        str += " Не норма.";
+        color = "red";
+    } else
+        color = "green";
+    ui->labelClosedCircuitVoltageBattery0->setText(str);
+    ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
+    Log(str, color);
+    ui->btnBuildReport->setEnabled(true);
+    if (dArrayClosedCircuitVoltageBattery[0] > settings.closecircuitbattery_limit) {
+        if (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageBattery->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+            bState = false;
+            ui->groupBoxCOMPort->setDisabled(bState);
+            ui->groupBoxDiagnosticMode->setDisabled(bState);
+            ui->cbParamsAutoMode->setDisabled(bState);
+            ui->cbSubParamsAutoMode->setDisabled(bState);
+            ((QPushButton*)sender())->setText("Пуск");
+            return;
+        }
     }
+
+    ui->progressBar->setValue(1);
+
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");
-    //iStepClosedCircuitVoltageBattery = 1;
-    ui->rbInsulationResistanceUUTBB->setEnabled(true);
-    ui->groupBoxCOMPort->setEnabled(true);
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
+
+    if(ui->rbModeDiagnosticManual->isChecked()) {
+        bState = false;
+        ui->groupBoxCOMPort->setEnabled(bState);
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);
+        ui->groupBoxDiagnosticMode->setDisabled(bState);
+        ui->cbParamsAutoMode->setDisabled(bState);
+        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ((QPushButton*)sender())->setText("Пуск");
+    }
 }
