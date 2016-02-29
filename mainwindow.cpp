@@ -322,9 +322,8 @@ void MainWindow::comboxSetData() {
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
-    if (ui->cbIsUUTBB->isChecked()) {
+    if (iBatteryIndex == 0 or iBatteryIndex == 1) {
         /// 6. Сопротивление изоляции УУТББ
-        ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbInsulationResistanceUUTBB->clear();
         modelInsulationResistanceUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
         for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
@@ -342,12 +341,10 @@ void MainWindow::comboxSetData() {
         connect(modelInsulationResistanceUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceUUTBB(QStandardItem*)));
 
         /// 7. Напряжение разомкнутой цепи БП
-        ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         ui->cbOpenCircuitVoltagePowerSupply->clear();
         ui->cbOpenCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
 
         /// 8. Напряжение замкнутой цепи БП
-        ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
         ui->cbClosedCircuitVoltagePowerSupply->clear();
         ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[1]);
@@ -452,6 +449,12 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->show();
         ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
+        ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
+        ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+        ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
+        ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
+        ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
+        ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
     } else {
         ui->rbInsulationResistanceUUTBB->hide();
         ui->cbInsulationResistanceUUTBB->hide();
@@ -462,8 +465,18 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->hide();
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
+        int tab_count = ui->tabWidget->count();
+        for (int i = tab_count; ; i--) {
+            if (i < 1)
+                break;
+            if (ui->tabWidget->tabText(i) == ui->rbInsulationResistanceUUTBB->text() or ui->tabWidget->tabText(i) == ui->rbOpenCircuitVoltagePowerSupply->text() or ui->tabWidget->tabText(i) == ui->rbClosedCircuitVoltagePowerSupply->text()) {
+                ui->tabWidget->removeTab(i);
+            }
+        }
+        ui->cbParamsAutoMode->removeItem(8);
+        ui->cbParamsAutoMode->removeItem(7);
+        ui->cbParamsAutoMode->removeItem(6);
     }
-    comboxSetData();
 }
 
 void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)

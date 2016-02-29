@@ -305,118 +305,120 @@ void MainWindow::on_btnBuildReport_clicked()
                 "</table>"\
             "</td>"\
         "</tr>";
+
+    /// только для батарей 9ER20P_20 или 9ER14PS_24
     if (ui->cbIsUUTBB->isChecked()) {
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
-    /// 6. Сопротивление изоляции УУТББ
-    sHtml += "<tr>"\
-            "<td>"\
-                "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
-                "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
-                    "<tbody>"\
-                        "<tr>"\
-                            "<td>"\
-                                "<p><b>№</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Сопротивление цепи</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Значение</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Результат</b></p>"\
-                            "</td>"\
-                        "</tr>";
-    for (int i = 0; i < battery[iBatteryIndex].i_uutbb_resist_num; i++) {
-        sHtml += tr("    <tr>"\
-                            "<td>%0.</td>"\
-                            "<td>%1</td>"\
-                            "<td>%2</td>"\
-                            "<td>%3</td>"\
-                        "</tr>").arg(i+1)
-                                .arg(battery[iBatteryIndex].uutbb_resist[i])
-                                .arg(dArrayInsulationResistanceUUTBB[i])
-                                .arg((dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) ? "Не норма!": "Норма");
-    }
-    sHtml += "       </tbody>"\
-                "</table>"\
-            "</td>"\
-        "</tr>";
-    ui->progressBar->setValue(ui->progressBar->value()+1);
+        /// 6. Сопротивление изоляции УУТББ
+        sHtml += "<tr>"\
+                "<td>"\
+                    "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
+                    "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
+                        "<tbody>"\
+                            "<tr>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Сопротивление цепи</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Значение</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Результат</b></p>"\
+                                "</td>"\
+                            "</tr>";
+        for (int i = 0; i < battery[iBatteryIndex].i_uutbb_resist_num; i++) {
+            sHtml += tr("    <tr>"\
+                                "<td>%0.</td>"\
+                                "<td>%1</td>"\
+                                "<td>%2</td>"\
+                                "<td>%3</td>"\
+                            "</tr>").arg(i+1)
+                                    .arg(battery[iBatteryIndex].uutbb_resist[i])
+                                    .arg(dArrayInsulationResistanceUUTBB[i])
+                                    .arg((dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) ? "Не норма!": "Норма");
+        }
+        sHtml += "       </tbody>"\
+                    "</table>"\
+                "</td>"\
+            "</tr>";
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
-    /// 7. Напряжение разомкнутой цепи БП
-    sHtml += "<tr>"\
-            "<td>"\
-                "<p><b>7. "+ui->rbOpenCircuitVoltagePowerSupply->text()+", В</b></p>"\
-                "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
-                    "<tbody>"\
-                        "<tr>"\
-                            "<td>"\
-                                "<p><b>№</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Напряжение цепи</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Значение</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Результат</b></p>"\
-                            "</td>"\
-                        "</tr>";
-    for (int i = 0; i < 1; i++) {
-        sHtml += tr("    <tr>"\
-                            "<td>%0.</td>"\
-                            "<td>%1</td>"\
-                            "<td>%2</td>"\
-                            "<td>%3</td>"\
-                        "</tr>").arg(i+1)
-                                .arg(battery[iBatteryIndex].uutbb_closecircuitpower[i])
-                                .arg(dArrayOpenCircuitVoltagePowerSupply[i])
-                                .arg((dArrayOpenCircuitVoltagePowerSupply[i] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[i] > settings.uutbb_opencircuitpower_limit_max) ? "Не норма!": "Норма");
-    }
-    sHtml += "       </tbody>"\
-                "</table>"\
-            "</td>"\
-        "</tr>";
-    ui->progressBar->setValue(ui->progressBar->value()+1);
+        /// 7. Напряжение разомкнутой цепи БП
+        sHtml += "<tr>"\
+                "<td>"\
+                    "<p><b>7. "+ui->rbOpenCircuitVoltagePowerSupply->text()+", В</b></p>"\
+                    "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
+                        "<tbody>"\
+                            "<tr>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Напряжение цепи</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Значение</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Результат</b></p>"\
+                                "</td>"\
+                            "</tr>";
+        for (int i = 0; i < 1; i++) {
+            sHtml += tr("    <tr>"\
+                                "<td>%0.</td>"\
+                                "<td>%1</td>"\
+                                "<td>%2</td>"\
+                                "<td>%3</td>"\
+                            "</tr>").arg(i+1)
+                                    .arg(battery[iBatteryIndex].uutbb_closecircuitpower[i])
+                                    .arg(dArrayOpenCircuitVoltagePowerSupply[i])
+                                    .arg((dArrayOpenCircuitVoltagePowerSupply[i] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[i] > settings.uutbb_opencircuitpower_limit_max) ? "Не норма!": "Норма");
+        }
+        sHtml += "       </tbody>"\
+                    "</table>"\
+                "</td>"\
+            "</tr>";
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
-    /// 8. Напряжение замкнутой цепи БП
-    sHtml += "<tr>"\
-            "<td>"\
-                "<p><b>8. "+ui->rbClosedCircuitVoltagePowerSupply->text()+", В</b></p>"\
-                "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
-                    "<tbody>"\
-                        "<tr>"\
-                            "<td>"\
-                                "<p><b>№</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Напряжение цепи</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Значение</b></p>"\
-                            "</td>"\
-                            "<td>"\
-                                "<p><b>Результат</b></p>"\
-                            "</td>"\
-                        "</tr>";
-    for (int i = 0; i < 2; i++) {
-        sHtml += tr("    <tr>"\
-                            "<td>%0.</td>"\
-                            "<td>%1</td>"\
-                            "<td>%2</td>"\
-                            "<td>%3</td>"\
-                        "</tr>").arg(i+1)
-                                .arg(battery[iBatteryIndex].uutbb_closecircuitpower[i])
-                                .arg(dArrayClosedCircuitVoltagePowerSupply[i])
-                                .arg((dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) ? "Не норма!": "Норма");
-    }
-    sHtml += "       </tbody>"\
-                "</table>"\
-            "</td>"\
-        "</tr>";
+        /// 8. Напряжение замкнутой цепи БП
+        sHtml += "<tr>"\
+                "<td>"\
+                    "<p><b>8. "+ui->rbClosedCircuitVoltagePowerSupply->text()+", В</b></p>"\
+                    "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
+                        "<tbody>"\
+                            "<tr>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Напряжение цепи</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Значение</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Результат</b></p>"\
+                                "</td>"\
+                            "</tr>";
+        for (int i = 0; i < 2; i++) {
+            sHtml += tr("    <tr>"\
+                                "<td>%0.</td>"\
+                                "<td>%1</td>"\
+                                "<td>%2</td>"\
+                                "<td>%3</td>"\
+                            "</tr>").arg(i+1)
+                                    .arg(battery[iBatteryIndex].uutbb_closecircuitpower[i])
+                                    .arg(dArrayClosedCircuitVoltagePowerSupply[i])
+                                    .arg((dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) ? "Не норма!": "Норма");
+        }
+        sHtml += "       </tbody>"\
+                    "</table>"\
+                "</td>"\
+            "</tr>";
     }
 
     /// общая таблица - низ
