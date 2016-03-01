@@ -11,8 +11,8 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения замкнутых цепей групп
 void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
 {
-    checkClosedCircuitVoltageGroup(); return;
-    qDebug()<<"checkClosedCircuitVoltageGroup";
+    //checkClosedCircuitVoltageGroup(); return;
+    //qDebug()<<"checkClosedCircuitVoltageGroup";
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
@@ -51,7 +51,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     }
     // !!! лишние label вообще стереть.
     // подготовить график
-    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
+    /*ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
     ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
     ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue dot
@@ -69,7 +69,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
     ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, cycleTimeSec+1);
     ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
+    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);*/
 
     if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
         //iStepClosedCircuitVoltageGroup = 1;
@@ -202,7 +202,7 @@ stop:
     if(ret) goto stop;
 
     // добавить цепи в комбобокс распассивации
-    modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
+    //modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
     for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
     {
         QStandardItem* item;
@@ -219,9 +219,9 @@ stop:
         }
         modelDepassivation->setItem(r+1, 0, item);
     }
-    ui->cbDepassivation->setModel(modelDepassivation);
-    ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
-    ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
+    //ui->cbDepassivation->setModel(modelDepassivation);
+    //ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
+    //ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
 
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима

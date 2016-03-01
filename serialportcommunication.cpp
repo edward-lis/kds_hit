@@ -47,7 +47,6 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
                 bFirstPing = false;
                 sendPing();
                 ui->btnCheckConnectedBattery->setEnabled(true); // т.к. коробочка на связи и сбросилась в исходное, то разрешим кнопочку "Проверить батарею"
-                ui->groupBoxDiagnosticMode->setEnabled(true); // разрешить выбор режима
             }
         }
         else // пришла какая-то другая посылка
@@ -139,9 +138,10 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
         ui->comboBoxCOMPort->setEnabled(true); // и разрешим комбобокс выбора порта
         ui->statusBar->showMessage(tr("Порт закрыт"));
         timerPing->stop();// остановить пинг
-        ui->btnCheckConnectedBattery->setEnabled(false); // закрыть кнопку проверки батареи
-        ui->groupBoxDiagnosticDevice->setEnabled(false); // закрыть группу выбора батареи
-        ui->groupBoxDiagnosticMode->setEnabled(false); // закрыть группу выбора режима проверки
+        ui->groupBoxDiagnosticDevice->setDisabled(true); // закрыть группу выбора батареи
+        ui->groupBoxDiagnosticMode->setDisabled(true); // запретить бокс выбора режима диагностики
+        ui->groupBoxCheckParams->setDisabled(true); // запретить бокс выбора параметра проверки ручного режима
+        ui->groupBoxCheckParamsAutoMode->setDisabled(true); // запретить бокс выбора начальных параметров проверки автоматического режима
         bPortOpen = false;
         loop.exit(-1); // закончить цикл ожидания ответа
     }

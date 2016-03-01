@@ -10,7 +10,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения разомкнутых цепей групп
 void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
 {
-    checkOpenCircuitVoltageGroup(); return;
+    //checkOpenCircuitVoltageGroup(); return;
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)

@@ -170,16 +170,16 @@ MainWindow::MainWindow(QWidget *parent) :
     bState = false;
     /// Заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
     for (int i = 0; i < 35; i++) {
-        dArrayVoltageOnTheHousing.append(0);
-        dArrayInsulationResistance.append(0);
-        dArrayOpenCircuitVoltageGroup.append(0);
-        dArrayOpenCircuitVoltageBattery.append(0);
-        dArrayClosedCircuitVoltageGroup.append(0);
-        dArrayDepassivation.append(0);
-        dArrayClosedCircuitVoltageBattery.append(0);
-        dArrayInsulationResistanceUUTBB.append(0);
-        dArrayOpenCircuitVoltagePowerSupply.append(0);
-        dArrayClosedCircuitVoltagePowerSupply.append(0);
+        dArrayVoltageOnTheHousing.append(-1);
+        dArrayInsulationResistance.append(-1);
+        dArrayOpenCircuitVoltageGroup.append(-1);
+        dArrayOpenCircuitVoltageBattery.append(-1);
+        dArrayClosedCircuitVoltageGroup.append(-1);
+        dArrayDepassivation.append(-1);
+        dArrayClosedCircuitVoltageBattery.append(-1);
+        dArrayInsulationResistanceUUTBB.append(-1);
+        dArrayOpenCircuitVoltagePowerSupply.append(-1);
+        dArrayClosedCircuitVoltagePowerSupply.append(-1);
     }
 
     iBatteryIndex = 0;
@@ -190,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // состояния виджетов в зависимости от признака отладки
     bDeveloperState = !settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
-    triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.
+    //triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.
 }
 
 MainWindow::~MainWindow()
@@ -365,15 +365,14 @@ void MainWindow::Log(QString message, QString color)
 // нажата радиокнопка режим Авто
 void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 {
-    ui->groupBoxCheckParams->setDisabled(checked);
-    ui->btnStartStopAutoModeDiagnostic->setEnabled(checked);
+    ui->groupBoxCheckParamsAutoMode->setEnabled(checked);
     bModeManual = false;
 }
 
 // нажата радиокнопка режим Ручной
 void MainWindow::on_rbModeDiagnosticManual_toggled(bool checked)
 {
-    ui->rbVoltageOnTheHousing->setEnabled(checked);
+    ui->groupBoxCheckParams->setEnabled(checked);
     bModeManual = true;
 }
 
@@ -514,11 +513,10 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         Log("Начало проверки - Автоматический режим", "blue");
         bState = true;
 
-        ui->groupBoxCOMPort->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->groupBoxCheckParams->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
+        ui->groupBoxCOMPort->setDisabled(bState); // запрещаем комбобокс COM-порта
+        ui->groupBoxDiagnosticMode->setDisabled(bState); // запрещаем бокс выбора режима диагностики
+        ui->cbParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального параметра проверки автоматического режима
+        ui->cbSubParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального под-параметра проверки автоматического режима
         ((QPushButton*)sender())->setText("Стоп");
 
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
@@ -560,22 +558,15 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
             }
         }
         Log("Проверка завершена - Автоматический режим", "blue");
-        /*bState = false;
-        ui->groupBoxCOMPort->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->groupBoxCheckParams->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Пуск");*/
-    } //else {
-        bState = false;
-        ui->groupBoxCOMPort->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->groupBoxCheckParams->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Пуск");
-    //}
+        QMessageBox::information(this, ui->rbModeDiagnosticAuto->text(), "Проверка завершена!"); // выводим сообщение о завершении проверки
+    }
+
+    bState = false;
+    ui->groupBoxCOMPort->setDisabled(bState); // разрешаем комбобокс COM-порта
+    ui->groupBoxDiagnosticMode->setDisabled(bState); // разрешаем бокс выбора режима диагностики
+    ui->cbParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального параметра проверки автоматического режима
+    ui->cbSubParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального под-параметра проверки автоматического режима
+    ((QPushButton*)sender())->setText("Пуск");
 }
 
 void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)

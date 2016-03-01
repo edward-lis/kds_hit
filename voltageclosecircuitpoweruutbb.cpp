@@ -12,7 +12,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения замкнутой цепи БП УУТББ
 void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
 {
-    checkClosedCircuitVoltagePowerSupply(); return;
+    //checkClosedCircuitVoltagePowerSupply(); return;
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)

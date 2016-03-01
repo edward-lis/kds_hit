@@ -111,11 +111,19 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(!((ui->comboBoxBatteryList->currentIndex()==0) && ui->cbIsUUTBB->isChecked()))
         {
             Log("Подключена батарея "+battery[0].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            ui->groupBoxDiagnosticMode->setDisabled(true); /// запретить выбрать режим диагностики
+            ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+            ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" УУТББ не соответствует выбранной");
         }
         else
         {
             Log("Подключена батарея "+battery[0].str_type_name+" УУТББ", "blue");
+            ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
+            if (ui->rbModeDiagnosticAuto->isChecked())
+                ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
+            else
+                ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
         }
     }
     if((0==x) && (1==y)) // 9ER20P-20
@@ -123,11 +131,19 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(!((ui->comboBoxBatteryList->currentIndex()==0) && !ui->cbIsUUTBB->isChecked()))
         {
             Log("Подключена батарея "+battery[0].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            ui->groupBoxDiagnosticMode->setDisabled(true); /// запретить выбрать режим диагностики
+            ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+            ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[0].str_type_name+" не соответствует выбранной");
         }
         else
         {
             Log("Подключена батарея "+battery[0].str_type_name, "blue");
+            ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
+            if (ui->rbModeDiagnosticAuto->isChecked())
+                ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
+            else
+                ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
         }
     }
     if((1==x) && (0==y)) // 9ЕR14PS-24 УУТББ
@@ -135,11 +151,19 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(!((ui->comboBoxBatteryList->currentIndex()==1) && ui->cbIsUUTBB->isChecked()))
         {
             Log("Подключена батарея "+battery[1].str_type_name+" УУТББ, но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            ui->groupBoxDiagnosticMode->setDisabled(true); /// запретить выбрать режим диагностики
+            ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+            ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" УУТББ не соответствует выбранной");
         }
         else
         {
             Log("Подключена батарея "+battery[1].str_type_name+" УУТББ", "blue");
+            ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
+            if (ui->rbModeDiagnosticAuto->isChecked())
+                ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
+            else
+                ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
         }
     }
     if((1==x) && (1==y)) //9ЕR14PS-24 или 9ER14P-24
@@ -147,11 +171,19 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(!(((ui->comboBoxBatteryList->currentIndex()==1) || (ui->comboBoxBatteryList->currentIndex()==2)) && !ui->cbIsUUTBB->isChecked()))
         {
             Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            ui->groupBoxDiagnosticMode->setDisabled(true); /// запретить выбрать режим диагностики
+            ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+            ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+" не соответствует выбранной");
         }
         else
         {
             Log("Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name, "blue");
+            ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
+            if (ui->rbModeDiagnosticAuto->isChecked())
+                ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
+            else
+                ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+"!");
         }
     }
@@ -160,20 +192,23 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         if(ui->comboBoxBatteryList->currentIndex()!=3) // если выбранная батарея не соответствует подключенной
         {
             Log("Подключена батарея "+battery[3].str_type_name+", но выбрана "+ui->comboBoxBatteryList->currentText()+(ui->cbIsUUTBB->isChecked()?" УУТББ":""), "red");
+            ui->groupBoxDiagnosticMode->setDisabled(true); /// запретить выбрать режим диагностики
+            ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+            ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключенная батарея "+battery[3].str_type_name+" не соответствует выбранной");
         }
         else
         {
             Log("Подключена батарея "+battery[3].str_type_name, "blue");
+            ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
+            if (ui->rbModeDiagnosticAuto->isChecked())
+                ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
+            else
+                ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
         }
     }
 stop:
     ui->btnCheckConnectedBattery->setEnabled(true); // по окончанию проверки разрешить кнопку
-    ui->groupBoxDiagnosticMode->setEnabled(true);
-    ui->groupBoxCheckParams->setEnabled(true);
-    ui->cbParamsAutoMode->setEnabled(true);
-    ui->cbSubParamsAutoMode->setEnabled(true);
-    ui->btnStartStopAutoModeDiagnostic->setEnabled(true);
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();

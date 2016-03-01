@@ -32,7 +32,17 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.dArrayClosedCircuitVoltageBattery
             << data.dArrayInsulationResistanceUUTBB
             << data.dArrayOpenCircuitVoltagePowerSupply
-            << data.dArrayClosedCircuitVoltagePowerSupply;
+            << data.dArrayClosedCircuitVoltagePowerSupply
+            << data.sArrayReportVoltageOnTheHousing
+            << data.sArrayReportInsulationResistance
+            << data.sArrayReportOpenCircuitVoltageGroup
+            << data.sArrayReportOpenCircuitVoltageBattery
+            << data.sArrayReportDepassivation
+            << data.sArrayReportClosedCircuitVoltageGroup
+            << data.sArrayReportClosedCircuitVoltageBattery
+            << data.sArrayReportInsulationResistanceUUTBB
+            << data.sArrayReportOpenCircuitVoltagePowerSupply
+            << data.sArrayReportClosedCircuitVoltagePowerSupply;
 }
 
 QDataStream &operator>>( QDataStream &stream, dataBattery &data )
@@ -63,7 +73,17 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.dArrayClosedCircuitVoltageBattery
             >> data.dArrayInsulationResistanceUUTBB
             >> data.dArrayOpenCircuitVoltagePowerSupply
-            >> data.dArrayClosedCircuitVoltagePowerSupply;
+            >> data.dArrayClosedCircuitVoltagePowerSupply
+            >> data.sArrayReportVoltageOnTheHousing
+            >> data.sArrayReportInsulationResistance
+            >> data.sArrayReportOpenCircuitVoltageGroup
+            >> data.sArrayReportOpenCircuitVoltageBattery
+            >> data.sArrayReportDepassivation
+            >> data.sArrayReportClosedCircuitVoltageGroup
+            >> data.sArrayReportClosedCircuitVoltageBattery
+            >> data.sArrayReportInsulationResistanceUUTBB
+            >> data.sArrayReportOpenCircuitVoltagePowerSupply
+            >> data.sArrayReportClosedCircuitVoltagePowerSupply;
 }
 
 /*!
@@ -111,7 +131,7 @@ void MainWindow::on_actionCheckSave_triggered()
     }
     data.dArrayClosedCircuitVoltageGroup = dArrayClosedCircuitVoltageGroup;
 
-    /// Распассивация
+    /// Распассивация /*переделать!*/
     for (int i = 0; i < ui->cbDepassivation->count(); i++)
     {
         QModelIndex index = ui->cbDepassivation->model()->index(i, 0);
@@ -139,6 +159,19 @@ void MainWindow::on_actionCheckSave_triggered()
         data.icbClosedCircuitVoltagePowerSupply = ui->cbClosedCircuitVoltagePowerSupply->currentIndex();
         data.dArrayClosedCircuitVoltagePowerSupply = dArrayClosedCircuitVoltagePowerSupply;
     }
+
+    /// выполненые проверки для отчета
+    data.sArrayReportVoltageOnTheHousing = sArrayReportVoltageOnTheHousing;
+    data.sArrayReportInsulationResistance = sArrayReportInsulationResistance;
+    data.sArrayReportOpenCircuitVoltageGroup = sArrayReportOpenCircuitVoltageGroup;
+    data.sArrayReportOpenCircuitVoltageBattery = sArrayReportOpenCircuitVoltageBattery;
+    data.sArrayReportDepassivation = sArrayReportDepassivation;
+    data.sArrayReportClosedCircuitVoltageGroup = sArrayReportClosedCircuitVoltageGroup;
+    data.sArrayReportClosedCircuitVoltageBattery = sArrayReportClosedCircuitVoltageBattery;
+    data.sArrayReportInsulationResistanceUUTBB = sArrayReportInsulationResistanceUUTBB;
+    data.sArrayReportOpenCircuitVoltagePowerSupply = sArrayReportOpenCircuitVoltagePowerSupply;
+    data.sArrayReportClosedCircuitVoltagePowerSupply = sArrayReportClosedCircuitVoltagePowerSupply;
+
     list << data;
 
     /// открывает диалог для размещения файла сохраненния проверки и задания его имени
@@ -159,6 +192,7 @@ void MainWindow::on_actionCheckSave_triggered()
     file.close(); /// закрываем файл
 
     Log(tr("Проверка успешно сохранена в файл <b>\"%0.dat\"</b>.").arg(QFileInfo(fileName).baseName()), "green");
+    QMessageBox::information(this, "Проверка", "Проверка успешно сохранена в файл!"); // выводим сообщение о завершении сохранения проверки в файла
 }
 
 
@@ -191,192 +225,252 @@ void MainWindow::on_actionCheckLoad_triggered()
         ui->cbParamsAutoMode->setCurrentIndex(data.icbParamsAutoMode);
         ui->cbSubParamsAutoMode->setCurrentIndex(data.icbSubParamsAutoMode);
 
+        /// выполненые проверки для отчета
+        sArrayReportVoltageOnTheHousing = data.sArrayReportVoltageOnTheHousing;
+        sArrayReportInsulationResistance = data.sArrayReportInsulationResistance;
+        sArrayReportOpenCircuitVoltageGroup = data.sArrayReportOpenCircuitVoltageGroup;
+        sArrayReportOpenCircuitVoltageBattery = data.sArrayReportOpenCircuitVoltageBattery;
+        sArrayReportDepassivation = data.sArrayReportDepassivation;
+        sArrayReportClosedCircuitVoltageGroup = data.sArrayReportClosedCircuitVoltageGroup;
+        sArrayReportClosedCircuitVoltageBattery = data.sArrayReportClosedCircuitVoltageBattery;
+        sArrayReportInsulationResistanceUUTBB = data.sArrayReportInsulationResistanceUUTBB;
+        sArrayReportOpenCircuitVoltagePowerSupply = data.sArrayReportOpenCircuitVoltagePowerSupply;
+        sArrayReportClosedCircuitVoltagePowerSupply = data.sArrayReportClosedCircuitVoltagePowerSupply;
+
         /// Напряжение на корпусе
         ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);
         for (int i = 0; i < 2; i++) {
             dArrayVoltageOnTheHousing[i] = data.dArrayVoltageOnTheHousing[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
-            if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayVoltageOnTheHousing[i] != -1) {
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
+                QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
+                if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
+                    sResult = "Не норма!";
+                    color = "red";
+                }
+                else {
+                    sResult = "Норма";
+                    color = "green";
+                }
+                label->setText(str+" "+sResult);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
+        if (!sArrayReportVoltageOnTheHousing.isEmpty())
+            ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
 
         /// Сопротивление изоляции
         ui->cbInsulationResistance->setCurrentIndex(data.icbInsulationResistance);
         for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
-            str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
-            if (dArrayInsulationResistance[i] > settings.isolation_resistance_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayInsulationResistance[i] != -1) {
+                str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'g', 0);
+                QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
+                if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
+                    sResult = "Не норма!";
+                    color = "red";
+                }
+                else {
+                    sResult = "Норма";
+                    color = "green";
+                }
+                label->setText(str+" "+sResult);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
+        if (!sArrayReportInsulationResistance.isEmpty())
+            ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
+
 
         /// Напряжение разомкнутой цепи группы
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
+            dArrayOpenCircuitVoltageGroup[i] = data.dArrayOpenCircuitVoltageGroup[i];
             QStandardItem* item;
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(data.itemsOpenCircuitVoltageGroup[i+1], Qt::CheckStateRole);
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
 
-            dArrayOpenCircuitVoltageGroup[i] = data.dArrayOpenCircuitVoltageGroup[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-            if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayOpenCircuitVoltageGroup[i] != -1) {
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+                if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+        if (!sArrayReportOpenCircuitVoltageGroup.isEmpty())
+            ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+
 
         /// Напряжение разомкнутой цепи батареи
         for (int i = 0; i < 1; i++) {
-            dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageBattery%0").arg(i));
-            if (dArrayOpenCircuitVoltageBattery[i] > settings.opencircuitbattery_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayOpenCircuitVoltageBattery[i] != -1) {
+                dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageBattery%0").arg(i));
+                if (dArrayOpenCircuitVoltageBattery[i] > settings.opencircuitbattery_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
+        if (!sArrayReportOpenCircuitVoltageBattery.isEmpty())
+            ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
+
 
         /// Напряжение замкнутой цепи группы
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
+            dArrayClosedCircuitVoltageGroup[i] = data.dArrayClosedCircuitVoltageGroup[i];
             QStandardItem* item;
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(data.itemsClosedCircuitVoltageGroup[i+1], Qt::CheckStateRole);
             modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
 
-            dArrayClosedCircuitVoltageGroup[i] = data.dArrayClosedCircuitVoltageGroup[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
-            if (dArrayClosedCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayClosedCircuitVoltageGroup[i] != -1) {
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+                if (dArrayClosedCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
+        if (!sArrayReportClosedCircuitVoltageGroup.isEmpty())
+            ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
 
-        /// Распассивация
+
+        /// Распассивация /*переделать!*/
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
-            QStandardItem* item;
-            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
-            if (data.itemsDepassivation[i+1] == 2)
-                item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-            else
-                item->setFlags(Qt::NoItemFlags);
-            item->setData(data.itemsDepassivation[i+1], Qt::CheckStateRole);
-            modelDepassivation->setItem(i+1, 0, item);
-
             dArrayDepassivation[i] = data.dArrayDepassivation[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
-            if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayDepassivation[i] != -1) {
+                QStandardItem* item;
+                item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+                if (data.itemsDepassivation[i+1] == 2)
+                    item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+                else
+                    item->setFlags(Qt::NoItemFlags);
+                item->setData(data.itemsDepassivation[i+1], Qt::CheckStateRole);
+                modelDepassivation->setItem(i+1, 0, item);
+
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+                if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+        if (!sArrayReportDepassivation.isEmpty())
+            ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
+
 
         /// Напряжение замкнутой цепи батареи
         for (int i = 0; i < 1; i++) {
             dArrayClosedCircuitVoltageBattery[i] = data.dArrayClosedCircuitVoltageBattery[i];
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageBattery%0").arg(i));
-            if (dArrayClosedCircuitVoltageBattery[i] > settings.closecircuitbattery_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
+            if (dArrayClosedCircuitVoltageBattery[i] != -1) {
+                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[i]);
+                QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageBattery%0").arg(i));
+                if (dArrayClosedCircuitVoltageBattery[i] > settings.closecircuitbattery_limit) {
+                    str += " Не норма.";
+                    color = "red";
+                } else
+                    color = "green";
+                label->setText(str);
+                label->setStyleSheet("QLabel { color : "+color+"; }");
+            }
         }
-        ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+        if (!sArrayReportClosedCircuitVoltageBattery.isEmpty())
+            ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+
 
         /// только для батарей 9ER20P_20 или 9ER14PS_24
         if (iBatteryIndex == 0 or iBatteryIndex == 1) {
             /// Сопротивление изоляции УУТББ
             for (int i = 0; i < battery[iBatteryIndex].i_uutbb_resist_num; i++)
             {
+                dArrayInsulationResistanceUUTBB[i] = data.dArrayInsulationResistanceUUTBB[i];
                 QStandardItem* item;
                 item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[i]));
                 item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
                 item->setData(data.itemsInsulationResistanceUUTBB[i+1], Qt::CheckStateRole);
                 modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
 
-                dArrayInsulationResistanceUUTBB[i] = data.dArrayInsulationResistanceUUTBB[i];
-                str = tr("\"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
-                QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
-                if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
-                    str += " Не норма.";
-                    color = "red";
-                } else
-                    color = "green";
-                label->setText(str);
-                label->setStyleSheet("QLabel { color : "+color+"; }");
+                if (dArrayInsulationResistanceUUTBB[i] != -1) {
+                    str = tr("\"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
+                    QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+                    if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
+                        str += " Не норма.";
+                        color = "red";
+                    } else
+                        color = "green";
+                    label->setText(str);
+                    label->setStyleSheet("QLabel { color : "+color+"; }");
+                }
             }
-            ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
+            if (!sArrayReportInsulationResistanceUUTBB.isEmpty())
+                ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
+
 
             /// Напряжение разомкнутой цепи БП
             for (int i = 0; i < 1; i++) {
                 dArrayOpenCircuitVoltagePowerSupply[i] = data.dArrayOpenCircuitVoltagePowerSupply[i];
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayOpenCircuitVoltagePowerSupply[i]);
-                QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltagePowerSupply%0").arg(i));
-                if (dArrayOpenCircuitVoltagePowerSupply[i] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[i] > settings.uutbb_opencircuitpower_limit_max) {
-                    str += " Не норма.";
-                    color = "red";
-                } else
-                    color = "green";
-                label->setText(str);
-                label->setStyleSheet("QLabel { color : "+color+"; }");
+                if (dArrayOpenCircuitVoltagePowerSupply[i] != -1) {
+                    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayOpenCircuitVoltagePowerSupply[i]);
+                    QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltagePowerSupply%0").arg(i));
+                    if (dArrayOpenCircuitVoltagePowerSupply[i] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[i] > settings.uutbb_opencircuitpower_limit_max) {
+                        str += " Не норма.";
+                        color = "red";
+                    } else
+                        color = "green";
+                    label->setText(str);
+                    label->setStyleSheet("QLabel { color : "+color+"; }");
+                }
             }
-            ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+            if (!sArrayReportOpenCircuitVoltagePowerSupply.isEmpty())
+                ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+
 
             /// Напряжение замкнутой цепи БП
             ui->cbClosedCircuitVoltagePowerSupply->setCurrentIndex(data.icbClosedCircuitVoltagePowerSupply);
             for (int i = 0; i < 2; i++) {
                 dArrayClosedCircuitVoltagePowerSupply[i] = data.dArrayClosedCircuitVoltagePowerSupply[i];
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayClosedCircuitVoltagePowerSupply[i]);
-                QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltagePowerSupply%0").arg(i));
-                if (dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) {
-                    str += " Не норма.";
-                    color = "red";
-                } else
-                    color = "green";
-                label->setText(str);
-                label->setStyleSheet("QLabel { color : "+color+"; }");
+                if (dArrayClosedCircuitVoltagePowerSupply[i] != -1) {
+                    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayClosedCircuitVoltagePowerSupply[i]);
+                    QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltagePowerSupply%0").arg(i));
+                    if (dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) {
+                        str += " Не норма.";
+                        color = "red";
+                    } else
+                        color = "green";
+                    label->setText(str);
+                    label->setStyleSheet("QLabel { color : "+color+"; }");
+                }
             }
-            ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
+            if (!sArrayReportClosedCircuitVoltagePowerSupply.isEmpty())
+                ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
         }
     }
-    ui->btnBuildReport->setEnabled(true);
+    ui->btnBuildReport->setEnabled(true); /// разрешаем кнопку формирования отчета
+    ui->groupBoxCheckParams->setDisabled(true); /// запретить выбрать параметр проверки ручного режима
+    ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// запретить выбрать начальный параметр проверки автоматического режима
     Log(tr("Проверка успешно загружена из файла <b>\"%0.dat\"</b>.").arg(QFileInfo(fileName).baseName()), "green");
+    QMessageBox::information(this, "Проверка", "Проверка успешно загружена из файла!"); // выводим сообщение о завершении загрузки проверки из файла
 }
