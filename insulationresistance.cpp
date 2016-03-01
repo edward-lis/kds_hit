@@ -93,8 +93,8 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
-        // собрать режим
-        str_num.sprintf(" %02i", battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]); // напечатать номер точки измерения изоляции
+        // собрать режим /// i???
+        str_num.sprintf(" %02i", bModeManual?battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]:i+1); // напечатать номер точки измерения изоляции
         baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
         timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
@@ -161,9 +161,10 @@ void MainWindow::on_btnInsulationResistance_clicked()
         {
             Log("Сопротивление изоляции: " + ui->cbInsulationResistance->currentText() + "=" + strResist + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
         }
-        if(verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
+        if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
-        str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'g', 0);
+        // напечатать рез-т в закладку и в журнал
+        str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             str += " Не норма.";
@@ -201,7 +202,6 @@ stop:
     timerSend->start(settings.delay_after_request_before_next_ADC2);
     ret=loop.exec();
     if(ret) goto stop; // если ошибка - вывалиться из режима
-    ui->progressBar->setValue(ui->progressBar->value()+1);
 
     bCheckInProgress = false; // вышли из состояния проверки
 

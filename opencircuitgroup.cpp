@@ -10,105 +10,208 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения разомкнутых цепей групп
 void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
 {
-    checkOpenCircuitVoltageGroup(); return;
+    //checkOpenCircuitVoltageGroup(); return;
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
     quint16 codeLimit=settings.opencircuitgroup_limit_min/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QString str_num; // номер цепи
+    int i=0; // номер цепи
+    QLabel *label; // надпись в закладке
+
+    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
+    {
+        // остановить текущую проверку, выход
+        bCheckInProgress = false;
+        timerSend->stop(); // остановить посылку очередной команды в порт
+        timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
+        qDebug()<<"loop.isRunning()"<<loop.isRunning();
+        if(loop.isRunning())
+        {
+            loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
+        }
+        return;
+    }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
-    // очистить массивы посылки/приёма
-    baSendArray.clear();
-    baSendCommand.clear();
-    baRecvArray.clear();
+    bCheckInProgress = true; // вошли в состояние проверки
 
-    ui->statusBar->showMessage(tr("Проверка напряжения разомкнутых цепей групп ..."));
-    Log(tr("Проверка напряжения разомкнутых цепей групп"), "blue");
+    // запретим виджеты, чтоб не нажимались
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
 
-    // сбросить коробочку
-    baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
-    sendSerialData(); // послать baSendArray в порт
-    // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
-    ret=loop.exec();
-    if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
+    // откроем вкладку
+    ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
+    ui->statusBar->showMessage(tr("Проверка ")+ui->rbOpenCircuitVoltageGroup->text()+" ...");
 
-    // !!! если нечего проверять, список пуст - проверить алгоритм
-    // Пробежимся по списку цепей
-    for(int i=1; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
+    if(bModeManual)// если в ручном режиме
     {
-        QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i, 0);
-        Qt::CheckState checkState = sitm->checkState();
-        if (checkState != Qt::Checked) continue;
+        // переименовать кнопку
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
+        }
+
+        //i=ui->cbOpenCircuitVoltageGroup->currentIndex();
+        iCurrentStep=0; // в ручном начнём сначала
+        iMaxSteps=modelOpenCircuitVoltageGroup->rowCount()-1; // -1 с учётом первой строки в комбобоксе
+    }
+    else
+    {
+        ui->cbParamsAutoMode->setCurrentIndex(2); // переключаем режим комбокса на наш
+        iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
+        iMaxSteps = ui->cbSubParamsAutoMode->count();
+    }
+
+    // Пробежимся по списку цепей
+    for(i=iCurrentStep; i < iMaxSteps; i++)
+    {
+        if(bModeManual) // в ручном будем идти по чекбоксам
+        {
+            QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i+1, 0); // взять очередной номер
+            Qt::CheckState checkState = sitm->checkState(); // и его состояние
+            if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
+        }
+
+        ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса
+        ui->progressBar->reset();
+
+        // очистить массивы посылки/приёма
+        baSendArray.clear();
+        baSendCommand.clear();
+        baRecvArray.clear();
+
+        // сбросить коробочку
+        baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
+        timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
+        // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
+        ret=loop.exec();
+        if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         // собрать режим
-        str_num.sprintf(" %02i", i); // напечатать номер цепи
+        str_num.sprintf(" %02i", i+1); // напечатать номер цепи. т.к. счётчик от нуля, поэтому +1
         baSendArray=(baSendCommand="UocG")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-        QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+        timerSend->start(settings.delay_after_IDLE_before_other);
         ret=loop.exec();
         if(ret) goto stop;
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         // опросить
         baSendArray=baSendCommand+"?#";
-        QTimer::singleShot(settings.delay_after_start_before_request_ADC1, this, SLOT(sendSerialData()));
+        timerSend->start(settings.delay_after_start_before_request_ADC1);
         ret=loop.exec();
         if(ret) goto stop;
         codeADC = getRecvData(baRecvArray);
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+        dArrayOpenCircuitVoltageGroup[i] = fU;
 
-        battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась
+        battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась
         if(bDeveloperState)
-            Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
+            Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
+            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
+            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
             // добавить цепь в список исправных
-            battery[iBatteryIndex].b_flag_circuit[i-1] &= ~CIRCUIT_FAULT; // снять флаг - цепь неисправна
+            battery[iBatteryIndex].b_flag_circuit[i] &= ~CIRCUIT_FAULT; // снять флаг - цепь неисправна
         }
         else // напряжение меньше (не норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма! Проверка группы под нагрузкой запрещена.", "red");
+            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма! Проверка группы под нагрузкой запрещена.", "red");
             // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
+            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
             // установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
-            battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_FAULT;
+            battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_FAULT;
         }
 
-        qDebug()<<"battery[iBatteryIndex].b_flag_circuit[i-1]"<<battery[iBatteryIndex].b_flag_circuit[i-1];
+        // напечатать рез-т в закладку и в журнал
+        str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
+        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+        if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min){
+            str += " Не норма.";
+            color = "red";
+        } else
+            color = "green";
+        label->setText(str);
+        label->setStyleSheet("QLabel { color : "+color+"; }");
+        Log(str, color);
+        ui->btnBuildReport->setEnabled(true);
 
-        // разобрать режим
-        baSendArray = (baSendCommand="IDLE")+"#";
-        QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
-        ret=loop.exec();
-        if(ret) goto stop;
-    }
+        // при напряжении меньше нормы в автоматическом режиме проверка продолжается
+        /*if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
+            if(!bModeManual)// если в автоматическом режиме
+            {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                    bState = false;
+                    ui->groupBoxCOMPort->setDisabled(bState);
+                    ui->groupBoxDiagnosticMode->setDisabled(bState);
+                    ui->cbParamsAutoMode->setDisabled(bState);
+                    ui->cbSubParamsAutoMode->setDisabled(bState);
+                    ((QPushButton*)sender())->setText("Пуск");
+                    // остановить текущую проверку, выход
+                    bCheckInProgress = false;
+                    ui->rbModeDiagnosticManual->setChecked(true);
+                    break;
+                }
+            }
+        }*/
+
+        // флаги цепи qDebug()<<"battery[iBatteryIndex].b_flag_circuit[i-1]"<<battery[iBatteryIndex].b_flag_circuit[i];
+
+    }//for
 
 stop:
+    // сбросить коробочку
+    baSendArray = (baSendCommand="IDLE")+"#";
+    timerSend->start(settings.delay_after_request_before_next_ADC2);
+    ret=loop.exec();
+    if(ret) goto stop; // если ошибка - вывалиться из режима
+
+    bCheckInProgress = false; // вышли из состояния проверки
+
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
-        if(ret==1) Log(tr("Timeout!"), "red");
-        else if(ret==2) Log(tr("Incorrect reply!"), "red");
+        if(ret == KDS_TIMEOUT) Log(tr("Timeout!"), "red");
+        else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
+        else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
+    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
 
-    // разобрать режим (если, например, вывалились сюда по неверному ответу)
-    baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
-    ret=loop.exec();
-    if(ret) goto stop;
+    if(bModeManual)
+    {
+        bState = false;
+        //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
+        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
+        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
+        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
+        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
+    }
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
     baSendCommand.clear();
     baRecvArray.clear();
+    ui->progressBar->reset();
 
     // оформить комбобокс НЗЦг в соответствии с полученными данными, запретить выбор просевших групп
     for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
@@ -128,7 +231,6 @@ stop:
         modelClosedCircuitVoltageGroup->setItem(r+1, 0, item);
     }
     ui->cbClosedCircuitVoltageGroup->setModel(modelClosedCircuitVoltageGroup);
-
 }
 
 // слот вызывается при изменении чекбоксов элементов списка комбобокса

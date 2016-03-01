@@ -29,6 +29,13 @@
 Текущая проверка - прошедшие проверки, остановка, сохранение незаконченной долгой проверки, и т.д.
 Отчёт продолжить в старом файле, или бахнуть новый? ...
 Использовать журнал событий для.
+
+На вкладках стирать предыдущие или добавлять новые строки с результатами измерения.
+Потому что при повторных измерения нихрена не понятно, что измеряется.
+При начале режима писать везде: цепь такая-то не измерялась, потом идёт измерение, потом результат.
+
+dArrayOpenCircuitVoltageGroup и другие массивы перетащить в battery[]
+
 */
 
 /* Соглашения:
@@ -502,11 +509,13 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         bCheckInProgress = false;
         timerSend->stop(); // остановить посылку очередной команды в порт
         timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
-        qDebug()<<"loop.isRunning()"<<loop.isRunning();
+        //qDebug()<<"loop.isRunning()"<<loop.isRunning();
         if(loop.isRunning())
         {
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
+        bState = false;
+
         return;
     }
 
@@ -522,7 +531,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ((QPushButton*)sender())->setText("Стоп");
 
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
-            if (!bState) return; /// если прожали Стоп выходим из цикла
+            if (!bState) break; // если прожали Стоп выходим из цикла
             switch (i) {
             case 0:
                 //checkVoltageOnTheHousing();
@@ -535,7 +544,8 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 break;
             case 2:
                 //checkOpenCircuitVoltageGroup();
-                Log("checkOpenCircuitVoltageGroup()", "blue");
+                //Log("checkOpenCircuitVoltageGroup()", "blue");
+                on_btnOpenCircuitVoltageGroup_clicked();
                 break;
             case 3:
                 checkOpenCircuitVoltageBattery();
