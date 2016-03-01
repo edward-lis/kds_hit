@@ -365,7 +365,7 @@ void MainWindow::on_btnBuildReport_clicked()
 
     if (!sArrayReportClosedCircuitVoltageGroup.isEmpty()) {
         ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );
-        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageGroup).arg(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
+        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageGroup->text()).arg(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
     }
 
     if (!sArrayReportDepassivation.isEmpty()) {
