@@ -28,16 +28,26 @@ struct dataBattery {
     QList<QVariant> itemsClosedCircuitVoltageGroup; //// состояние чекбоксов "Напряжение замкнутой цепи группы"
     QList<QVariant> itemsDepassivation; //// состояние чекбоксов "Распассивация"
     QList<QVariant> itemsInsulationResistanceUUTBB; //// состояние чекбоксов "Сопротивления изоляции УУТББ"
-    QList<double> dArrayVoltageOnTheHousing;
-    QList<double> dArrayInsulationResistance;
-    QList<double> dArrayOpenCircuitVoltageGroup;
-    QList<double> dArrayOpenCircuitVoltageBattery;
-    QList<double> dArrayClosedCircuitVoltageGroup;
-    QList<double> dArrayDepassivation;
-    QList<double> dArrayClosedCircuitVoltageBattery;
-    QList<double> dArrayInsulationResistanceUUTBB;
-    QList<double> dArrayOpenCircuitVoltagePowerSupply;
-    QList<double> dArrayClosedCircuitVoltagePowerSupply;
+    QList<double> dArrayVoltageOnTheHousing; /// масив текущих значений проверок
+    QList<double> dArrayInsulationResistance; /// масив текущих значений проверок
+    QList<double> dArrayOpenCircuitVoltageGroup; /// масив текущих значений проверок
+    QList<double> dArrayOpenCircuitVoltageBattery; /// масив текущих значений проверок
+    QList<double> dArrayClosedCircuitVoltageGroup; /// масив текущих значений проверок
+    QList<double> dArrayDepassivation; /// масив текущих значений проверок
+    QList<double> dArrayClosedCircuitVoltageBattery; /// масив текущих значений проверок
+    QList<double> dArrayInsulationResistanceUUTBB; /// масив текущих значений проверок
+    QList<double> dArrayOpenCircuitVoltagePowerSupply; /// масив текущих значений проверок
+    QList<double> dArrayClosedCircuitVoltagePowerSupply; /// масив текущих значений проверок
+    QList<QString> sArrayReportVoltageOnTheHousing; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportInsulationResistance; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltageGroup; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltageBattery; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltageGroup; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportDepassivation; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltageBattery; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
 };
 
 #endif // DATAFILE_H

@@ -11,7 +11,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка распассивации
 void MainWindow::on_btnDepassivation_clicked()
 {
-    checkDepassivation(); return;
+    //checkDepassivation(); return;
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
@@ -57,14 +57,14 @@ void MainWindow::on_btnDepassivation_clicked()
     }
     // !!! лишние label вообще стереть.
     // Подготовка графика
-    ui->widgetDepassivation->addGraph(); // blue line
+    /*ui->widgetDepassivation->addGraph(); // blue line
     ui->widgetDepassivation->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetDepassivation->graph(0)->clearData();
     ui->widgetDepassivation->addGraph(); // blue dot
     ui->widgetDepassivation->graph(1)->clearData();
     ui->widgetDepassivation->graph(1)->setLineStyle(QCPGraph::lsNone);
     //ui->widgetDepassivation->graph(1)->setPen(QPen(Qt::green));
-    ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));*/
     /*ui->widgetDepassivation->addGraph(); // red line
     ui->widgetDepassivation->graph(2)->setPen(QPen(Qt::red));
     ui->widgetDepassivation->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
@@ -72,10 +72,10 @@ void MainWindow::on_btnDepassivation_clicked()
     ui->widgetDepassivation->graph(2)->addData(0, settings.closecircuitgroup_limit);
     ui->widgetDepassivation->graph(2)->addData(cycleTimeSec+1, settings.closecircuitgroup_limit);*/
 
-    ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
+    /*ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
     // ниже в цикле ui->widgetDepassivation->xAxis->setRange(0, cycleTimeSec+1);
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetDepassivation->yAxis->setRange(24, 33);
+    ui->widgetDepassivation->yAxis->setRange(24, 33);*/
 
     ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);

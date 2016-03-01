@@ -167,20 +167,38 @@ void MainWindow::on_btnInsulationResistance_clicked()
         str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
-            str += " Не норма.";
+            sResult = "Не норма!";
             color = "red";
-        } else
+        }
+        else {
+            sResult = "Норма";
             color = "green";
-        label->setText(str);
+        }
+        label->setText(str+" "+sResult);
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str, color);
+        Log(str+" "+sResult, color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
+
+        /// заполняем массив проверок для отчета
+        QDateTime dateTime = QDateTime::currentDateTime();
+        QString textTime = dateTime.toString("hh:mm:ss");
+        sArrayReportInsulationResistance.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "</tr>")
+                    .arg(textTime)
+                    .arg(battery[iBatteryIndex].str_isolation_resistance[i])
+                    .arg(dArrayInsulationResistance[i], 0, 'g', 0)
+                    .arg(sResult));
 
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             if(!bModeManual)// если в автоматическом режиме
             {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 Продолжить?").arg(str+" "+sResult), tr("Да"), tr("Нет"))) {
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState);
                     ui->groupBoxDiagnosticMode->setDisabled(bState);
@@ -223,9 +241,7 @@ stop:
         ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
         ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
         ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
-    } //else
-        // !!! а если выход из автомата в ручное???
-        //ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+    }
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.

@@ -10,7 +10,7 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки сопротивления изоляции УУТББ
 void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 {
-    checkInsulationResistanceUUTBB(); return;
+    //checkInsulationResistanceUUTBB(); return;
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
     float resist=0; // получившееся сопротивление

@@ -73,6 +73,17 @@ private:
     QList<double> dArrayInsulationResistanceUUTBB;
     QList<double> dArrayOpenCircuitVoltagePowerSupply;
     QList<double> dArrayClosedCircuitVoltagePowerSupply;
+    QList<QString> sArrayReportVoltageOnTheHousing; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportInsulationResistance; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltageGroup; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltageBattery; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltageGroup; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportDepassivation; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltageBattery; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QString sResult; /// строка результата проверки "Норма" или "Не норма!"
     QString str;
     QString color;
     QString paramMsg;

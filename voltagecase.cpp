@@ -132,23 +132,40 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
         if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit)
         {
-            str += " Не норма.";
+            sResult = "Не норма!";
             color = "red";
         }
-        else
+        else {
+            sResult = "Норма";
             color = "green";
-        label->setText(str);
+        }
+        label->setText(str+" "+sResult);
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str, color);
+        Log(str+" "+sResult, color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
+
+        /// заполняем массив проверок для отчета
+        QDateTime dateTime = QDateTime::currentDateTime();
+        QString textTime = dateTime.toString("hh:mm:ss");
+        sArrayReportVoltageOnTheHousing.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "</tr>")
+                    .arg(textTime)
+                    .arg(battery[iBatteryIndex].str_voltage_corpus[i])
+                    .arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2)
+                    .arg(sResult));
 
         if(codeU > codeLimit) // напряжение больше (в кодах)
         {
             if(!bModeManual)// если в автоматическом режиме
             {
                 //if(!bModeManual && !bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет")))
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(str+" "+sResult), tr("Да"), tr("Нет")))
                 {
                     qDebug()<<"переход в ручной режим";
                     Log("Останов проверки - переход в ручной режим", "blue");
