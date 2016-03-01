@@ -25,7 +25,6 @@ void MainWindow::on_btnBuildReport_clicked()
     printer.setPaperSize(QPrinter::A4);
     printer.setOutputFileName(fileName);
 
-
     /// шапка отчета
     sHtml = tr("<h1 style=\"text-align: center;\">Отчет проверки батареи: %0%1%2</h1>"\
                "<p align=\"center\">Дата производства: <b>%3</b> Номер батареи: <b>%4</b></p>"\
@@ -362,6 +361,23 @@ void MainWindow::on_btnBuildReport_clicked()
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
             "Дата: %0</p>").arg(textDate);
+
+
+    if (!sArrayReportClosedCircuitVoltageGroup.isEmpty()) {
+        ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );
+        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageGroup).arg(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
+    }
+
+    if (!sArrayReportDepassivation.isEmpty()) {
+        ui->widgetDepassivation->savePng(QDir::tempPath()+"DepassivationGraph.png",  493, 526, 1.0, -1 );
+        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbDepassivation->text()).arg(QDir::tempPath()+"DepassivationGraph.png");
+    }
+
+    if (!sArrayReportClosedCircuitVoltageBattery.isEmpty()) {
+        ui->widgetClosedCircuitBattery->savePng(QDir::tempPath()+"ClosedCircuitBatteryGraph.png",  413, 526, 1.0, -1 );
+        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageBattery->text()).arg(QDir::tempPath()+"ClosedCircuitBatteryGraph.png");
+    }
+
 
     QTextDocument doc;
     doc.setHtml(sHtml);
