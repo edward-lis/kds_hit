@@ -23,26 +23,75 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     QDateTime dt; // текущее время очередного измерения
     double x; // текущая координата Х
     int cycleTimeSec=settings.time_depassivation[2]; // длительность цикла проверки в секундах
-    bool firstMeasurement=true; // первое измерение
+    bool bFirstPoll=true; // первое измерение
+    int i=0; // номер цепи
+    QLabel *label; // надпись в закладке
+
+    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
+    {
+        // остановить текущую проверку, выход
+        bCheckInProgress = false;
+        timerSend->stop(); // остановить посылку очередной команды в порт
+        timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
+        qDebug()<<"loop.isRunning()"<<loop.isRunning();
+        if(loop.isRunning())
+        {
+            loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
+        }
+        return;
+    }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
+    bCheckInProgress = true; // вошли в состояние проверки
 
-    baSendArray.clear();
-    baSendCommand.clear();
-    baRecvArray.clear();
+    // запретим виджеты, чтоб не нажимались
+    ui->groupBoxCOMPort->setDisabled(bState);
+    ui->groupBoxDiagnosticDevice->setDisabled(bState);
+    ui->groupBoxDiagnosticMode->setDisabled(bState);
+    ui->cbParamsAutoMode->setDisabled(bState);
+    ui->cbSubParamsAutoMode->setDisabled(bState);
+
+    // откроем вкладку
+    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
+    ui->statusBar->showMessage(tr("Проверка ")+ui->rbClosedCircuitVoltageGroup->text()+" ...");
+
+    if(bModeManual)// если в ручном режиме
+    {
+        // переименовать кнопку
+        if(!bState) {
+            bState = true;
+            ui->groupBoxCheckParams->setEnabled(bState);
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
+        }
+
+        //i=ui->cbOpenCircuitVoltageGroup->currentIndex();
+        iCurrentStep=0; // в ручном начнём сначала
+        iMaxSteps=modelClosedCircuitVoltageGroup->rowCount()-1; // -1 с учётом первой строки в комбобоксе
+    }
+    else
+    {
+        ui->cbParamsAutoMode->setCurrentIndex(4); // переключаем режим комбокса на наш
+        iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
+        iMaxSteps = ui->cbSubParamsAutoMode->count();
+    }
 
     // написать про группы, в зависимости от признаков и флагов. !!! если НРЦг не проверялось, то и НЗЦг не проверять, во избежание.
-    for(int i=1; i<battery[iBatteryIndex].group_num+1; i++)
+    for(int i=0; i<battery[iBatteryIndex].group_num; i++)
     {
         QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
-        if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_OCG_TESTED))
+        if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
         {
-            label->setText(tr("%1) НРЦг не проверялось.").arg(i));
+            label->setText(tr("%1) НРЦг не проверялось.").arg(i+1));
         }
-        else if(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_FAULT)
+        else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
         {
-            label->setText(tr("%1) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i));
+            label->setText(tr("%1) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i+1));
         }
         else
         {
@@ -50,84 +99,65 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         }
     }
     // !!! лишние label вообще стереть.
-    // подготовить график
-    /*ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue line
-    ui->widgetClosedCircuitVoltageGroup->graph(0)->setPen(QPen(Qt::blue));
-    ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData();
-    ui->widgetClosedCircuitVoltageGroup->addGraph(); // blue dot
-    ui->widgetClosedCircuitVoltageGroup->graph(1)->clearData();
-    ui->widgetClosedCircuitVoltageGroup->graph(1)->setLineStyle(QCPGraph::lsNone);
-    //ui->widgetClosedCircuitVoltageGroup->graph(1)->setPen(QPen(Qt::green));
-    ui->widgetClosedCircuitVoltageGroup->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
-    ui->widgetClosedCircuitVoltageGroup->addGraph(); // red line
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->setPen(QPen(Qt::red));
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(cycleTimeSec+1, settings.closecircuitgroup_limit);
 
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, cycleTimeSec+1);
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);*/
-
-    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup") {
-        //iStepClosedCircuitVoltageGroup = 1;
-        bState = false;
-        //ui->btnClosedCircuitVoltageGroup_2->setEnabled(false);
-    }
-    if (((QPushButton*)sender())->objectName() == "btnClosedCircuitVoltageGroup_2")
-        bState = false;
-    // !!! спросить смысл if (!bState) return;
-    ui->groupBoxCOMPort->setEnabled(false);
-    ui->groupBoxDiagnosticDevice->setEnabled(false);
-    ui->groupBoxDiagnosticMode->setEnabled(false);
-    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
-
-    // сбросить коробочку
-    baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
-    sendSerialData(); // послать baSendArray в порт
-    // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
-    ret=loop.exec();
-    if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
-
-    // !!! если нечего проверять, список пуст - проверить алгоритм
     // Пробежимся по списку цепей
-    for(int i=1; i < modelClosedCircuitVoltageGroup->rowCount(); i++)
+    for(int i=iCurrentStep; i < iMaxSteps; i++)
     {
-        QStandardItem *sitm = modelClosedCircuitVoltageGroup->item(i, 0);
-        Qt::CheckState checkState = sitm->checkState();
-        if (checkState != Qt::Checked) continue;
+        if(bModeManual) // в ручном будем идти по чекбоксам
+        {
+            QStandardItem *sitm = modelClosedCircuitVoltageGroup->item(i+1, 0); // взять очередной номер
+            Qt::CheckState checkState = sitm->checkState(); // и его состояние
+            if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
+        }
 
-        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
-        label->setText(tr("%1) Идёт проверка ...").arg(i));
+        ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса !!! в зависимости от времени!
+        ui->progressBar->reset();
+
+        // очистить массивы посылки/приёма
+        baSendArray.clear();
+        baSendCommand.clear();
+        baRecvArray.clear();
+
+        // сбросить коробочку
+        baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
+        timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
+        // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
+        ret=loop.exec();
+        if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
+        ui->progressBar->setValue(ui->progressBar->value()+1);
+
+        // написать в закладке, что измеряется некоторая текущая цепь
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
+        label->setText(tr("%1) Идёт проверка ...").arg(i+1));
+
         // собрать режим
-        str_num.sprintf(" %02i %1i", i, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
+        str_num.sprintf(" %02i %1i", i+1, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
         baSendArray=(baSendCommand="UccG")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-        QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+        timerSend->start(settings.delay_after_IDLE_before_other);
         ret=loop.exec();
         if(ret) goto stop;
+        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         starttime = QDateTime::currentDateTime(); // время начала измерения
         dt = QDateTime::currentDateTime(); // текущее время
         ui->widgetClosedCircuitVoltageGroup->graph(0)->clearData(); // очистить график
 
+        bFirstPoll=true;// после сбора режима первый опрос
+
         while(-dt.msecsTo(starttime) < cycleTimeSec*1000) // пока время цикла проверки не вышло, продолжим измерять
         {
             // опросить
             baSendArray=baSendCommand+"?#";
-            QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+            timerSend->start(bFirstPoll?settings.delay_after_start_before_request_ADC1:settings.delay_after_request_before_next_ADC1);
             ret=loop.exec();
             if(ret) goto stop;
             codeADC = getRecvData(baRecvArray); // напряжение в коде
             fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
             // нарисуем график
-            if(firstMeasurement)
+            if(bFirstPoll)
             {
-                firstMeasurement = false;
+                bFirstPoll = false;
                 starttime = QDateTime::currentDateTime(); // время начала измерения начнём считать после получения первого ответа (чтобы график рисовался с нуля)
             }
             dt = QDateTime::currentDateTime(); // текущее время
@@ -137,33 +167,46 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->widgetClosedCircuitVoltageGroup->replot();
         }
 
+        dArrayClosedCircuitVoltageGroup[i] = fU;
+
         if(bDeveloperState) // если отладочный режим, написать в лог код АЦП
-            Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
+            Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
+
+        // напечатать рез-т в закладку и в журнал
+        str = tr("НЗЦг \"%1\" = <b>%2</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2);
+        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+        if (dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
+            str += " Не норма.";
+            color = "red";
+        } else
+            color = "green";
+        label->setText(str);
+        label->setStyleSheet("QLabel { color : "+color+"; }");
+        Log(str, color);
+        ui->btnBuildReport->setEnabled(true);
 
         // по окончанию цикла снять нагрузку, разобрать режим (!!! даже в ручном режиме)
         baSendArray = (baSendCommand="IDLE")+"#";
-        QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
+        timerSend->start(settings.delay_after_request_before_next_ADC1);
         ret=loop.exec();
         if(ret) goto stop;
 
-        str = tr("%1) Напряжение цепи 1 Х3 «Х3-» - %1 Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU, 'f', 2));
-        Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green"); // !!! анализ рез-та в вольтах. переделать в коды, как ниже.
         // проанализировать результаты, в кодах
         if(codeADC >= codeLimit) // напряжение больше (норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Норма.", "blue");
-            label->setText(tr("%1) %2 В. Норма.").arg(i).arg(QString::number(fU, 'f', 2)));
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения. !!! под нагрузкой???
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
+            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Норма.", "blue");
+            //label->setText(tr("%1) %2 В. Норма.").arg(i).arg(QString::number(fU, 'f', 2)));
+            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
+            // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
         }
         else // напряжение меньше (не норма)
         {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Не норма!", "red");
-            label->setText(tr("%1) %2 В. Не норма!").arg(i).arg(QString::number(fU, 'f', 2)));
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения. !!! под нагрузкой???
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-            // !!! добавить цепь в список распассивируемых
-            //int rett = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
+            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В. Не норма!", "red");
+            //label->setText(tr("%1) %2 В. Не норма!").arg(i).arg(QString::number(fU, 'f', 2)));
+            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
+            // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
+
+            // добавить цепь в список распассивируемых
             switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 В. Не норма! \nПродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
             case 0:
                 break;
@@ -171,7 +214,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                 //imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
                 //ui->cbDepassivation->addItem(battery[iBatteryIndex].circuitgroup[iStepClosedCircuitVoltageGroup-1]);
                 // !!! Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
-                battery[iBatteryIndex].b_flag_circuit[i-1] |= CIRCUIT_DEPASS; // добавить признак, что группе нужна депассивация
+                battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_DEPASS; // добавить признак, что группе нужна депассивация
                 break;
             case 2:
                 //ui->btnClosedCircuitVoltageGroup_2->setEnabled(true);
@@ -182,24 +225,44 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             default:
                 break;
             }
-            ui->rbModeDiagnosticManual->setChecked(true);
-            ui->rbModeDiagnosticAuto->setEnabled(false);
+            //ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
+            //ui->rbModeDiagnosticAuto->setEnabled(false); // запрет автоматической диагностики
         }
 
     }// конец цикла проверок цепей
 stop:
+    // сбросить коробочку
+    baSendArray = (baSendCommand="IDLE")+"#";
+    timerSend->start(settings.delay_after_request_before_next_ADC1);
+    ret=loop.exec();
+
+    bCheckInProgress = false; // вышли из состояния проверки
+
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
-        if(ret==1) Log(tr("Timeout!"), "red");
-        else if(ret==2) Log(tr("Incorrect reply!"), "red");
+        if(ret == KDS_TIMEOUT) Log(tr("Timeout!"), "red");
+        else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
+        else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
+    }
+    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
+
+    if(bModeManual)
+    {
+        bState = false;
+        //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
+        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
+        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
+        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
+        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
+        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
     }
 
-    // разобрать режим
-    baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
-    ret=loop.exec();
-    if(ret) goto stop;
+    timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
+    baSendArray.clear(); // очистить буфера команд.
+    baSendCommand.clear();
+    baRecvArray.clear();
+    ui->progressBar->reset();
 
     // добавить цепи в комбобокс распассивации
     //modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
@@ -218,23 +281,13 @@ stop:
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
         }
         modelDepassivation->setItem(r+1, 0, item);
+
+        if(dArrayClosedCircuitVoltageGroup[r] < settings.closecircuitgroup_limit) // если какая-либо цепь была меньше нормы
+            ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
     }
     //ui->cbDepassivation->setModel(modelDepassivation);
     //ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
     //ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
-
-
-    timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
-    baSendArray.clear(); // очистить буфера команд.
-    baSendCommand.clear();
-    baRecvArray.clear();
-
-    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
-    //iStepClosedCircuitVoltageGroup = 1;
-    ui->rbClosedCircuitVoltageBattery->setEnabled(true);
-    ui->groupBoxCOMPort->setEnabled(true);
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
 }
 
 // слот вызывается при изменении чекбоксов элементов списка комбобокса

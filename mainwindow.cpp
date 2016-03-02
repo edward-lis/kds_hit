@@ -550,7 +550,8 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 on_btnOpenCircuitVoltageBattery_clicked();
                 break;
             case 4:
-                checkClosedCircuitVoltageGroup();
+                //checkClosedCircuitVoltageGroup();
+                on_btnClosedCircuitVoltageGroup_clicked();
                 break;
             case 5:
                 checkClosedCircuitVoltageBattery();
