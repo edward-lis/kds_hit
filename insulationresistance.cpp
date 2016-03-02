@@ -44,13 +44,12 @@ void MainWindow::on_btnInsulationResistance_clicked()
     ui->groupBoxDiagnosticMode->setDisabled(bState);
     ui->cbParamsAutoMode->setDisabled(bState);
     ui->cbSubParamsAutoMode->setDisabled(bState);
+
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
     ui->statusBar->showMessage(tr("Проверка ")+ui->rbInsulationResistance->text()+" ...");
-    //ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
-    //ui->progressBar->reset();
 
     if(bModeManual)// если в ручном режиме
     {
@@ -63,7 +62,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
             bState = false;
             ((QPushButton*)sender())->setText("Пуск");
         }
-        //ui->progressBar->setValue(ui->progressBar->value()+1);
 
         i=ui->cbInsulationResistance->currentIndex();
         iCurrentStep=i; // чтобы цикл for выполнился только раз в ручном.
@@ -219,7 +217,6 @@ stop:
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC2);
     ret=loop.exec();
-    if(ret) goto stop; // если ошибка - вывалиться из режима
 
     bCheckInProgress = false; // вышли из состояния проверки
 

@@ -17,7 +17,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     float voltageU=0;
     int i=0; // номер цепи
     QLabel *label; // надпись в закладке
-    qDebug()<<"on_btnVoltageOnTheHousing_clicked";
+    //qDebug()<<"on_btnVoltageOnTheHousing_clicked";
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -217,13 +217,12 @@ stop:
         // !!! а если выход из автомата в ручное???
         //ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
 
-    ui->progressBar->reset();
-
     //ui->btnVoltageOnTheHousing->setEnabled(true); // разрешить кнопку
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear();
     baSendCommand.clear();
     baRecvArray.clear();
+    ui->progressBar->reset();
 }
 
 /*

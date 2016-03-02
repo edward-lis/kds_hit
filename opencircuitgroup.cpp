@@ -114,8 +114,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         timerSend->start(settings.delay_after_start_before_request_ADC1);
         ret=loop.exec();
         if(ret) goto stop;
-        codeADC = getRecvData(baRecvArray);
         ui->progressBar->setValue(ui->progressBar->value()+1);
+        codeADC = getRecvData(baRecvArray);
 
         fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
         dArrayOpenCircuitVoltageGroup[i] = fU;
@@ -123,6 +123,19 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась
         if(bDeveloperState)
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
+
+        // напечатать рез-т в закладку и в журнал
+        str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
+        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+        if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min){
+            str += " Не норма.";
+            color = "red";
+        } else
+            color = "green";
+        label->setText(str);
+        label->setStyleSheet("QLabel { color : "+color+"; }");
+        Log(str, color);
+        ui->btnBuildReport->setEnabled(true);
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)
@@ -141,19 +154,6 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             // установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
             battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_FAULT;
         }
-
-        // напечатать рез-т в закладку и в журнал
-        str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
-        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-        if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min){
-            str += " Не норма.";
-            color = "red";
-        } else
-            color = "green";
-        label->setText(str);
-        label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str, color);
-        ui->btnBuildReport->setEnabled(true);
 
         // при напряжении меньше нормы в автоматическом режиме проверка продолжается
         /*if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
@@ -181,9 +181,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
 stop:
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
-    timerSend->start(settings.delay_after_request_before_next_ADC2);
+    timerSend->start(settings.delay_after_request_before_next_ADC1);
     ret=loop.exec();
-    if(ret) goto stop; // если ошибка - вывалиться из режима
 
     bCheckInProgress = false; // вышли из состояния проверки
 
