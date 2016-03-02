@@ -554,7 +554,8 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 on_btnClosedCircuitVoltageGroup_clicked();
                 break;
             case 5:
-                checkClosedCircuitVoltageBattery();
+                //checkClosedCircuitVoltageBattery();
+                on_btnClosedCircuitVoltageBattery_clicked();
                 break;
             case 6:
                 checkInsulationResistanceUUTBB();

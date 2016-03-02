@@ -283,7 +283,10 @@ stop:
         modelDepassivation->setItem(r+1, 0, item);
 
         if(dArrayClosedCircuitVoltageGroup[r] < settings.closecircuitgroup_limit) // если какая-либо цепь была меньше нормы
+        {
             ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
+            bState = false;
+        }
     }
     //ui->cbDepassivation->setModel(modelDepassivation);
     //ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);

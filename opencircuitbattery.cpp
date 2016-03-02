@@ -122,7 +122,6 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     Log(str, color);
     ui->btnBuildReport->setEnabled(true);
 
-    qDebug()<<bModeManual<<codeADC<<codeLimit;
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)
     {
