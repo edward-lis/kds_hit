@@ -365,17 +365,17 @@ void MainWindow::on_btnBuildReport_clicked()
 
     if (!sArrayReportClosedCircuitVoltageGroup.isEmpty()) {
         ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );
-        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageGroup->text()).arg(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
+        sHtml += tr("<p><img src=\"%1\"/><br/>График. %0.</p>").arg(ui->rbClosedCircuitVoltageGroup->text()).arg(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
     }
 
     if (!sArrayReportDepassivation.isEmpty()) {
         ui->widgetDepassivation->savePng(QDir::tempPath()+"DepassivationGraph.png",  493, 526, 1.0, -1 );
-        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbDepassivation->text()).arg(QDir::tempPath()+"DepassivationGraph.png");
+        sHtml += tr("<p><img src=\"%1\"/><br/>График. %0.</p>").arg(ui->rbDepassivation->text()).arg(QDir::tempPath()+"DepassivationGraph.png");
     }
 
     if (!sArrayReportClosedCircuitVoltageBattery.isEmpty()) {
         ui->widgetClosedCircuitBattery->savePng(QDir::tempPath()+"ClosedCircuitBatteryGraph.png",  413, 526, 1.0, -1 );
-        sHtml += tr("<p>График. %0.</p><img src=\"%1\">").arg(ui->rbClosedCircuitVoltageBattery->text()).arg(QDir::tempPath()+"ClosedCircuitBatteryGraph.png");
+        sHtml += tr("<p><img src=\"%1\"/><br/>График. %0.</p>").arg(ui->rbClosedCircuitVoltageBattery->text()).arg(QDir::tempPath()+"ClosedCircuitBatteryGraph.png");
     }
 
 
