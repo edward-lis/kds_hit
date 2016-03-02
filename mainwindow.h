@@ -59,6 +59,9 @@ private:
     QStandardItemModel *modelDepassivation;
     QStandardItemModel *modelOpenCircuitVoltageGroup;
     QStandardItemModel *modelInsulationResistanceUUTBB;
+    QStandardItem *item;
+    QLabel *label; // надпись в закладке
+    QDateTime dateTime; /// время окончания проверки для отчета
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     int iCurrentStep;
     int iMaxSteps;

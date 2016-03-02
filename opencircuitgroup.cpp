@@ -18,7 +18,17 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     int ret=0; // код возврата ошибки
     QString str_num; // номер цепи
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
+
+    /// по началу проверки очистим все label'ы и полученные результаты
+    for (int i = 0; i < 28; i++) {
+        dArrayOpenCircuitVoltageGroup[i] = -1;
+        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num)
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+    }
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -42,8 +52,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     ui->groupBoxCOMPort->setDisabled(bState);
     ui->groupBoxDiagnosticDevice->setDisabled(bState);
     ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
+    ui->groupBoxCheckParamsAutoMode->setDisabled(bState);
 
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
@@ -125,17 +134,37 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
+        str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
         label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
         if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min){
-            str += " Не норма.";
+            sResult = "Не норма!";
             color = "red";
-        } else
+        }
+        else {
+            sResult = "Норма";
             color = "green";
-        label->setText(str);
+        }
+        label->setText(str+" "+sResult);
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str, color);
+        Log(str+" "+sResult, color);
+
         ui->btnBuildReport->setEnabled(true);
+
+        /// заполняем массив проверок для отчета
+        dateTime = QDateTime::currentDateTime();
+        sArrayReportOpenCircuitVoltageGroup.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "    <td>%4</td>"\
+                       "</tr>")
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(i+1)
+                    .arg(battery[iBatteryIndex].circuitgroup[i])
+                    .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
+                    .arg(sResult));
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)

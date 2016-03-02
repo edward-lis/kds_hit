@@ -21,10 +21,10 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     double x; // текущая координата Х
     bool bFirstPoll=true; // первое измерение
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
 
     // Подготовка графика !!! перетащить в mainwindow
-    ui->widgetClosedCircuitBattery->addGraph(); // blue line
+    /*ui->widgetClosedCircuitBattery->addGraph(); // blue line
     ui->widgetClosedCircuitBattery->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetClosedCircuitBattery->graph(0)->clearData();
     ui->widgetClosedCircuitBattery->addGraph(); // blue dot
@@ -42,7 +42,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     ui->widgetClosedCircuitBattery->xAxis->setLabel(tr("Время, c"));
     ui->widgetClosedCircuitBattery->xAxis->setRange(0, settings.time_closecircuitbattery+2);
     ui->widgetClosedCircuitBattery->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);
+    ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);*/
     // показать закладку на экране
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
@@ -159,16 +159,36 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
     // напечатать рез-т в закладку и в журнал
-    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0]);
+    str = tr("%0) \"%1\" = <b>%2</b> В.").arg(1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0]);
     if (dArrayClosedCircuitVoltageBattery[0] < settings.closecircuitbattery_limit) {
-        str += " Не норма.";
+        sResult = "Не норма!";
         color = "red";
-    } else
+    }
+    else {
+        sResult = "Норма";
         color = "green";
-    ui->labelClosedCircuitVoltageBattery0->setText(str);
+    }
+    ui->labelClosedCircuitVoltageBattery0->setText(str+" "+sResult);
     ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
-    Log(str, color);
+    Log(str+" "+sResult, color);
+
     ui->btnBuildReport->setEnabled(true);
+
+    /// заполняем массив проверок для отчета
+    dateTime = QDateTime::currentDateTime();
+    sArrayReportClosedCircuitVoltageBattery.append(
+                tr("<tr>"\
+                   "    <td>%0</td>"\
+                   "    <td>%1</td>"\
+                   "    <td>%2</td>"\
+                   "    <td>%3</td>"\
+                   "    <td>%4</td>"\
+                   "</tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(1)
+                .arg(battery[iBatteryIndex].circuitbattery)
+                .arg(dArrayClosedCircuitVoltageBattery[0])
+                .arg(sResult));
 
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)

@@ -242,7 +242,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         for (int i = 0; i < 2; i++) {
             dArrayVoltageOnTheHousing[i] = data.dArrayVoltageOnTheHousing[i];
             if (dArrayVoltageOnTheHousing[i] != -1) {
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
                 QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
                 if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
                     sResult = "Не норма!";
@@ -264,7 +264,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
             if (dArrayInsulationResistance[i] != -1) {
-                str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'g', 0);
+                str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'g', 0);
                 QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
                 if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
                     sResult = "Не норма!";
@@ -293,14 +293,17 @@ void MainWindow::on_actionCheckLoad_triggered()
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
 
             if (dArrayOpenCircuitVoltageGroup[i] != -1) {
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
                 QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
                 if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                    str += " Не норма.";
+                    sResult = "Не норма!";
                     color = "red";
-                } else
+                }
+                else {
+                    sResult = "Норма";
                     color = "green";
-                label->setText(str);
+                }
+                label->setText(str+" "+sResult);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
@@ -310,16 +313,19 @@ void MainWindow::on_actionCheckLoad_triggered()
 
         /// Напряжение разомкнутой цепи батареи
         for (int i = 0; i < 1; i++) {
+            dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
             if (dArrayOpenCircuitVoltageBattery[i] != -1) {
-                dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i]);
                 QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageBattery%0").arg(i));
                 if (dArrayOpenCircuitVoltageBattery[i] > settings.opencircuitbattery_limit) {
-                    str += " Не норма.";
+                    sResult = "Не норма!";
                     color = "red";
-                } else
+                }
+                else {
+                    sResult = "Норма";
                     color = "green";
-                label->setText(str);
+                }
+                label->setText(str+" "+sResult);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
@@ -338,14 +344,17 @@ void MainWindow::on_actionCheckLoad_triggered()
             modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
 
             if (dArrayClosedCircuitVoltageGroup[i] != -1) {
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i]);
                 QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
                 if (dArrayClosedCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
-                    str += " Не норма.";
+                    sResult = "Не норма!";
                     color = "red";
-                } else
+                }
+                else {
+                    sResult = "Норма";
                     color = "green";
-                label->setText(str);
+                }
+                label->setText(str+" "+sResult);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
@@ -367,14 +376,17 @@ void MainWindow::on_actionCheckLoad_triggered()
                 item->setData(data.itemsDepassivation[i+1], Qt::CheckStateRole);
                 modelDepassivation->setItem(i+1, 0, item);
 
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayDepassivation[i]);
                 QLabel * label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
                 if (dArrayDepassivation[i] > settings.closecircuitgroup_limit) {
-                    str += " Не норма.";
+                    sResult = "Не норма!";
                     color = "red";
-                } else
+                }
+                else {
+                    sResult = "Норма";
                     color = "green";
-                label->setText(str);
+                }
+                label->setText(str+" "+sResult);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
@@ -386,14 +398,17 @@ void MainWindow::on_actionCheckLoad_triggered()
         for (int i = 0; i < 1; i++) {
             dArrayClosedCircuitVoltageBattery[i] = data.dArrayClosedCircuitVoltageBattery[i];
             if (dArrayClosedCircuitVoltageBattery[i] != -1) {
-                str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[i]);
                 QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageBattery%0").arg(i));
                 if (dArrayClosedCircuitVoltageBattery[i] > settings.closecircuitbattery_limit) {
-                    str += " Не норма.";
+                    sResult = "Не норма!";
                     color = "red";
-                } else
+                }
+                else {
+                    sResult = "Норма";
                     color = "green";
-                label->setText(str);
+                }
+                label->setText(str+" "+sResult);
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
@@ -414,14 +429,17 @@ void MainWindow::on_actionCheckLoad_triggered()
                 modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
 
                 if (dArrayInsulationResistanceUUTBB[i] != -1) {
-                    str = tr("\"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
+                    str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
                     QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
                     if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
-                        str += " Не норма.";
+                        sResult = "Не норма!";
                         color = "red";
-                    } else
+                    }
+                    else {
+                        sResult = "Норма";
                         color = "green";
-                    label->setText(str);
+                    }
+                    label->setText(str+" "+sResult);
                     label->setStyleSheet("QLabel { color : "+color+"; }");
                 }
             }
@@ -433,14 +451,17 @@ void MainWindow::on_actionCheckLoad_triggered()
             for (int i = 0; i < 1; i++) {
                 dArrayOpenCircuitVoltagePowerSupply[i] = data.dArrayOpenCircuitVoltagePowerSupply[i];
                 if (dArrayOpenCircuitVoltagePowerSupply[i] != -1) {
-                    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayOpenCircuitVoltagePowerSupply[i]);
+                    str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayOpenCircuitVoltagePowerSupply[i]);
                     QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltagePowerSupply%0").arg(i));
                     if (dArrayOpenCircuitVoltagePowerSupply[i] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[i] > settings.uutbb_opencircuitpower_limit_max) {
-                        str += " Не норма.";
+                        sResult = "Не норма!";
                         color = "red";
-                    } else
+                    }
+                    else {
+                        sResult = "Норма";
                         color = "green";
-                    label->setText(str);
+                    }
+                    label->setText(str+" "+sResult);
                     label->setStyleSheet("QLabel { color : "+color+"; }");
                 }
             }
@@ -453,14 +474,17 @@ void MainWindow::on_actionCheckLoad_triggered()
             for (int i = 0; i < 2; i++) {
                 dArrayClosedCircuitVoltagePowerSupply[i] = data.dArrayClosedCircuitVoltagePowerSupply[i];
                 if (dArrayClosedCircuitVoltagePowerSupply[i] != -1) {
-                    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayClosedCircuitVoltagePowerSupply[i]);
+                    str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayClosedCircuitVoltagePowerSupply[i]);
                     QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltagePowerSupply%0").arg(i));
                     if (dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) {
-                        str += " Не норма.";
+                        sResult = "Не норма!";
                         color = "red";
-                    } else
+                    }
+                    else {
+                        sResult = "Норма";
                         color = "green";
-                    label->setText(str);
+                    }
+                    label->setText(str+" "+sResult);
                     label->setStyleSheet("QLabel { color : "+color+"; }");
                 }
             }

@@ -95,7 +95,7 @@ void MainWindow::on_btnDepassivation_clicked()
         QStandardItem *sitm = modelDepassivation->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState != Qt::Checked) continue;
-        QLabel * label = findChild<QLabel*>(tr("labelDepassivation%1").arg(i));
+        label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
 
         // три ступени распассивации
         for(int k=0; k<3; k++)
@@ -148,7 +148,29 @@ void MainWindow::on_btnDepassivation_clicked()
             ret=loop.exec();
             if(ret) goto stop;
         }
-        label->setText(tr("%1) Распассивация закончена").arg(i));
+        //label->setText(tr("%1) Распассивация закончена").arg(i));
+
+        sResult = "Выполнена";
+        color = "green";
+        label->setText(str+" "+sResult);
+        label->setStyleSheet("QLabel { color : "+color+"; }");
+        Log(str+" "+sResult, color);
+
+        ui->btnBuildReport->setEnabled(true);
+
+        /// заполняем массив проверок для отчета
+        dateTime = QDateTime::currentDateTime();
+        sArrayReportDepassivation.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "</tr>")
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(i+1)
+                    .arg(battery[iBatteryIndex].circuitgroup[i])
+                    .arg(sResult));
 #if 0
         str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));
         Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green");

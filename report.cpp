@@ -58,6 +58,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -87,6 +90,9 @@ void MainWindow::on_btnBuildReport_clicked()
                             "<tr>"\
                                 "<td>"\
                                     "<p><b>Время</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Цепь</b></p>"\
@@ -119,6 +125,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -147,6 +156,9 @@ void MainWindow::on_btnBuildReport_clicked()
                             "<tr>"\
                                 "<td>"\
                                     "<p><b>Время</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Цепь</b></p>"\
@@ -179,6 +191,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
+                                    "<p><b>№</b></p>"\
+                                "</td>"\
+                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -209,10 +224,10 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>Цепь</b></p>"\
+                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>Значение</b></p>"\
+                                    "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
@@ -237,6 +252,9 @@ void MainWindow::on_btnBuildReport_clicked()
                             "<tr>"\
                                 "<td>"\
                                     "<p><b>Время</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Цепь</b></p>"\
@@ -272,6 +290,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                         "<p><b>Время</b></p>"\
                                     "</td>"\
                                     "<td>"\
+                                        "<p><b>№</b></p>"\
+                                    "</td>"\
+                                    "<td>"\
                                         "<p><b>Цепь</b></p>"\
                                     "</td>"\
                                     "<td>"\
@@ -302,6 +323,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                         "<p><b>Время</b></p>"\
                                     "</td>"\
                                     "<td>"\
+                                        "<p><b>№</b></p>"\
+                                    "</td>"\
+                                    "<td>"\
                                         "<p><b>Цепь</b></p>"\
                                     "</td>"\
                                     "<td>"\
@@ -330,6 +354,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<tr>"\
                                     "<td>"\
                                         "<p><b>Время</b></p>"\
+                                    "</td>"\
+                                    "<td>"\
+                                        "<p><b>№</b></p>"\
                                     "</td>"\
                                     "<td>"\
                                         "<p><b>Цепь</b></p>"\

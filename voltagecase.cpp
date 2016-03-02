@@ -16,7 +16,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     quint16 codeLimit=settings.voltage_corpus_limit/settings.coefADC2 + settings.offsetADC2; // код, пороговое напряжение.
     float voltageU=0;
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
     //qDebug()<<"on_btnVoltageOnTheHousing_clicked";
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
@@ -129,9 +129,8 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         }
 
         label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
-        str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
-        if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit)
-        {
+        str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
+        if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
             sResult = "Не норма!";
             color = "red";
         }
@@ -146,16 +145,17 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
         /// заполняем массив проверок для отчета
-        QDateTime dateTime = QDateTime::currentDateTime();
-        QString textTime = dateTime.toString("hh:mm:ss");
+        dateTime = QDateTime::currentDateTime();
         sArrayReportVoltageOnTheHousing.append(
                     tr("<tr>"\
                        "    <td>%0</td>"\
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
-                    .arg(textTime)
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(i+1)
                     .arg(battery[iBatteryIndex].str_voltage_corpus[i])
                     .arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2)
                     .arg(sResult));

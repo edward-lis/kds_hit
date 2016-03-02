@@ -162,7 +162,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
+        str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             sResult = "Не норма!";
@@ -179,16 +179,17 @@ void MainWindow::on_btnInsulationResistance_clicked()
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
         /// заполняем массив проверок для отчета
-        QDateTime dateTime = QDateTime::currentDateTime();
-        QString textTime = dateTime.toString("hh:mm:ss");
+        dateTime = QDateTime::currentDateTime();
         sArrayReportInsulationResistance.append(
                     tr("<tr>"\
                        "    <td>%0</td>"\
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
-                    .arg(textTime)
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(i+1)
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
                     .arg(dArrayInsulationResistance[i], 0, 'g', 0)
                     .arg(sResult));

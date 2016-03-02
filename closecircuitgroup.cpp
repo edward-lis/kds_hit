@@ -25,7 +25,17 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     int cycleTimeSec=settings.time_depassivation[2]; // длительность цикла проверки в секундах
     bool bFirstPoll=true; // первое измерение
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
+
+    /// по началу проверки очистим все label'ы и полученные результаты
+    for (int i = 0; i < 28; i++) {
+        dArrayClosedCircuitVoltageGroup[i] = -1;
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num)
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+    }
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -173,17 +183,37 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("НЗЦг \"%1\" = <b>%2</b> В.").arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2);
+        str = tr("%0) НЗЦг \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2);
         QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
         if (dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
-            str += " Не норма.";
+            sResult = "Не норма!";
             color = "red";
-        } else
+        }
+        else {
+            sResult = "Норма";
             color = "green";
-        label->setText(str);
+        }
+        label->setText(str+" "+sResult);
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str, color);
+        Log(str+" "+sResult, color);
+
         ui->btnBuildReport->setEnabled(true);
+
+        /// заполняем массив проверок для отчета
+        dateTime = QDateTime::currentDateTime();
+        sArrayReportClosedCircuitVoltageGroup.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "    <td>%4</td>"\
+                       "</tr>")
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(i+1)
+                    .arg(battery[iBatteryIndex].circuitgroup[i])
+                    .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
+                    .arg(sResult));
 
         // по окончанию цикла снять нагрузку, разобрать режим (!!! даже в ручном режиме)
         baSendArray = (baSendCommand="IDLE")+"#";

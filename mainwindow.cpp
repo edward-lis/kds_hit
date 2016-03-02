@@ -168,6 +168,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetDepassivation->yAxis->setRange(24, 33);
 
+    /// описание графика для "Напряжение замкнутой цепи батареи"
+    ui->widgetClosedCircuitBattery->addGraph(); // blue line
+    ui->widgetClosedCircuitBattery->graph(0)->setPen(QPen(Qt::blue));
+    ui->widgetClosedCircuitBattery->graph(0)->clearData();
+    ui->widgetClosedCircuitBattery->addGraph(); // blue dot
+    ui->widgetClosedCircuitBattery->graph(1)->clearData();
+    ui->widgetClosedCircuitBattery->graph(1)->setLineStyle(QCPGraph::lsNone);
+    //ui->widgetClosedCircuitVoltagePowerUUTBB->graph(1)->setPen(QPen(Qt::green));
+    ui->widgetClosedCircuitBattery->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetClosedCircuitBattery->addGraph(); // red line
+    ui->widgetClosedCircuitBattery->graph(2)->setPen(QPen(Qt::red));
+    ui->widgetClosedCircuitBattery->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
+    ui->widgetClosedCircuitBattery->graph(2)->clearData();
+    ui->widgetClosedCircuitBattery->graph(2)->addData(0, settings.closecircuitbattery_limit);
+    ui->widgetClosedCircuitBattery->graph(2)->addData(settings.time_closecircuitbattery+2, settings.closecircuitbattery_limit);
+    ui->widgetClosedCircuitBattery->xAxis->setLabel(tr("Время, c"));
+    ui->widgetClosedCircuitBattery->xAxis->setRange(0, settings.time_closecircuitbattery+2);
+    ui->widgetClosedCircuitBattery->yAxis->setLabel(tr("Напряжение, В"));
+    ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);
+
     /// удаляем все вкладки кроме первой - журнала событий(0), каждый раз удаляем вторую(1)
     int tab_count = ui->tabWidget->count();
     for (int i = 1; i < tab_count; i++) {
@@ -250,33 +270,75 @@ void MainWindow::delay( int millisecondsToWait )
 void MainWindow::comboxSetData() {
     ui->cbParamsAutoMode->clear();
 
+    /// скрываем все вкладки кроме журнала событий
+    int tab_count = ui->tabWidget->count();
+    for (int i = 1; i < tab_count; i++) {
+        ui->tabWidget->removeTab(1);
+    }
+
+    /// восстанавливаем значение масивов проверки в исходное
+    if (!dArrayVoltageOnTheHousing.isEmpty()) {
+        for (int i = 0; i < 35; i++) {
+            dArrayVoltageOnTheHousing[i];
+            dArrayInsulationResistance[i];
+            dArrayOpenCircuitVoltageGroup[i];
+            dArrayOpenCircuitVoltageBattery[i];
+            dArrayClosedCircuitVoltageGroup[i];
+            dArrayDepassivation[i];
+            dArrayClosedCircuitVoltageBattery[i];
+            dArrayInsulationResistanceUUTBB[i];
+            dArrayOpenCircuitVoltagePowerSupply[i];
+            dArrayClosedCircuitVoltagePowerSupply[i];
+        }
+    }
+
     /// 1. Напряжения на корпусе
     ui->cbParamsAutoMode->addItem(tr("1. %0").arg(ui->rbVoltageOnTheHousing->text()));
     ui->cbVoltageOnTheHousing->clear();
-    ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[0]);
-    ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[1]);
+    sArrayReportInsulationResistance.clear(); /// очищаем массив проверок для отчета
+
+    /// очистка и заполнение label*ов на вкладке и очистка массива с полученными параметрами проверки
+    for (int i = 0; i < 2; i++) {
+        label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
+        label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+        label->setStyleSheet("QLabel { color : black; }");
+        ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[i]);
+    }
 
     /// 2. Сопротивление изоляции
     ui->cbParamsAutoMode->addItem(tr("2. %0").arg(ui->rbInsulationResistance->text()));
     ui->cbInsulationResistance->clear();
-    ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[0]);
-    ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[1]);
-    if (iBatteryIndex == 0 or iBatteryIndex == 3) { /// еще две пары если батарея 9ER20P_20 или 9ER20P_28
-        ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[2]);
-        ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[3]);
+    sArrayReportInsulationResistance.clear(); /// очищаем массив проверок для отчета
+
+    /// проходимся по всем label'ам
+    for (int i = 0; i < 4; i++) {
+        label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].i_isolation_resistance_num) { /// еще две пары если батарея 9ER20P_20 или 9ER20P_28
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]));
+            ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[i]);
+        }
     }
 
     /// 3. Напряжение разомкнутой цепи группы
     ui->cbParamsAutoMode->addItem(tr("3. %0").arg(ui->rbOpenCircuitVoltageGroup->text()));
-    ui->cbOpenCircuitVoltageGroup->clear();
+    //ui->cbOpenCircuitVoltageGroup->clear();
+    sArrayReportOpenCircuitVoltageGroup.clear(); /// очищаем массив проверок для отчета
     modelOpenCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
-    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
-    {
-        QStandardItem* item;
-        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(Qt::Checked, Qt::CheckStateRole);
-        modelOpenCircuitVoltageGroup->setItem(r+1, 0, item);
+
+    /// проходимся по всем label'ам
+    for (int i = 0; i < 28; i++) {
+        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+            modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+        }
     }
 
     ui->cbOpenCircuitVoltageGroup->setModel(modelOpenCircuitVoltageGroup);
@@ -288,20 +350,31 @@ void MainWindow::comboxSetData() {
     /// 3а. Напряжение разомкнутой цепи батареи
     ui->cbParamsAutoMode->addItem(tr("3а. %0").arg(ui->rbOpenCircuitVoltageBattery->text()));
     ui->cbOpenCircuitVoltageBattery->clear();
+    sArrayReportOpenCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbOpenCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
+    ui->labelOpenCircuitVoltageBattery0->setText(tr("%0) \"%1\"").arg(1).arg(battery[iBatteryIndex].circuitbattery));
+    ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : black; }");
 
     /// 4. Напряжение замкнутой цепи группы
     ui->cbParamsAutoMode->addItem(tr("4. %0").arg(ui->rbClosedCircuitVoltageGroup->text()));
-    ui->cbClosedCircuitVoltageGroup->clear();
+    //ui->cbClosedCircuitVoltageGroup->clear();
+    sArrayReportClosedCircuitVoltageGroup.clear(); /// очищаем массив проверок для отчета
     modelClosedCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
-    for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
-    {
-        QStandardItem* item;
-        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[r]));
-        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        item->setData(Qt::Checked, Qt::CheckStateRole);
-        modelClosedCircuitVoltageGroup->setItem(r+1, 0, item);
+
+    /// проходимся по всем label'ам
+    for (int i = 0; i < 28; i++) {
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+            modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+        }
     }
+
     ui->cbClosedCircuitVoltageGroup->setModel(modelClosedCircuitVoltageGroup);
     ui->cbClosedCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
     ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
@@ -309,15 +382,24 @@ void MainWindow::comboxSetData() {
     connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
 
     /// 4а. Распассивация
+    sArrayReportDepassivation.clear(); /// очищаем массив проверок для отчета
     modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
-    for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
-    {
-        QStandardItem* item;
-        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
-        item->setFlags(Qt::NoItemFlags);
-        item->setData(Qt::Unchecked, Qt::CheckStateRole);
-        modelDepassivation->setItem(i+1, 0, item);
+
+    /// проходимся по всем label'ам
+    for (int i = 0; i < 28; i++) {
+        label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+            item->setFlags(Qt::NoItemFlags);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+            modelDepassivation->setItem(i+1, 0, item);
+            label->setText(tr("%0) \"%1\" не требуется.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+            label->setStyleSheet("QLabel { color : green; }");
+        }
     }
+
     ui->cbDepassivation->setModel(modelDepassivation);
     ui->cbDepassivation->setItemData(0, "DISABLE", Qt::UserRole-1);
     ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(0).arg(battery[iBatteryIndex].group_num));
@@ -326,21 +408,31 @@ void MainWindow::comboxSetData() {
     /// 5. Напряжение замкнутой цепи батареи
     ui->cbParamsAutoMode->addItem(tr("5. %0").arg(ui->rbClosedCircuitVoltageBattery->text()));
     ui->cbClosedCircuitVoltageBattery->clear();
+    sArrayReportClosedCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
+    ui->labelClosedCircuitVoltageBattery0->setText(tr("%0) \"%1\"").arg(1).arg(battery[iBatteryIndex].circuitbattery));
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
     if (iBatteryIndex == 0 or iBatteryIndex == 1) {
         /// 6. Сопротивление изоляции УУТББ
         ui->cbInsulationResistanceUUTBB->clear();
+        sArrayReportInsulationResistanceUUTBB.clear(); /// очищаем массив проверок для отчета
         modelInsulationResistanceUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
-        for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
-        {
-            QStandardItem* item;
-            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[r]));
-            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-            item->setData(Qt::Checked, Qt::CheckStateRole);
-            modelInsulationResistanceUUTBB->setItem(r+1, 0, item);
+
+        /// проходимся по всем label'ам
+        for (int i = 0; i < 33; i++) {
+            label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+            label->setStyleSheet("QLabel { color : black; }");
+            label->clear();
+            if (i < battery[iBatteryIndex].i_uutbb_resist_num) {
+                item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[i]));
+                item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+                item->setData(Qt::Checked, Qt::CheckStateRole);
+                modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
+                label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
+            }
         }
+
         ui->cbInsulationResistanceUUTBB->setModel(modelInsulationResistanceUUTBB);
         ui->cbInsulationResistanceUUTBB->setItemData(0, "DISABLE", Qt::UserRole-1);
         ui->cbInsulationResistanceUUTBB->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].i_uutbb_resist_num).arg(battery[iBatteryIndex].i_uutbb_resist_num));
@@ -349,12 +441,22 @@ void MainWindow::comboxSetData() {
 
         /// 7. Напряжение разомкнутой цепи БП
         ui->cbOpenCircuitVoltagePowerSupply->clear();
+        sArrayReportOpenCircuitVoltagePowerSupply.clear(); /// очищаем массив проверок для отчета
         ui->cbOpenCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+        ui->labelOpenCircuitVoltagePowerSupply0->setText(tr("%0) \"%1\"").arg(1).arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
+        ui->labelOpenCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : black; }");
 
         /// 8. Напряжение замкнутой цепи БП
         ui->cbClosedCircuitVoltagePowerSupply->clear();
-        ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
-        ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[1]);
+        sArrayReportClosedCircuitVoltagePowerSupply.clear(); /// очищаем массив проверок для отчета
+
+        /// проходимся по всем label'ам
+        for (int i = 0; i < 2; i++) {
+            label = findChild<QLabel*>(tr("labelClosedCircuitVoltagePowerSupply%0").arg(i));
+            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]));
+            label->setStyleSheet("QLabel { color : black; }");
+            ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[i]);
+        }
     }
 }
 
@@ -455,9 +557,9 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->show();
         ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
-        ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
-        ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
-        ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
+        //ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
+        //ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
+        //ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
         ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
@@ -471,14 +573,14 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->hide();
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
-        int tab_count = ui->tabWidget->count();
+        /*int tab_count = ui->tabWidget->count();
         for (int i = tab_count; ; i--) {
             if (i < 1)
                 break;
             if (ui->tabWidget->tabText(i) == ui->rbInsulationResistanceUUTBB->text() or ui->tabWidget->tabText(i) == ui->rbOpenCircuitVoltagePowerSupply->text() or ui->tabWidget->tabText(i) == ui->rbClosedCircuitVoltagePowerSupply->text()) {
                 ui->tabWidget->removeTab(i);
             }
-        }
+        }*/
         ui->cbParamsAutoMode->removeItem(8);
         ui->cbParamsAutoMode->removeItem(7);
         ui->cbParamsAutoMode->removeItem(6);

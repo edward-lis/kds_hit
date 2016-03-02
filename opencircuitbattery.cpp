@@ -17,7 +17,7 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     quint16 codeLimit=settings.opencircuitbattery_limit/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -111,16 +111,36 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     if(bDeveloperState)
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
-    str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2);
+    str = tr("%0) \"%1\" = <b>%2</b> В.").arg(1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2);
     if (dArrayOpenCircuitVoltageBattery[0] < settings.opencircuitbattery_limit) {
-        str += " Не норма.";
+        sResult = "Не норма!";
         color = "red";
-    } else
+    }
+    else {
+        sResult = "Норма";
         color = "green";
-    ui->labelOpenCircuitVoltageBattery0->setText(str);
+    }
+    ui->labelOpenCircuitVoltageBattery0->setText(str+" "+sResult);
     ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
-    Log(str, color);
+    Log(str+" "+sResult, color);
+
     ui->btnBuildReport->setEnabled(true);
+
+    /// заполняем массив проверок для отчета
+    dateTime = QDateTime::currentDateTime();
+    sArrayReportOpenCircuitVoltageBattery.append(
+                tr("<tr>"\
+                   "    <td>%0</td>"\
+                   "    <td>%1</td>"\
+                   "    <td>%2</td>"\
+                   "    <td>%3</td>"\
+                   "    <td>%4</td>"\
+                   "</tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(1)
+                .arg(battery[iBatteryIndex].circuitbattery)
+                .arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2)
+                .arg(sResult));
 
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)
