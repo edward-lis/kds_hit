@@ -44,8 +44,8 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     ui->widgetClosedCircuitBattery->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);*/
     // показать закладку на экране
-    ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
+    //ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
+    //ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -101,7 +101,6 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
 
-
     ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса
     ui->progressBar->reset();
 
@@ -120,7 +119,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     // собрать режим
     baSendArray=(baSendCommand="UccB")+"#";
     if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-    QTimer::singleShot(settings.delay_after_IDLE_before_other, this, SLOT(sendSerialData()));
+    timerSend->start(settings.delay_after_IDLE_before_other);
     ret=loop.exec();
     if(ret) goto stop;
     ui->progressBar->setValue(ui->progressBar->value()+1);
@@ -205,6 +204,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
         ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
+        bState = false;
     }
 
 stop:

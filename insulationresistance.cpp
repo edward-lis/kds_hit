@@ -91,8 +91,8 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
-        // собрать режим /// i???
-        str_num.sprintf(" %02i", bModeManual?battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]:i+1); // напечатать номер точки измерения изоляции
+        // собрать режим
+        str_num.sprintf(" %02i", bModeManual?battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]:battery[iBatteryIndex].isolation_resistance_nn[i]); // напечатать номер точки измерения изоляции
         baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
         timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время

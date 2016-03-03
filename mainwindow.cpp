@@ -216,7 +216,7 @@ MainWindow::MainWindow(QWidget *parent) :
     comboxSetData();
 
     // состояния виджетов в зависимости от признака отладки
-    bDeveloperState = !settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
+    //bDeveloperState = settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
     //triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.
 }
 
@@ -660,13 +660,16 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
                 on_btnClosedCircuitVoltageBattery_clicked();
                 break;
             case 6:
-                checkInsulationResistanceUUTBB();
+                //checkInsulationResistanceUUTBB();
+                on_btnInsulationResistanceUUTBB_clicked();
                 break;
             case 7:
-                checkOpenCircuitVoltagePowerSupply();
+                //checkOpenCircuitVoltagePowerSupply();
+                on_btnOpenCircuitVoltagePowerSupply_clicked();
                 break;
             case 8:
-                checkClosedCircuitVoltagePowerSupply();
+                //checkClosedCircuitVoltagePowerSupply();
+                on_btnClosedCircuitVoltagePowerSupply_clicked();
                 break;
             default:
                 break;
