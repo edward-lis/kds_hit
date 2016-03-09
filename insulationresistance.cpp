@@ -4,6 +4,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "battery.h"
+#include "settings.h"
+
+extern Settings settings;
 
 extern QVector<Battery> battery;
 
@@ -162,7 +165,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
+        str = tr("%0) \"%1\" = <b>%2</b> Ом.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'f', 0);
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             sResult = "Не норма!";
@@ -191,7 +194,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(i+1)
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
-                    .arg(dArrayInsulationResistance[i], 0, 'g', 0)
+                    .arg(dArrayInsulationResistance[i], 0, 'f', 0)
                     .arg(sResult));
 
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {

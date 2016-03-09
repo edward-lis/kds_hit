@@ -5,6 +5,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "battery.h"
+#include "settings.h"
+
+extern Settings settings;
 
 extern QVector<Battery> battery;
 
@@ -24,7 +27,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     double x; // текущая координата Х
     int cycleTimeSec=settings.time_depassivation[2]; // длительность цикла проверки в секундах
     bool bFirstPoll=true; // первое измерение
-    int i=0; // номер цепи
+    //int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
 
     /// по началу проверки очистим все label'ы и полученные результаты

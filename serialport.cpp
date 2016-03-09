@@ -3,6 +3,7 @@
 #include <QErrorMessage>
 #include "settings.h"
 
+extern Settings settings;
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
@@ -24,7 +25,35 @@ bool SerialPort::openPort(QString portName)
     if (serial)
     {
         serial->setPortName(portName);
-        serial->setBaudRate(QSerialPort::Baud115200);
+        switch (settings.baudrate) {
+        case 1200:
+            serial->setBaudRate(QSerialPort::Baud1200);
+            break;
+        case 2400:
+            serial->setBaudRate(QSerialPort::Baud2400);
+            break;
+        case 4800:
+            serial->setBaudRate(QSerialPort::Baud4800);
+            break;
+        case 9600:
+            serial->setBaudRate(QSerialPort::Baud9600);
+            break;
+        case 19200:
+            serial->setBaudRate(QSerialPort::Baud19200);
+            break;
+        case 38400:
+            serial->setBaudRate(QSerialPort::Baud38400);
+            break;
+        case 57600:
+            serial->setBaudRate(QSerialPort::Baud57600);
+            break;
+        case 115200:
+            serial->setBaudRate(QSerialPort::Baud115200);
+            break;
+        default:
+            serial->setBaudRate(QSerialPort::Baud9600);
+            break;
+        }
         serial->setDataBits(QSerialPort::Data8);
         serial->setParity(QSerialPort::NoParity);
         serial->setStopBits(QSerialPort::OneStop);

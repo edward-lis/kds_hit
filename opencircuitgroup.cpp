@@ -4,6 +4,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "battery.h"
+#include "settings.h"
+
+extern Settings settings;
 
 extern QVector<Battery> battery;
 

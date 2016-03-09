@@ -14,7 +14,7 @@ extern QVector<Battery> battery;
 Settings::Settings(QObject *parent) : QObject(parent)
 {
     //qDebug() << "App path : " << qApp->applicationDirPath() << "/" << INI_FILE_NAME; // возвращает путь к папке с исполняемым файлом и ini-файлу
-    m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
+    //m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
     //QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
 }
 
@@ -30,6 +30,8 @@ void Settings::saveSettings()
 void Settings::loadSettings()
 {
     int i;
+
+    m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
 
     QSettings settings(m_sSettingsFile, QSettings::IniFormat);
     settings.setIniCodec("Windows-1251"); // т.к. мы в винде, то устанавливаем кодек для ini-файла
@@ -55,6 +57,9 @@ void Settings::loadSettings()
     bDeveloperState = settings.value("bDeveloperState", false).toBool();
     // уровень печати отладочной инф-ии
     verbose = settings.value("verbose", 1).toInt();
+
+    // скорость последовательного порта
+    baudrate = settings.value("baudrate", 9600).toInt();
 
     // Задержки
     delay_after_start_before_request_ADC1 = settings.value("delay_after_start_before_request_ADC1", 400).toInt();

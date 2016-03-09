@@ -50,9 +50,6 @@ public:
     ~MainWindow();
     QCustomPlot *customPlot;
 
-    /// Установки из ini-файла
-    Settings settings;
-
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *modelClosedCircuitVoltageGroup;

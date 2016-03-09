@@ -24,6 +24,7 @@ public:
 
     bool bDeveloperState; ///< Режим разработчика
     int verbose;     ///< Уровень печати отладочной инф-ии в консоль
+    int baudrate; ///< скорость последовательного порта
     // задержки после определённой команды и перед выдачей следующей команды, по протоколу
     int delay_after_start_before_request_ADC1; ///< после команды пуска режима, перед первым запросом, мс
     int delay_after_start_before_request_ADC2;

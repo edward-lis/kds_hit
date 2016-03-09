@@ -1,5 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "settings.h"
+
+extern Settings settings;
 
 // Приём данных от последовательного порта
 void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)

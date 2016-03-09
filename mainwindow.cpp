@@ -65,9 +65,10 @@ dArrayOpenCircuitVoltageGroup и другие массивы перетащит�
 
 QVector<Battery> battery; ///< массив типов батарей, с настройками для каждого типа
 
+Settings settings; ///< Установки из ini-файла
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    settings(0),
     ui(new Ui::MainWindow),
     serialPort(new SerialPort), bPortOpen(false),
     timeoutResponse(NULL), timerPing(NULL), timerSend(NULL),
