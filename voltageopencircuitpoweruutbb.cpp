@@ -208,7 +208,7 @@ stop:
 /*
  * Напряжение разомкнутой цепи блока питания
  */
-void MainWindow::checkOpenCircuitVoltagePowerSupply()
+/*void MainWindow::checkOpenCircuitVoltagePowerSupply()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
@@ -275,4 +275,4 @@ void MainWindow::checkOpenCircuitVoltagePowerSupply()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

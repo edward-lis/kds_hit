@@ -210,10 +210,8 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
-                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(i+1)
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
                     .arg(sResult));
@@ -345,7 +343,7 @@ void MainWindow::itemChangedClosedCircuitVoltageGroup(QStandardItem* itm)
 /*
  * Напряжение замкнутой цепи группы
  */
-void MainWindow::checkClosedCircuitVoltageGroup()
+/*void MainWindow::checkClosedCircuitVoltageGroup()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     int x = 10; /// затычка
@@ -555,7 +553,7 @@ void MainWindow::checkClosedCircuitVoltageGroup()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/
 
 #if 0
 switch (iBatteryIndex) {

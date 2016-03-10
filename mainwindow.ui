@@ -2830,25 +2830,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="labelClosedCircuitVoltagePowerSupply1">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>15</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>15</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>labelClosedCircuitVoltagePowerSupply1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QCustomPlot" name="widgetClosedCircuitVoltagePowerUUTBB" native="true"/>
         </item>
        </layout>

@@ -137,10 +137,8 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
                    "    <td>%1</td>"\
                    "    <td>%2</td>"\
                    "    <td>%3</td>"\
-                   "    <td>%4</td>"\
                    "</tr>")
                 .arg(dateTime.toString("hh:mm:ss"))
-                .arg(1)
                 .arg(battery[iBatteryIndex].circuitbattery)
                 .arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2)
                 .arg(sResult));
@@ -210,7 +208,7 @@ stop:
 /*
  * Напряжение разомкнутой цепи батареи
  */
-void MainWindow::checkOpenCircuitVoltageBattery()
+/*void MainWindow::checkOpenCircuitVoltageBattery()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
@@ -277,4 +275,4 @@ void MainWindow::checkOpenCircuitVoltageBattery()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

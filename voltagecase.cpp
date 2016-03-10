@@ -155,10 +155,8 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
-                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(i+1)
                     .arg(battery[iBatteryIndex].str_voltage_corpus[i])
                     .arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2)
                     .arg(sResult));
@@ -231,7 +229,7 @@ stop:
 /*
  * Напряжение на корпусе батареи
  */
-void MainWindow::checkVoltageOnTheHousing()
+/*void MainWindow::checkVoltageOnTheHousing()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
@@ -337,4 +335,4 @@ void MainWindow::checkVoltageOnTheHousing()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

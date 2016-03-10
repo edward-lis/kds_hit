@@ -161,10 +161,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
-                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(i+1)
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
                     .arg(sResult));
@@ -283,7 +281,7 @@ void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
 /*
  * Напряжение разомкнутой цепи группы
  */
-void MainWindow::checkOpenCircuitVoltageGroup()
+/*void MainWindow::checkOpenCircuitVoltageGroup()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
@@ -473,4 +471,4 @@ void MainWindow::checkOpenCircuitVoltageGroup()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

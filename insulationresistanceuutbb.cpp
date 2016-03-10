@@ -21,7 +21,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
     int ret=0; // код возврата ошибки
     QString strResist; // строка с получившимся значением
 //    int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
+    //QLabel *label; // надпись в закладке
 
     /// по началу проверки очистим все label'ы и полученные результаты
     for (int i = 0; i < battery[iBatteryIndex].uutbb_resist.size(); i++) {
@@ -30,7 +30,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         label->setStyleSheet("QLabel { color : black; }");
         label->clear();
         //??? if (i < battery[iBatteryIndex].uutbb_resist.size())
-            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
+            label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
     }
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
@@ -271,7 +271,7 @@ void MainWindow::itemChangedInsulationResistanceUUTBB(QStandardItem* itm)
 /*
  * Сопротивление изоляции платы измерительной УУТББ
  */
-void MainWindow::checkInsulationResistanceUUTBB()
+/*void MainWindow::checkInsulationResistanceUUTBB()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
@@ -517,4 +517,4 @@ void MainWindow::checkInsulationResistanceUUTBB()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

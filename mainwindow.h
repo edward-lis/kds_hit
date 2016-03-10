@@ -90,8 +90,8 @@ private:
     bool bState;
     void getCOMPorts();
     void comboxSetData();
-    float param; /// для отладки, потом убрать
-    double randMToN(double M, double N); /// для отладки, потом убрать
+    //float param; /// для отладки, потом убрать
+    //double randMToN(double M, double N); /// для отладки, потом убрать
     //+++ Edward
 
     /// Экземпляр класса последовательный порт
@@ -143,7 +143,7 @@ private:
 
 public slots:
     void Log(QString message, QString color);
-    void delay(int millisecondsToWait);
+    /*void delay(int millisecondsToWait);
     void checkVoltageOnTheHousing();
     void checkInsulationResistance();
     void checkOpenCircuitVoltageGroup();
@@ -153,7 +153,7 @@ public slots:
     void checkClosedCircuitVoltageBattery();
     void checkInsulationResistanceUUTBB();
     void checkOpenCircuitVoltagePowerSupply();
-    void checkClosedCircuitVoltagePowerSupply();
+    void checkClosedCircuitVoltagePowerSupply();*/
 
 signals:
     //+++ Edward

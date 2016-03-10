@@ -168,10 +168,8 @@ void MainWindow::on_btnDepassivation_clicked()
                        "    <td>%0</td>"\
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
-                       "    <td>%3</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(i+1)
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(sResult));
 #if 0
@@ -258,7 +256,7 @@ void MainWindow::itemChangedDepassivation(QStandardItem* itm)
 /*
  * Распассивация
  */
-void MainWindow::checkDepassivation()
+/*void MainWindow::checkDepassivation()
 {
     int x = 10; /// затычка
     ui->widgetDepassivation->graph(0)->clearData(); // очистить график
@@ -454,4 +452,4 @@ void MainWindow::checkDepassivation()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

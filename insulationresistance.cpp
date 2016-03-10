@@ -189,10 +189,8 @@ void MainWindow::on_btnInsulationResistance_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
-                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(i+1)
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
                     .arg(dArrayInsulationResistance[i], 0, 'f', 0)
                     .arg(sResult));
@@ -254,7 +252,7 @@ stop:
 /*
  * Сопротивление изоляции
  */
-void MainWindow::checkInsulationResistance()
+/*void MainWindow::checkInsulationResistance()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
@@ -368,4 +366,4 @@ void MainWindow::checkInsulationResistance()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

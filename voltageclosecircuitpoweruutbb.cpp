@@ -228,7 +228,7 @@ stop:
 /*
  * Напряжение замкнутой цепи блока питания
  */
-void MainWindow::checkClosedCircuitVoltagePowerSupply()
+/*void MainWindow::checkClosedCircuitVoltagePowerSupply()
 {
     qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
@@ -334,4 +334,4 @@ void MainWindow::checkClosedCircuitVoltagePowerSupply()
         ui->cbSubParamsAutoMode->setDisabled(bState);
         ((QPushButton*)sender())->setText("Пуск");
     }
-}
+}*/

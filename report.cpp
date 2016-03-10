@@ -10,7 +10,7 @@ extern QVector<Battery> battery;
 void MainWindow::on_btnBuildReport_clicked()
 {
     qDebug() << "on_btnBuildReport_clicked()";
-    QDateTime dateTime = QDateTime::currentDateTime();
+    dateTime = QDateTime::currentDateTime();
     QString textDateTime = dateTime.toString("yyyy-MM-dd-hh-mm-ss-zzz");
     QString textDate = dateTime.toString("dd.MM.yyyy");
     QString textTime = dateTime.toString("hh:mm:ss");
@@ -58,9 +58,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>№</b></p>"\
-                                "</td>"\
-                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -84,15 +81,12 @@ void MainWindow::on_btnBuildReport_clicked()
     if (!sArrayReportInsulationResistance.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>2. "+ui->rbInsulationResistance->text()+", МОм</b></p>"\
+                    "<p><b>2. "+ui->rbInsulationResistance->text()+", ОМ</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
                                 "<td>"\
                                     "<p><b>Время</b></p>"\
-                                "</td>"\
-                                "<td>"\
-                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Цепь</b></p>"\
@@ -125,9 +119,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>№</b></p>"\
-                                "</td>"\
-                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -156,9 +147,6 @@ void MainWindow::on_btnBuildReport_clicked()
                             "<tr>"\
                                 "<td>"\
                                     "<p><b>Время</b></p>"\
-                                "</td>"\
-                                "<td>"\
-                                    "<p><b>№</b></p>"\
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Цепь</b></p>"\
@@ -191,9 +179,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>№</b></p>"\
-                                "</td>"\
-                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -224,9 +209,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>№</b></p>"\
-                                "</td>"\
-                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -254,9 +236,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<p><b>Время</b></p>"\
                                 "</td>"\
                                 "<td>"\
-                                    "<p><b>№</b></p>"\
-                                "</td>"\
-                                "<td>"\
                                     "<p><b>Цепь</b></p>"\
                                 "</td>"\
                                 "<td>"\
@@ -282,15 +261,12 @@ void MainWindow::on_btnBuildReport_clicked()
         if (!sArrayReportInsulationResistanceUUTBB.isEmpty()) {
             sHtml += "<tr>"\
                     "<td>"\
-                        "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
+                        "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", ОМ</b></p>"\
                         "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                             "<tbody>"\
                                 "<tr>"\
                                     "<td>"\
                                         "<p><b>Время</b></p>"\
-                                    "</td>"\
-                                    "<td>"\
-                                        "<p><b>№</b></p>"\
                                     "</td>"\
                                     "<td>"\
                                         "<p><b>Цепь</b></p>"\
@@ -323,9 +299,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                         "<p><b>Время</b></p>"\
                                     "</td>"\
                                     "<td>"\
-                                        "<p><b>№</b></p>"\
-                                    "</td>"\
-                                    "<td>"\
                                         "<p><b>Цепь</b></p>"\
                                     "</td>"\
                                     "<td>"\
@@ -354,9 +327,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<tr>"\
                                     "<td>"\
                                         "<p><b>Время</b></p>"\
-                                    "</td>"\
-                                    "<td>"\
-                                        "<p><b>№</b></p>"\
                                     "</td>"\
                                     "<td>"\
                                         "<p><b>Цепь</b></p>"\
