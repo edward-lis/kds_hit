@@ -83,6 +83,7 @@ private:
     QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QString sLabelText;
     QString sResult; /// строка результата проверки "Норма" или "Не норма!"
     QString str;
     QString color;

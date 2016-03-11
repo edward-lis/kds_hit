@@ -41,11 +41,11 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     bCheckInProgress = true; // вошли в состояние проверки
 
     // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->cbParamsAutoMode->setDisabled(true);
+    ui->cbSubParamsAutoMode->setDisabled(true);
 
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
@@ -92,6 +92,11 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
     ui->progressBar->setValue(ui->progressBar->value()+1);
 
+    /// формируем строку и пишем на label "идет измерение..."
+    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
+    ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " идет измерение...");
+    ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : blue; }");
+
     // собрать режим
     baSendArray=(baSendCommand="UocB")+"#";
     if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
@@ -114,7 +119,6 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     if(bDeveloperState)
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
-    str = tr("%0) \"%1\" = <b>%2</b> В.").arg(1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2);
     if (dArrayOpenCircuitVoltageBattery[0] < settings.opencircuitbattery_limit) {
         sResult = "Не норма!";
         color = "red";
@@ -123,9 +127,9 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
         sResult = "Норма";
         color = "green";
     }
-    ui->labelOpenCircuitVoltageBattery0->setText(str+" "+sResult);
+    ui->labelOpenCircuitVoltageBattery0->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult));
     ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
-    Log(str+" "+sResult, color);
+    Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult), color);
 
     ui->btnBuildReport->setEnabled(true);
 
@@ -172,6 +176,11 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
         }
     }
 stop:
+    if(ret == KDS_STOP) {
+        ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " измерение прервано!");
+        ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC1);
@@ -186,17 +195,18 @@ stop:
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
-    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
 
     if(bModeManual)
     {
         bState = false;
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
-        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
-        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
-        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
-        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
     }
+
+    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
+    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
+    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
+    ui->btnOpenCircuitVoltageBattery->setText("Пуск");  // поменять текст на кнопке
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.

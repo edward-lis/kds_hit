@@ -34,6 +34,13 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     quint16 uocpb; // напряжение БП УУТББ
     //int ret=0;
 
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->comboBoxBatteryList->setDisabled(true);
+    ui->cbIsUUTBB->setDisabled(true);
+    ui->cbIsImitator->setDisabled(true);
+    ui->dateEditBatteryBuild->setDisabled(true);
+    ui->lineEditBatteryNumber->setDisabled(true);
+
     qDebug()<<U1<<U2;
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"; return;} // !!! костыль: если цикл уже работает - выйти обратно
@@ -212,6 +219,12 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     }
 stop:
     ui->btnCheckConnectedBattery->setEnabled(true); // по окончанию проверки разрешить кнопку
+    ui->groupBoxCOMPort->setEnabled(true);
+    ui->comboBoxBatteryList->setEnabled(true);
+    ui->cbIsUUTBB->setEnabled(true);
+    ui->cbIsImitator->setEnabled(true);
+    ui->dateEditBatteryBuild->setEnabled(true);
+    ui->lineEditBatteryNumber->setEnabled(true);
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();

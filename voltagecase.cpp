@@ -41,11 +41,11 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     bCheckInProgress = true; // вошли в состояние проверки
 
     // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->cbParamsAutoMode->setDisabled(true);
+    ui->cbSubParamsAutoMode->setDisabled(true);
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
@@ -91,6 +91,12 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]);
+        label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
+
         if(i == 1) // если выбрана в комбобоксе такая цепь
         {
             baSendArray=(baSendCommand="UcaseM")+"#";
@@ -131,8 +137,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x "+settings.offsetADC2+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
         }
 
-        label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
-        str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
         if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
             sResult = "Не норма!";
             color = "red";
@@ -141,9 +145,9 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(str+" "+sResult);
+        label->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str+" "+sResult, color);
+        Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
@@ -166,7 +170,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(!bModeManual)// если в автоматическом режиме
             {
                 //if(!bModeManual && !bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(str+" "+sResult), tr("Да"), tr("Нет")))
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(sLabelText+" "+sResult), tr("Да"), tr("Нет")))
                 {
                     qDebug()<<"переход в ручной режим";
                     Log("Останов проверки - переход в ручной режим", "blue");
@@ -188,6 +192,11 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         if(bModeManual) QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
     } // for
 stop:
+    if(ret == KDS_STOP) {
+        label->setText(sLabelText + " измерение прервано!");
+        label->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC2);
@@ -203,22 +212,19 @@ stop:
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
-    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
 
     if(bModeManual)
     {
         bState = false;
-        //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
-        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
-        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
-        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
-        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
-    } //else
-        // !!! а если выход из автомата в ручное???
-        //ui->cbParamsAutoMode->setCurrentIndex(ui->cbParamsAutoMode->currentIndex()+1); // переключаем комбокс на следующий режим
+    }
 
-    //ui->btnVoltageOnTheHousing->setEnabled(true); // разрешить кнопку
+    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
+    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
+    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
+    ui->btnVoltageOnTheHousing->setText("Пуск");        // поменять текст на кнопке
+
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear();
     baSendCommand.clear();

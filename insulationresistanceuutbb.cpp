@@ -24,14 +24,14 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
     //QLabel *label; // надпись в закладке
 
     /// по началу проверки очистим все label'ы и полученные результаты
-    for (int i = 0; i < battery[iBatteryIndex].uutbb_resist.size(); i++) {
+    /*for (int i = 0; i < battery[iBatteryIndex].uutbb_resist.size(); i++) {
         dArrayInsulationResistanceUUTBB[i] = -1;
         label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
         label->setStyleSheet("QLabel { color : black; }");
         label->clear();
         //??? if (i < battery[iBatteryIndex].uutbb_resist.size())
             label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
-    }
+    }*/
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -52,10 +52,11 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
     bCheckInProgress = true; // вошли в состояние проверки
 
     // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->groupBoxCheckParamsAutoMode->setDisabled(bState);
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->cbParamsAutoMode->setDisabled(true);
+    ui->cbSubParamsAutoMode->setDisabled(true);
 
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
@@ -121,6 +122,12 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         if(ret) goto stop;
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]);
+        label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
+
         // послать опрос
         baSendArray=baSendCommand+"?#";
         timerSend->start(settings.delay_after_start_before_request_ADC2);
@@ -173,7 +180,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             strResist = QString::number(resist, 'f', 0) + "Ом, ";
         }*/
         strResist = QString::number(resist, 'f', 0) + " Ом, ";
-        dArrayInsulationResistanceUUTBB[i] = resist;
+        dArrayInsulationResistanceUUTBB[i] = resist/1000000;
 
         // если отладочный режим, напечатать отладочную инфу
         if(bDeveloperState)
@@ -183,8 +190,6 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i], 0, 'f', 0);
-        label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
         if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
             sResult = "Не норма!";
             color = "red";
@@ -193,9 +198,9 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(str+" "+sResult);
+        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i], 0, 'f', 0).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str+" "+sResult, color);
+        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i], 0, 'f', 0).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
@@ -218,6 +223,11 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         }
     }// конец цикла обхода всех точек измерения сопротивления изоляции
 stop:
+    if(ret == KDS_STOP) {
+        label->setText(sLabelText + " измерение прервано!");
+        label->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC2);
@@ -232,18 +242,18 @@ stop:
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
-    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
 
     if(bModeManual)
     {
         bState = false;
-        //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
-        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
-        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
-        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
-        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
     }
+
+    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
+    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
+    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
+    ui->btnInsulationResistanceUUTBB->setText("Пуск");  // поменять текст на кнопке
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.

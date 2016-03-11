@@ -40,7 +40,7 @@ void MainWindow::on_btnDepassivation_clicked()
         QStandardItem *sitm = modelDepassivation->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
 
-        QLabel * label = findChild<QLabel*>(tr("labelDepassivation%1").arg(i));
+        QLabel * label = findChild<QLabel*>(tr("labelDepassivation%1").arg(i-1));
         if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_OCG_TESTED))
         {
             label->setText(tr("%1) НРЦг не проверялось.").arg(i));
@@ -98,7 +98,7 @@ void MainWindow::on_btnDepassivation_clicked()
         QStandardItem *sitm = modelDepassivation->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState != Qt::Checked) continue;
-        label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+        label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i-1));
 
         // три ступени распассивации
         for(int k=0; k<3; k++)

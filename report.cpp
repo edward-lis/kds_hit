@@ -81,7 +81,7 @@ void MainWindow::on_btnBuildReport_clicked()
     if (!sArrayReportInsulationResistance.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>2. "+ui->rbInsulationResistance->text()+", ОМ</b></p>"\
+                    "<p><b>2. "+ui->rbInsulationResistance->text()+", МОм</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
@@ -261,7 +261,7 @@ void MainWindow::on_btnBuildReport_clicked()
         if (!sArrayReportInsulationResistanceUUTBB.isEmpty()) {
             sHtml += "<tr>"\
                     "<td>"\
-                        "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", ОМ</b></p>"\
+                        "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
                         "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                             "<tbody>"\
                                 "<tr>"\

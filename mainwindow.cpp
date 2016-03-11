@@ -369,8 +369,8 @@ void MainWindow::comboxSetData() {
         label->clear();
         if (i < battery[iBatteryIndex].group_num) {
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
-            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-            item->setData(Qt::Checked, Qt::CheckStateRole);
+            item->setFlags(Qt::NoItemFlags);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
             label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
         }
@@ -378,7 +378,7 @@ void MainWindow::comboxSetData() {
 
     ui->cbClosedCircuitVoltageGroup->setModel(modelClosedCircuitVoltageGroup);
     ui->cbClosedCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
-    ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].group_num).arg(battery[iBatteryIndex].group_num));
+    ui->cbClosedCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(0).arg(battery[iBatteryIndex].group_num));
     //ui->cbClosedCircuitVoltageGroup->setCurrentIndex(0);
     connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
 
@@ -468,8 +468,8 @@ void MainWindow::comboxSetData() {
 void MainWindow::Log(QString message, QString color)
 {
     dateTime = QDateTime::currentDateTime();
-    str = (color == "green" or color == "red" or color == "blue") ? "<font color=\""+color+"\">"+message+"</font>" : message;
-    ui->EventLog->appendHtml(tr("%0").arg(dateTime.toString("hh:mm:ss.zzz") + " " + str));
+    QString sLogStr = (color == "green" or color == "red" or color == "blue") ? "<font color=\""+color+"\">"+message+"</font>" : message;
+    ui->EventLog->appendHtml(tr("%0").arg(dateTime.toString("hh:mm:ss.zzz") + " " + sLogStr));
 }
 
 // нажата радиокнопка режим Авто
@@ -586,6 +586,11 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->cbParamsAutoMode->removeItem(7);
         ui->cbParamsAutoMode->removeItem(6);
     }
+
+    /// запрещаем панели
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->groupBoxCheckParams->setDisabled(true);
+    ui->groupBoxCheckParamsAutoMode->setDisabled(true);
 }
 
 void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
@@ -598,6 +603,11 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     }
     iBatteryIndex = index;
     comboxSetData();
+
+    /// запрещаем панели
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->groupBoxCheckParams->setDisabled(true);
+    ui->groupBoxCheckParamsAutoMode->setDisabled(true);
 }
 
 // нажата кнопка Старт(Стоп) автоматического режима диагностики

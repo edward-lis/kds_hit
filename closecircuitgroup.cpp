@@ -31,14 +31,14 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     //QLabel *label; // надпись в закладке
 
     /// по началу проверки очистим все label'ы и полученные результаты
-    for (int i = 0; i < 28; i++) {
+    /*for (int i = 0; i < 28; i++) {
         dArrayClosedCircuitVoltageGroup[i] = -1;
         label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
         label->setStyleSheet("QLabel { color : black; }");
         label->clear();
         if (i < battery[iBatteryIndex].group_num)
             label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-    }
+    }*/
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -59,11 +59,11 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     bCheckInProgress = true; // вошли в состояние проверки
 
     // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->cbParamsAutoMode->setDisabled(true);
+    ui->cbSubParamsAutoMode->setDisabled(true);
 
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
@@ -76,7 +76,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         // переименовать кнопку
         if(!bState) {
             bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
             ((QPushButton*)sender())->setText("Стоп");
         } else {
             bState = false;
@@ -97,18 +96,18 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     // написать про группы, в зависимости от признаков и флагов. !!! если НРЦг не проверялось, то и НЗЦг не проверять, во избежание.
     for(int i=0; i<battery[iBatteryIndex].group_num; i++)
     {
-        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
         if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
         {
-            label->setText(tr("%1) НРЦг не проверялось.").arg(i+1));
+            label->setText(tr("%0) НРЦг не проверялось.").arg(i+1));
         }
         else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
         {
-            label->setText(tr("%1) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i+1));
+            label->setText(tr("%0) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i+1));
         }
         else
         {
-            label->setText(tr("%1)").arg(i));
+            label->setText(tr("%0)").arg(i+1));
         }
     }
     // !!! лишние label вообще стереть.
@@ -140,8 +139,11 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
         // написать в закладке, что измеряется некоторая текущая цепь
-        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
-        label->setText(tr("%1) Идёт проверка ...").arg(i+1));
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]);
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
 
         // собрать режим
         str_num.sprintf(" %02i %1i", i+1, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
@@ -186,8 +188,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
         // напечатать рез-т в закладку и в журнал
-        str = tr("%0) НЗЦг \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2);
-        QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
         if (dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
             sResult = "Не норма!";
             color = "red";
@@ -196,9 +196,9 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(str+" "+sResult);
+        label->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str+" "+sResult, color);
+        Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true);
 
@@ -276,18 +276,23 @@ stop:
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
-    if(ret == KDS_STOP) Log(tr("Останов оператором!"), "red");
+    if(ret == KDS_STOP) {
+        label->setText(sLabelText + " измерение прервано!");
+        label->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
 
     if(bModeManual)
     {
         bState = false;
-        //ui->groupBoxCOMPort->setEnabled(bState);          // кнопка последовательного порта
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);  // открыть группу выбора батареи
-        ui->groupBoxDiagnosticMode->setDisabled(bState);    // окрыть группу выбора режима
-        ui->cbParamsAutoMode->setDisabled(bState);          // открыть комбобокс выбора пункта начала автоматического режима
-        ui->cbSubParamsAutoMode->setDisabled(bState);       // открыть комбобокс выбора подпункта начала автоматического режима
-        ((QPushButton*)sender())->setText("Пуск");         // поменять текст на кнопке
     }
+
+    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
+    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
+    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
+    ui->btnClosedCircuitVoltageGroup->setText("Пуск");  // поменять текст на кнопке
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
