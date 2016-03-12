@@ -107,7 +107,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             ui->progressBar->setValue(ui->progressBar->value()+1);
 
             baSendArray=baSendCommand+"?#";
-            timerSend->start(settings.delay_after_start_before_request_ADC2);
+            timerSend->start(settings.delay_after_start_before_request_voltagecase);
             ret=loop.exec();
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
@@ -123,7 +123,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             ui->progressBar->setValue(ui->progressBar->value()+1);
 
             baSendArray=baSendCommand+"?#";
-            timerSend->start(settings.delay_after_start_before_request_ADC2);
+            timerSend->start(settings.delay_after_start_before_request_voltagecase);
             ret=loop.exec();
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса

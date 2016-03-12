@@ -31,6 +31,7 @@ public:
     int delay_after_request_before_next_ADC1; ///< в режиме, между запросами, мс
     int delay_after_request_before_next_ADC2;
     int delay_after_IDLE_before_other; ///< после IDLE перед следующим режимом, мс
+    int delay_after_start_before_request_voltagecase; ///< задержка между сбором режима измерения напряжения на корпусе и измерением напряжения, мс
 
     int num_batteries_types; ///< кол-во уникальных типов батарей
     float coefADC1; ///< коэффициент пересчёта кода АЦП в вольты

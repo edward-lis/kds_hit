@@ -86,6 +86,8 @@ void MainWindow::on_btnInsulationResistance_clicked()
         baSendCommand.clear();
         baRecvArray.clear();
 
+        label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i)); // если вдруг вывалимся из цикла, чтобы написать после стопа
+
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
         timerSend->start(settings.delay_after_request_before_next_ADC2); //sendSerialData(); // послать baSendArray в порт
