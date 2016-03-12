@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport printsupport
 TARGET = kds_hit
 TEMPLATE = app
 
+RC_ICONS = "Transport Car battery.ico"
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -44,4 +45,5 @@ FORMS    += mainwindow.ui
 
 DISTFILES += \
     AGN_kds_prot09_xit_15.txt \
-    kds_hit.ini
+    kds_hit.ini \
+    Transport Car battery.ico
