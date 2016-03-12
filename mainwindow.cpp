@@ -94,6 +94,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut *developMode = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this);
     connect(developMode, SIGNAL(activated()), this, SLOT(triggerDeveloperState()));
 
+    bDeveloperState = settings.bDeveloperState;
+
     // Добавить в комбобокс наименования батарей, считанных из ини-файла
     for(int i=0; i<settings.num_batteries_types; i++)
     {
@@ -641,7 +643,9 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->cbSubParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального под-параметра проверки автоматического режима
         ((QPushButton*)sender())->setText("Стоп");
 
-        for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++) {
+        for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++)
+        {
+            qDebug()<<"i"<<i<<"ui->cbParamsAutoMode->count()"<<ui->cbParamsAutoMode->count()<<"bState"<<bState;
             if (!bState) break; // если прожали Стоп выходим из цикла
             switch (i) {
             case 0:

@@ -27,9 +27,6 @@ void MainWindow::on_btnDepassivation_clicked()
     int cycleTimeSec=0; // длительность цикла проверки в секундах
     bool firstMeasurement=true; // первое измерение
 
-    if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
-    timerPing->stop(); // остановить пинг
-
     baSendArray.clear();
     baSendCommand.clear();
     baRecvArray.clear();
@@ -47,7 +44,7 @@ void MainWindow::on_btnDepassivation_clicked()
         }
         else if(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_FAULT)
         {
-            label->setText(tr("%1) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i));
+            label->setText(tr("%1) НРЦг < нормы, проверка под нагрузкой запрещена.").arg(i));
         }
         else if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_DEPASS) || (checkState != Qt::Checked))
         {
@@ -80,9 +77,51 @@ void MainWindow::on_btnDepassivation_clicked()
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetDepassivation->yAxis->setRange(24, 33);*/
 
+    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
+    {
+        // остановить текущую проверку, выход
+        bCheckInProgress = false;
+        timerSend->stop(); // остановить посылку очередной команды в порт
+        timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
+        qDebug()<<"loop.isRunning()"<<loop.isRunning();
+        if(loop.isRunning())
+        {
+            loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
+        }
+        return;
+    }
+
+    if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
+    timerPing->stop(); // остановить пинг
+    bCheckInProgress = true; // вошли в состояние проверки
+
+    // запретим виджеты, чтоб не нажимались
+    ui->groupBoxCOMPort->setDisabled(true);
+    ui->groupBoxDiagnosticDevice->setDisabled(true);
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->cbParamsAutoMode->setDisabled(true);
+    ui->cbSubParamsAutoMode->setDisabled(true);
+
     ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
+    Log(tr("Проверка начата - %1").arg(ui->rbDepassivation->text()), "blue");
+    ui->statusBar->showMessage(tr("Проверка ")+ui->rbDepassivation->text()+" ...");
+
+    if(bModeManual)// если в ручном режиме
+    {
+        // переименовать кнопку
+        if(!bState) {
+            bState = true;
+            ((QPushButton*)sender())->setText("Стоп");
+        } else {
+            bState = false;
+            ((QPushButton*)sender())->setText("Пуск");
+        }
+
+        //i=ui->cbOpenCircuitVoltageGroup->currentIndex();
+        iCurrentStep=0; // в ручном начнём сначала
+        iMaxSteps=modelClosedCircuitVoltageGroup->rowCount()-1; // -1 с учётом первой строки в комбобоксе
+    }
 
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -211,18 +250,25 @@ void MainWindow::on_btnDepassivation_clicked()
 #endif
     }// конец цикла проверок цепей
 stop:
+    // сбросить коробочку
+    baSendArray = (baSendCommand="IDLE")+"#";
+    timerSend->start(settings.delay_after_request_before_next_ADC1);
+    ret=loop.exec();
+
+    bCheckInProgress = false; // вышли из состояния проверки
+
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
     {
-        if(ret==1) Log(tr("Timeout!"), "red");
-        else if(ret==2) Log(tr("Incorrect reply!"), "red");
+        if(ret == KDS_TIMEOUT) Log(tr("Timeout!"), "red");
+        else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
+        else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
-
-    // разобрать режим
-    baSendArray = (baSendCommand="IDLE")+"#";
-    QTimer::singleShot(settings.delay_after_request_before_next_ADC1, this, SLOT(sendSerialData()));
-    ret=loop.exec();
-    if(ret) goto stop;
+    if(ret == KDS_STOP) {
+        label->setText(sLabelText + " измерение прервано!");
+        label->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
@@ -230,11 +276,15 @@ stop:
     baRecvArray.clear();
 
     Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
-    //iStepClosedCircuitVoltageGroup = 1;
+
+    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
+    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
+    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
+
     ui->rbDepassivation->setEnabled(true);
-    ui->groupBoxCOMPort->setEnabled(true);
-    ui->groupBoxDiagnosticDevice->setEnabled(true);
-    ui->groupBoxDiagnosticMode->setEnabled(true);
+    ui->btnDepassivation->setText("Пуск");  // поменять текст на кнопке
 }
 
 // слот вызывается при изменении чекбоксов элементов списка комбобокса

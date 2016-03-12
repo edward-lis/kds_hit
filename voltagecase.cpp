@@ -51,8 +51,9 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
     ui->statusBar->showMessage(tr("Проверка ")+ui->rbVoltageOnTheHousing->text()+" ...");
-    ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
-    ui->progressBar->reset();
+    //ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
+    ui->progressBar->setRange(0,0);
+//    ui->progressBar->reset();
 
     if(bModeManual)// если в ручном режиме
     {
@@ -229,6 +230,8 @@ stop:
     baSendArray.clear();
     baSendCommand.clear();
     baRecvArray.clear();
+
+    ui->progressBar->setMaximum(1); // stop progress
     ui->progressBar->reset();
 }
 

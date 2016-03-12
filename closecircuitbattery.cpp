@@ -102,9 +102,25 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         ui->cbParamsAutoMode->setCurrentIndex(5); // переключаем режим комбокса на наш
         iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
         iMaxSteps = ui->cbSubParamsAutoMode->count();
+        // если все цепи меньше нормы, или не проверялись - в автомате батарею под нагрузкой не проверять
+        bool bAllCircuitsFail=true;
+        for(int i=0; i<battery[iBatteryIndex].group_num; i++)
+        {
+            if(!((!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
+                    || (battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)))
+            {
+                bAllCircuitsFail=false;
+            }
+        }
+        if(bAllCircuitsFail)
+        {
+            QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка батареи под нагрузкой запрещена.");
+            bState = false;
+            goto stop;
+        }
     }
 
-    ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса
+    ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса
     ui->progressBar->reset();
 
     baSendArray.clear();

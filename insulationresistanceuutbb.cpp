@@ -97,7 +97,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
         }
 
-        ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса
+        ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса
         ui->progressBar->reset();
 
         // очистить массивы посылки/приёма

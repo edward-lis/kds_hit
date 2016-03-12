@@ -79,7 +79,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
 
     for(i=iCurrentStep; i<iMaxSteps; i++)
     {
-        ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса
+        ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса
         ui->progressBar->reset();
 
         baSendArray.clear();

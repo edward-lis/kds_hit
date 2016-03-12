@@ -40,7 +40,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
     }*/
 
-    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
+    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
         // остановить текущую проверку, выход
         bCheckInProgress = false;
@@ -93,7 +93,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
 
-    // написать про группы, в зависимости от признаков и флагов. !!! если НРЦг не проверялось, то и НЗЦг не проверять, во избежание.
+    // написать про группы, в зависимости от признаков и флагов.
     for(int i=0; i<battery[iBatteryIndex].group_num; i++)
     {
         label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
@@ -103,14 +103,29 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         }
         else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
         {
-            label->setText(tr("%0) НРЦг меньше нормы, проверка под нагрузкой запрещена.").arg(i+1));
+            label->setText(tr("%0) НРЦг <нормы, проверка под нагрузкой запрещена.").arg(i+1));
         }
         else
         {
             label->setText(tr("%0)").arg(i+1));
         }
     }
-    // !!! лишние label вообще стереть.
+    // если все цепи меньше нормы, или не проверялись - в автомате батарею под нагрузкой не проверять
+    bool bAllCircuitsFail=true;
+    for(int i=0; i<battery[iBatteryIndex].group_num; i++)
+    {
+        if(!((!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
+                || (battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)))
+        {
+            bAllCircuitsFail=false;
+        }
+    }
+    if(bAllCircuitsFail)
+    {
+        QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка цепей под нагрузкой запрещена.");
+        bState = false;
+        goto stop;
+    }
 
     // Пробежимся по списку цепей
     for(int i=iCurrentStep; i < iMaxSteps; i++)
@@ -121,8 +136,14 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             Qt::CheckState checkState = sitm->checkState(); // и его состояние
             if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
         }
+        else // в автомате проверять флаги. если НРЦг не проверялось, то и НЗЦг не проверять, во избежание.
+        {
+            if((!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
+                    || (battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT))
+                continue;
+        }
 
-        ui->progressBar->setMaximum(3); // установить кол-во ступеней прогресса !!! в зависимости от времени!
+        ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса !!! в зависимости от времени!
         ui->progressBar->reset();
 
         // очистить массивы посылки/приёма

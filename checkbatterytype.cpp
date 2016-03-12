@@ -41,9 +41,9 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     ui->dateEditBatteryBuild->setDisabled(true);
     ui->lineEditBatteryNumber->setDisabled(true);
 
-    qDebug()<<U1<<U2;
+    //qDebug()<<U1<<U2;
 
-    if(loop.isRunning()){qDebug()<<"loop.isRunning()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"; return;} // !!! костыль: если цикл уже работает - выйти обратно
+    if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} //  костыль: если цикл уже работает - выйти обратно
     ui->btnCheckConnectedBattery->setEnabled(false); // на время проверки запретить кнопку
     timerPing->stop(); // остановить пинг
 
