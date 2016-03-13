@@ -229,6 +229,11 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     }
 
 stop:
+    if(ret == KDS_STOP) {
+        ui->labelClosedCircuitVoltageBattery0->setText(sLabelText + " измерение прервано!");
+        ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC1);
@@ -242,11 +247,6 @@ stop:
         if(ret == KDS_TIMEOUT) Log(tr("Timeout!"), "red");
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
-    }
-    if(ret == KDS_STOP) {
-        ui->labelClosedCircuitVoltageBattery0->setText(sLabelText + " измерение прервано!");
-        ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : red; }");
-        Log(sLabelText + " измерение прервано!", "red");
     }
 
     if(bModeManual)

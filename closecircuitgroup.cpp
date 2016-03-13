@@ -280,6 +280,11 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
 
     }// конец цикла проверок цепей
 stop:
+    if(ret == KDS_STOP) {
+        label->setText(sLabelText + " измерение прервано!");
+        label->setStyleSheet("QLabel { color : red; }");
+        Log(sLabelText + " измерение прервано!", "red");
+    }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC1);
@@ -293,11 +298,6 @@ stop:
         if(ret == KDS_TIMEOUT) Log(tr("Timeout!"), "red");
         else if(ret == KDS_INCORRECT_REPLY) Log(tr("Incorrect reply!"), "red");
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
-    }
-    if(ret == KDS_STOP) {
-        label->setText(sLabelText + " измерение прервано!");
-        label->setStyleSheet("QLabel { color : red; }");
-        Log(sLabelText + " измерение прервано!", "red");
     }
 
     if(bModeManual)
