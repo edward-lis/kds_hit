@@ -32,27 +32,36 @@ void MainWindow::on_btnDepassivation_clicked()
     baRecvArray.clear();
 
     // написать про группы, в зависимости от признаков и флагов
-    for(int i=1; i<battery[iBatteryIndex].group_num+1; i++)
+    for(int i = 0; i < 28; i++)
     {
-        QStandardItem *sitm = modelDepassivation->item(i, 0);
-        Qt::CheckState checkState = sitm->checkState();
+        dArrayDepassivation[i] = -1;
+        label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num) {
+            QStandardItem *sitm = modelDepassivation->item(i+1, 0);
+            Qt::CheckState checkState = sitm->checkState();
 
-        QLabel * label = findChild<QLabel*>(tr("labelDepassivation%1").arg(i-1));
-        if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_OCG_TESTED))
-        {
-            label->setText(tr("%1) НРЦг не проверялось.").arg(i));
-        }
-        else if(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_FAULT)
-        {
-            label->setText(tr("%1) НРЦг < нормы, проверка под нагрузкой запрещена.").arg(i));
-        }
-        else if(!(battery[iBatteryIndex].b_flag_circuit[i-1] & CIRCUIT_DEPASS) || (checkState != Qt::Checked))
-        {
-            label->setText(tr("%1) Распассивация не требуется.").arg(i));
-        }
-        else
-        {
-            label->setText(tr("%1)").arg(i));
+            label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
+            if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
+            {
+                label->setText(tr("%0) НРЦг не проверялось.").arg(i+1));
+            }
+            else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
+            {
+                label->setText(tr("%0) НРЦг < нормы, проверка под нагрузкой запрещена.").arg(i+1));
+                label->setStyleSheet("QLabel { color : red; }");
+            }
+            else if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_DEPASS) || (checkState != Qt::Checked))
+            {
+                label->setText(tr("%0) %1 не требуется.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+                label->setStyleSheet("QLabel { color : green; }");
+            }
+            else
+            {
+                label->setText(tr("%0) %1 требуется!").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+                label->setStyleSheet("QLabel { color : blue; }");
+            }
         }
     }
     // !!! лишние label вообще стереть.
@@ -191,12 +200,13 @@ void MainWindow::on_btnDepassivation_clicked()
             if(ret) goto stop;
         }
         //label->setText(tr("%1) Распассивация закончена").arg(i));
+        sLabelText = tr("%0) \"%1\"").arg(i).arg(battery[iBatteryIndex].circuitgroup[i]);
 
         sResult = "Выполнена";
         color = "green";
-        label->setText(str+" "+sResult);
+        label->setText(tr("%0 %1").arg(sLabelText).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(str+" "+sResult, color);
+        Log(tr("%0 %1").arg(sLabelText).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true);
 

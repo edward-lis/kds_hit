@@ -42,16 +42,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
-    } else {
-        /// по началу проверки очистим все label'ы и полученные результаты
-        for (int i = 0; i < 28; i++) {
-            dArrayClosedCircuitVoltageGroup[i] = -1;
-            label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
-            label->setStyleSheet("QLabel { color : black; }");
-            label->clear();
-            if (i < battery[iBatteryIndex].group_num)
-                label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-        }
     }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
@@ -94,20 +84,26 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     }
 
     // написать про группы, в зависимости от признаков и флагов.
-    for(int i=0; i<battery[iBatteryIndex].group_num; i++)
+    for(int i = 0; i < 28; i++)
     {
+        dArrayClosedCircuitVoltageGroup[i] = -1;
         label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%1").arg(i));
-        if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
-        {
-            label->setText(tr("%0) НРЦг не проверялось.").arg(i+1));
-        }
-        else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
-        {
-            label->setText(tr("%0) НРЦг <нормы, проверка под нагрузкой запрещена.").arg(i+1));
-        }
-        else
-        {
-            label->setText(tr("%0)").arg(i+1));
+        label->setStyleSheet("QLabel { color : black; }");
+        label->clear();
+        if (i < battery[iBatteryIndex].group_num) {
+            if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_OCG_TESTED))
+            {
+                label->setText(tr("%0) НРЦг не проверялось.").arg(i+1));
+            }
+            else if(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_FAULT)
+            {
+                label->setText(tr("%0) НРЦг <нормы, проверка под нагрузкой запрещена.").arg(i+1));
+                label->setStyleSheet("QLabel { color : red; }");
+            }
+            else
+            {
+                label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+            }
         }
     }
     // если все цепи меньше нормы, или не проверялись - в автомате батарею под нагрузкой не проверять
@@ -266,6 +262,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                 //imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
                 //ui->cbDepassivation->addItem(battery[iBatteryIndex].circuitgroup[iStepClosedCircuitVoltageGroup-1]);
                 // !!! Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
+                label->setText("*" + label->text());
                 battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_DEPASS; // добавить признак, что группе нужна депассивация
                 break;
             case 2:
