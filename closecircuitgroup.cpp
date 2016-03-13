@@ -30,16 +30,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     //int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
 
-    /// по началу проверки очистим все label'ы и полученные результаты
-    /*for (int i = 0; i < 28; i++) {
-        dArrayClosedCircuitVoltageGroup[i] = -1;
-        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
-        label->setStyleSheet("QLabel { color : black; }");
-        label->clear();
-        if (i < battery[iBatteryIndex].group_num)
-            label->setText(tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-    }*/
-
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
         // остановить текущую проверку, выход
@@ -52,6 +42,16 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
+    } else {
+        /// по началу проверки очистим все label'ы и полученные результаты
+        for (int i = 0; i < 28; i++) {
+            dArrayClosedCircuitVoltageGroup[i] = -1;
+            label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+            label->setStyleSheet("QLabel { color : black; }");
+            label->clear();
+            if (i < battery[iBatteryIndex].group_num)
+                label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+        }
     }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
@@ -151,6 +151,13 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         baSendCommand.clear();
         baRecvArray.clear();
 
+        // написать в закладке, что измеряется некоторая текущая цепь
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]);
+        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
+
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
         timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -158,13 +165,6 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         ret=loop.exec();
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
         ui->progressBar->setValue(ui->progressBar->value()+1);
-
-        // написать в закладке, что измеряется некоторая текущая цепь
-        /// формируем строку и пишем на label "идет измерение..."
-        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]);
-        label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
-        label->setText(sLabelText + " идет измерение...");
-        label->setStyleSheet("QLabel { color : blue; }");
 
         // собрать режим
         str_num.sprintf(" %02i %1i", i+1, 3); // напечатать номер цепи и номер тока по протоколу (3 в данном случае)
@@ -259,7 +259,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
 
             // добавить цепь в список распассивируемых
-            switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 В. Не норма! \nПродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
+            switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
             case 0:
                 break;
             case 1:

@@ -240,7 +240,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         sArrayReportOpenCircuitVoltagePowerSupply = data.sArrayReportOpenCircuitVoltagePowerSupply;
         sArrayReportClosedCircuitVoltagePowerSupply = data.sArrayReportClosedCircuitVoltagePowerSupply;
 
-        /// Напряжение на корпусе
+        /// 1. Напряжения на корпусе
         ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);
         for (int i = 0; i < 2; i++) {
             dArrayVoltageOnTheHousing[i] = data.dArrayVoltageOnTheHousing[i];
@@ -262,12 +262,12 @@ void MainWindow::on_actionCheckLoad_triggered()
         if (!sArrayReportVoltageOnTheHousing.isEmpty())
             ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
 
-        /// Сопротивление изоляции
+        /// 2. Сопротивление изоляции
         ui->cbInsulationResistance->setCurrentIndex(data.icbInsulationResistance);
         for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
             if (dArrayInsulationResistance[i] != -1) {
-                str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i], 0, 'g', 0);
+                str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0);
                 QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
                 if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
                     sResult = "Не норма!";
@@ -285,7 +285,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
 
 
-        /// Напряжение разомкнутой цепи группы
+        /// 3. Напряжение разомкнутой цепи группы
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             dArrayOpenCircuitVoltageGroup[i] = data.dArrayOpenCircuitVoltageGroup[i];
@@ -296,9 +296,9 @@ void MainWindow::on_actionCheckLoad_triggered()
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
 
             if (dArrayOpenCircuitVoltageGroup[i] != -1) {
-                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2);
                 QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-                if (dArrayOpenCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
+                if (dArrayOpenCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
                     sResult = "Не норма!";
                     color = "red";
                 }
@@ -314,13 +314,13 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
 
 
-        /// Напряжение разомкнутой цепи батареи
+        /// 3а. Напряжение разомкнутой цепи батареи
         for (int i = 0; i < 1; i++) {
             dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
             if (dArrayOpenCircuitVoltageBattery[i] != -1) {
-                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitbattery).arg(dArrayOpenCircuitVoltageBattery[i], 0, 'f', 2);
                 QLabel * label = findChild<QLabel*>(tr("labelOpenCircuitVoltageBattery%0").arg(i));
-                if (dArrayOpenCircuitVoltageBattery[i] > settings.opencircuitbattery_limit) {
+                if (dArrayOpenCircuitVoltageBattery[i] < settings.opencircuitbattery_limit) {
                     sResult = "Не норма!";
                     color = "red";
                 }
@@ -336,7 +336,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
 
 
-        /// Напряжение замкнутой цепи группы
+        /// 4. Напряжение замкнутой цепи группы
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             dArrayClosedCircuitVoltageGroup[i] = data.dArrayClosedCircuitVoltageGroup[i];
@@ -346,9 +346,9 @@ void MainWindow::on_actionCheckLoad_triggered()
             modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
 
             if (dArrayClosedCircuitVoltageGroup[i] != -1) {
-                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i]);
+                str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2);
                 QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltageGroup%0").arg(i));
-                if (dArrayClosedCircuitVoltageGroup[i] > settings.closecircuitgroup_limit) {
+                if (dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
                     sResult = "Не норма!";
                     color = "red";
                 }
@@ -395,11 +395,11 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
 
 
-        /// Напряжение замкнутой цепи батареи
+        /// 5. Напряжение замкнутой цепи батареи
         dArrayClosedCircuitVoltageBattery[0] = data.dArrayClosedCircuitVoltageBattery[0];
         if (dArrayClosedCircuitVoltageBattery[0] != -1) {
-            str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0]);
-            if (dArrayClosedCircuitVoltageBattery[0] > settings.closecircuitbattery_limit) {
+            str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2);
+            if (dArrayClosedCircuitVoltageBattery[0] < settings.closecircuitbattery_limit) {
                 sResult = "Не норма!";
                 color = "red";
             }
@@ -416,7 +416,7 @@ void MainWindow::on_actionCheckLoad_triggered()
 
         /// только для батарей 9ER20P_20 или 9ER14PS_24
         if (iBatteryIndex == 0 or iBatteryIndex == 1) {
-            /// Сопротивление изоляции УУТББ
+            /// 6. Сопротивление изоляции УУТББ
             for (int i = 0; i < battery[iBatteryIndex].i_uutbb_resist_num; i++)
             {
                 dArrayInsulationResistanceUUTBB[i] = data.dArrayInsulationResistanceUUTBB[i];
@@ -426,9 +426,9 @@ void MainWindow::on_actionCheckLoad_triggered()
                 modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
 
                 if (dArrayInsulationResistanceUUTBB[i] != -1) {
-                    str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]);
+                    str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0);
                     QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
-                    if (dArrayInsulationResistanceUUTBB[i] > settings.uutbb_isolation_resist_limit) {
+                    if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
                         sResult = "Не норма!";
                         color = "red";
                     }
@@ -444,11 +444,11 @@ void MainWindow::on_actionCheckLoad_triggered()
                 ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
 
 
-            /// Напряжение разомкнутой цепи БП
+            /// 7. Напряжение разомкнутой цепи БП
             dArrayOpenCircuitVoltagePowerSupply[0] = data.dArrayOpenCircuitVoltagePowerSupply[0];
             if (dArrayOpenCircuitVoltagePowerSupply[0] != -1) {
-                str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dArrayOpenCircuitVoltagePowerSupply[0]);
-                if (dArrayOpenCircuitVoltagePowerSupply[0] < settings.uutbb_opencircuitpower_limit_min or dArrayOpenCircuitVoltagePowerSupply[0] > settings.uutbb_opencircuitpower_limit_max) {
+                str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 0);
+                if (dArrayOpenCircuitVoltagePowerSupply[0] < settings.uutbb_opencircuitpower_limit_min) {
                     sResult = "Не норма!";
                     color = "red";
                 }
@@ -462,13 +462,13 @@ void MainWindow::on_actionCheckLoad_triggered()
             }
 
 
-            /// Напряжение замкнутой цепи БП
+            /// 8. Напряжение замкнутой цепи БП
             ui->cbClosedCircuitVoltagePowerSupply->setCurrentIndex(data.icbClosedCircuitVoltagePowerSupply);
 
             dArrayClosedCircuitVoltagePowerSupply[0] = data.dArrayClosedCircuitVoltagePowerSupply[0];
             if (dArrayClosedCircuitVoltagePowerSupply[0] != -1) {
-                str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dArrayClosedCircuitVoltagePowerSupply[0]);
-                if (dArrayClosedCircuitVoltagePowerSupply[0] > settings.uutbb_closecircuitpower_limit) {
+                str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 0);
+                if (dArrayClosedCircuitVoltagePowerSupply[0] < settings.uutbb_closecircuitpower_limit) {
                     sResult = "Не норма!";
                     color = "red";
                 }

@@ -23,16 +23,6 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 //    int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
 
-    /// по началу проверки очистим все label'ы и полученные результаты
-    /*for (int i = 0; i < battery[iBatteryIndex].uutbb_resist.size(); i++) {
-        dArrayInsulationResistanceUUTBB[i] = -1;
-        label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
-        label->setStyleSheet("QLabel { color : black; }");
-        label->clear();
-        //??? if (i < battery[iBatteryIndex].uutbb_resist.size())
-            label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
-    }*/
-
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
         // остановить текущую проверку, выход
@@ -45,6 +35,16 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
+    } else {
+        /// по началу проверки очистим все label'ы и полученные результаты
+        for (int i = 0; i < 33; i++) {
+            dArrayInsulationResistanceUUTBB[i] = -1;
+            label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+            label->setStyleSheet("QLabel { color : black; }");
+            label->clear();
+            if (i < battery[iBatteryIndex].uutbb_resist.size())
+                label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]));
+        }
     }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
@@ -89,7 +89,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 
     // Пробежимся по списку точек измерения сопротивлений изоляции
     for(int i=iCurrentStep; i < iMaxSteps; i++)
-    {
+    {   
         if(bModeManual) // в ручном будем идти по чекбоксам
         {
             QStandardItem *sitm = modelInsulationResistanceUUTBB->item(i+1, 0); // взять очередной номер
@@ -104,6 +104,12 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         baSendArray.clear();
         baSendCommand.clear();
         baRecvArray.clear();
+
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]);
+        label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
 
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -121,12 +127,6 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         ret=loop.exec();
         if(ret) goto stop;
         ui->progressBar->setValue(ui->progressBar->value()+1);
-
-        /// формируем строку и пишем на label "идет измерение..."
-        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]);
-        label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
-        label->setText(sLabelText + " идет измерение...");
-        label->setStyleSheet("QLabel { color : blue; }");
 
         // послать опрос
         baSendArray=baSendCommand+"?#";
@@ -180,7 +180,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             strResist = QString::number(resist, 'f', 0) + "Ом, ";
         }*/
         strResist = QString::number(resist, 'f', 0) + " Ом, ";
-        dArrayInsulationResistanceUUTBB[i] = resist/1000000;
+        dArrayInsulationResistanceUUTBB[i] = resist;
 
         // если отладочный режим, напечатать отладочную инфу
         if(bDeveloperState)
@@ -198,16 +198,30 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i], 0, 'f', 0).arg(sResult));
+        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i], 0, 'f', 0).arg(sResult), color);
+        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
+
+        /// заполняем массив проверок для отчета
+        dateTime = QDateTime::currentDateTime();
+        sArrayReportInsulationResistanceUUTBB.append(
+                    tr("<tr>"\
+                       "    <td>%0</td>"\
+                       "    <td>%1</td>"\
+                       "    <td>%2</td>"\
+                       "    <td>%3</td>"\
+                       "</tr>")
+                    .arg(dateTime.toString("hh:mm:ss"))
+                    .arg(battery[iBatteryIndex].uutbb_resist[i])
+                    .arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0)
+                    .arg(sResult));
 
         if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
             if(!bModeManual)// если в автоматическом режиме
             {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("%0 Продолжить?").arg(str+" "+sResult), tr("Да"), tr("Нет"))) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0).arg(sResult), tr("Да"), tr("Нет"))) {
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState);
                     ui->groupBoxDiagnosticMode->setDisabled(bState);

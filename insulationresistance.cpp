@@ -86,6 +86,12 @@ void MainWindow::on_btnInsulationResistance_clicked()
         baSendCommand.clear();
         baRecvArray.clear();
 
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]);
+        label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
+
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i)); // если вдруг вывалимся из цикла, чтобы написать после стопа
 
         // сбросить коробочку
@@ -104,12 +110,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
         ret=loop.exec();
         if(ret) goto stop;
         ui->progressBar->setValue(ui->progressBar->value()+1);
-
-        /// формируем строку и пишем на label "идет измерение..."
-        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]);
-        label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
-        label->setText(sLabelText + " идет измерение...");
-        label->setStyleSheet("QLabel { color : blue; }");
 
         // послать опрос
         baSendArray=baSendCommand+"?#";
@@ -182,9 +182,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 2).arg(sResult));
+        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 2).arg(sResult), color);
+        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
@@ -199,13 +199,13 @@ void MainWindow::on_btnInsulationResistance_clicked()
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
-                    .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 2)
+                    .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0)
                     .arg(sResult));
 
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             if(!bModeManual)// если в автоматическом режиме
             {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 Продолжить?").arg(sLabelText+" "+sResult), tr("Да"), tr("Нет"))) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult), tr("Да"), tr("Нет"))) {
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState);
                     ui->groupBoxDiagnosticMode->setDisabled(bState);

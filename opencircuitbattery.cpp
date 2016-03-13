@@ -84,6 +84,11 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
+    /// формируем строку и пишем на label "идет измерение..."
+    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
+    ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " идет измерение...");
+    ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : blue; }");
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -91,11 +96,6 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
     ui->progressBar->setValue(ui->progressBar->value()+1);
-
-    /// формируем строку и пишем на label "идет измерение..."
-    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
-    ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " идет измерение...");
-    ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : blue; }");
 
     // собрать режим
     baSendArray=(baSendCommand="UocB")+"#";
@@ -161,7 +161,7 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
         if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
         else
         {
-            if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+            if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
                 bState = false;
                 ui->groupBoxCOMPort->setDisabled(bState);
                 ui->groupBoxDiagnosticMode->setDisabled(bState);

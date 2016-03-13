@@ -83,6 +83,11 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
+    /// формируем строку и пишем на label "идет измерение..."
+    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+    ui->labelOpenCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");
+    ui->labelOpenCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : blue; }");
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -90,11 +95,6 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
     ui->progressBar->setValue(ui->progressBar->value()+1);
-
-    /// формируем строку и пишем на label "идет измерение..."
-    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
-    ui->labelOpenCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");
-    ui->labelOpenCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : blue; }");
 
     // собрать режим
     baSendArray=(baSendCommand="UocPB")+"#";
@@ -160,7 +160,7 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
         if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи БП УУТББ"), tr("Напряжение цепи ")+battery[iBatteryIndex].uutbb_closecircuitpower[0]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
         else
         {
-            QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 Проверка под нагрузкой запрещена.").arg(str), tr("Да"));
+            QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 = %1 В. %2 Проверка под нагрузкой запрещена.").arg(sLabelText).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult), tr("Да"));
             bState = false;
             ui->groupBoxCOMPort->setDisabled(bState);
             ui->groupBoxDiagnosticMode->setDisabled(bState);

@@ -110,6 +110,11 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
+    /// формируем строку и пишем на label "идет измерение..."
+    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
+    ui->labelClosedCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");
+    ui->labelClosedCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : blue; }");
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -117,11 +122,6 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
     ui->progressBar->setValue(ui->progressBar->value()+1);
-
-    /// формируем строку и пишем на label "идет измерение..."
-    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
-    ui->labelClosedCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");
-    ui->labelClosedCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : blue; }");
 
     // собрать режим
     baSendArray=(baSendCommand = (iCurrentStep==0)?"UccPB":"UccPBI")+"#"; // 0 - просто НЗЦбп, 1 - НЗЦбп с контролем тока
@@ -173,11 +173,25 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
         sResult = "Норма";
         color = "green";
     }
-    ui->labelClosedCircuitVoltagePowerSupply0->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltagePowerSupply[0]).arg(sResult));
+    ui->labelClosedCircuitVoltagePowerSupply0->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult));
     ui->labelClosedCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : "+color+"; }");
-    Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltagePowerSupply[0]).arg(sResult), color);
+    Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult), color);
 
     ui->btnBuildReport->setEnabled(true);
+
+    /// заполняем массив проверок для отчета
+    dateTime = QDateTime::currentDateTime();
+    sArrayReportClosedCircuitVoltagePowerSupply.append(
+                tr("<tr>"\
+                   "    <td>%0</td>"\
+                   "    <td>%1</td>"\
+                   "    <td>%2</td>"\
+                   "    <td>%3</td>"\
+                   "</tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].uutbb_closecircuitpower[0])
+                .arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2)
+                .arg(sResult));
 
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)

@@ -164,7 +164,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(!bModeManual)// если в автоматическом режиме
             {
                 //if(!bModeManual && !bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(sLabelText+" "+sResult), tr("Да"), tr("Нет")))
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет")))
                 {
                     qDebug()<<"переход в ручной режим";
                     Log("Останов проверки - переход в ручной режим", "blue");

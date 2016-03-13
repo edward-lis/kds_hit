@@ -127,6 +127,11 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
+    /// формируем строку и пишем на label "идет измерение..."
+    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
+    ui->labelClosedCircuitVoltageBattery0->setText(sLabelText + " идет измерение...");
+    ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : blue; }");
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -134,11 +139,6 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     ret=loop.exec();
     if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
     ui->progressBar->setValue(ui->progressBar->value()+1);
-
-    /// формируем строку и пишем на label "идет измерение..."
-    sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
-    ui->labelClosedCircuitVoltageBattery0->setText(sLabelText + " идет измерение...");
-    ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : blue; }");
 
     // собрать режим
     baSendArray=(baSendCommand="UccB")+"#";
@@ -190,9 +190,9 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         sResult = "Норма";
         color = "green";
     }
-    ui->labelClosedCircuitVoltageBattery0->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageBattery[0]).arg(sResult));
+    ui->labelClosedCircuitVoltageBattery0->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult));
     ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
-    Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageBattery[0]).arg(sResult), color);
+    Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult), color);
 
     ui->btnBuildReport->setEnabled(true);
 
@@ -207,7 +207,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
                    "</tr>")
                 .arg(dateTime.toString("hh:mm:ss"))
                 .arg(battery[iBatteryIndex].circuitbattery)
-                .arg(dArrayClosedCircuitVoltageBattery[0])
+                .arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2)
                 .arg(sResult));
 
     // проанализировать результаты

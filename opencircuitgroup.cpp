@@ -23,16 +23,6 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
 
-    /// по началу проверки очистим все label'ы и полученные результаты
-    /*for (int i = 0; i < 28; i++) {
-        dArrayOpenCircuitVoltageGroup[i] = -1;
-        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-        label->setStyleSheet("QLabel { color : black; }");
-        label->clear();
-        if (i < battery[iBatteryIndex].group_num)
-            label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-    }*/
-
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
         // остановить текущую проверку, выход
@@ -45,6 +35,16 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
+    } else {
+        /// по началу проверки очистим все label'ы и полученные результаты
+        for (int i = 0; i < 28; i++) {
+            dArrayOpenCircuitVoltageGroup[i] = -1;
+            label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+            label->setStyleSheet("QLabel { color : black; }");
+            label->clear();
+            if (i < battery[iBatteryIndex].group_num)
+                label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
+        }
     }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
@@ -105,6 +105,13 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         baSendCommand.clear();
         baRecvArray.clear();
 
+        /// формируем строку и пишем на label "идет измерение..."
+        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]);
+        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
+        label->setText(sLabelText + " идет измерение...");
+        label->setStyleSheet("QLabel { color : blue; }");
+
+
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
         timerSend->start(settings.delay_after_request_before_next_ADC1); // послать baSendArray в порт
@@ -112,12 +119,6 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         ret=loop.exec();
         if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
         ui->progressBar->setValue(ui->progressBar->value()+1);
-
-        /// формируем строку и пишем на label "идет измерение..."
-        sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]);
-        label = findChild<QLabel*>(tr("labelOpenCircuitVoltageGroup%0").arg(i));
-        label->setText(sLabelText + " идет измерение...");
-        label->setStyleSheet("QLabel { color : blue; }");
 
         // собрать режим
         str_num.sprintf(" %02i", i+1); // напечатать номер цепи. т.к. счётчик от нуля, поэтому +1
@@ -194,7 +195,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         /*if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
             if(!bModeManual)// если в автоматическом режиме
             {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState);
                     ui->groupBoxDiagnosticMode->setDisabled(bState);
