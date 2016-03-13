@@ -68,6 +68,7 @@ void Settings::loadSettings()
     delay_after_request_before_next_ADC2 = settings.value("delay_after_request_before_next_ADC2", 800).toInt();
     delay_after_IDLE_before_other = settings.value("delay_after_IDLE_before_other", 150).toInt();
     delay_after_start_before_request_voltagecase = settings.value("delay_after_start_before_request_voltagecase", 1000).toInt();
+    voltagecase_num = settings.value("voltagecase_num", 5).toInt();
 
     // Для чтения шестнадцатиричных данных
     str = settings.value("k1_code", 1).toString();

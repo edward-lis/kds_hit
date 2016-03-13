@@ -84,13 +84,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         baSendArray.clear();
         baSendCommand.clear();
         baRecvArray.clear();
-        // сбросить коробочку
-        baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
-        timerSend->start(settings.delay_after_request_before_next_ADC2); //sendSerialData(); // послать baSendArray в порт
-        // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
-        ret=loop.exec();
-        if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
-        ui->progressBar->setValue(ui->progressBar->value()+1);
 
         /// формируем строку и пишем на label "идет измерение..."
         sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]);
@@ -98,9 +91,24 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         label->setText(sLabelText + " идет измерение...");
         label->setStyleSheet("QLabel { color : blue; }");
 
-        if(i == 1) // если выбрана в комбобоксе такая цепь
+        for(int j=0; j<settings.voltagecase_num; j++)
         {
-            baSendArray=(baSendCommand="UcaseM")+"#";
+            // сбросить коробочку
+            baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
+            timerSend->start(settings.delay_after_request_before_next_ADC2); //sendSerialData(); // послать baSendArray в порт
+            // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
+            ret=loop.exec();
+            if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
+            //ui->progressBar->setValue(ui->progressBar->value()+1);
+
+            if(i == 1) // если выбрана в комбобоксе такая цепь
+            {
+                baSendArray=(baSendCommand="UcaseM")+"#";
+            }
+            else
+            {
+                baSendArray=(baSendCommand="UcaseP")+"#";
+            }
             if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
             timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
             ret=loop.exec();
@@ -113,29 +121,14 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
             ui->progressBar->setValue(ui->progressBar->value()+1);
-        }
-        else
-        {
-            baSendArray=(baSendCommand="UcaseP")+"#";
-            if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
-            timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
-            ret=loop.exec();
-            if(ret) goto stop;
-            ui->progressBar->setValue(ui->progressBar->value()+1);
 
-            baSendArray=baSendCommand+"?#";
-            timerSend->start(settings.delay_after_start_before_request_voltagecase);
-            ret=loop.exec();
-            if(ret) goto stop;
-            codeU = getRecvData(baRecvArray); // получить данные опроса
-            ui->progressBar->setValue(ui->progressBar->value()+1);
-        }
-        voltageU = ((codeU-settings.offsetADC2)*settings.coefADC2); // напряжение в вольтах
-        dArrayVoltageOnTheHousing[i] = voltageU;
-        // если отладочный режим, напечатать отладочную инфу
-        if(bDeveloperState)
-        {
-            Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x "+settings.offsetADC2+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
+            voltageU = ((codeU-settings.offsetADC2)*settings.coefADC2); // напряжение в вольтах
+            dArrayVoltageOnTheHousing[i] = voltageU;
+            // если отладочный режим, напечатать отладочную инфу
+            if(bDeveloperState)
+            {
+                Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x "+qPrintable(QString::number(settings.offsetADC2, 16))+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
+            }
         }
 
         if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
