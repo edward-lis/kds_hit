@@ -47,6 +47,9 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     ui->btnCheckConnectedBattery->setEnabled(false); // на время проверки запретить кнопку
     timerPing->stop(); // остановить пинг
 
+    ui->statusBar->showMessage(tr("Проверка типа подключенной батареи ..."));
+    ui->progressBar->setRange(0,0);
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     sendSerialData(); // послать baSendArray в порт
@@ -229,4 +232,7 @@ stop:
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();
     baRecvArray.clear();
+
+    ui->progressBar->setMaximum(1); // stop progress
+    ui->progressBar->reset();
 }
