@@ -233,6 +233,12 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                     .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
                     .arg(sResult));
 
+        /// добавим в массив графиков полученный график
+        ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );
+        img.load(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png");
+        imgArrayReportGraph.append(img);
+        sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltageGroup->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dateTime.toString("hh:mm:ss")));
+
         // по окончанию цикла снять нагрузку, разобрать режим (!!! даже в ручном режиме)
         baSendArray = (baSendCommand="IDLE")+"#";
         timerSend->start(settings.delay_after_request_before_next_ADC1);

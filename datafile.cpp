@@ -45,7 +45,9 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.sArrayReportClosedCircuitVoltageBattery
             << data.sArrayReportInsulationResistanceUUTBB
             << data.sArrayReportOpenCircuitVoltagePowerSupply
-            << data.sArrayReportClosedCircuitVoltagePowerSupply;
+            << data.sArrayReportClosedCircuitVoltagePowerSupply
+            << data.sArrayReportGraphDescription
+            << data.imgArrayReportGraph;
 }
 
 QDataStream &operator>>( QDataStream &stream, dataBattery &data )
@@ -86,7 +88,9 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.sArrayReportClosedCircuitVoltageBattery
             >> data.sArrayReportInsulationResistanceUUTBB
             >> data.sArrayReportOpenCircuitVoltagePowerSupply
-            >> data.sArrayReportClosedCircuitVoltagePowerSupply;
+            >> data.sArrayReportClosedCircuitVoltagePowerSupply
+            >> data.sArrayReportGraphDescription
+            >> data.imgArrayReportGraph;
 }
 
 /*!
@@ -174,6 +178,8 @@ void MainWindow::on_actionCheckSave_triggered()
     data.sArrayReportInsulationResistanceUUTBB = sArrayReportInsulationResistanceUUTBB;
     data.sArrayReportOpenCircuitVoltagePowerSupply = sArrayReportOpenCircuitVoltagePowerSupply;
     data.sArrayReportClosedCircuitVoltagePowerSupply = sArrayReportClosedCircuitVoltagePowerSupply;
+    data.sArrayReportGraphDescription = sArrayReportGraphDescription;
+    data.imgArrayReportGraph = imgArrayReportGraph;
 
     list << data;
 
@@ -239,6 +245,8 @@ void MainWindow::on_actionCheckLoad_triggered()
         sArrayReportInsulationResistanceUUTBB = data.sArrayReportInsulationResistanceUUTBB;
         sArrayReportOpenCircuitVoltagePowerSupply = data.sArrayReportOpenCircuitVoltagePowerSupply;
         sArrayReportClosedCircuitVoltagePowerSupply = data.sArrayReportClosedCircuitVoltagePowerSupply;
+        sArrayReportGraphDescription = data.sArrayReportGraphDescription;
+        imgArrayReportGraph = data.imgArrayReportGraph;
 
         /// 1. Напряжения на корпусе
         ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);

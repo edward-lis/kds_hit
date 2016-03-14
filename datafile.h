@@ -48,6 +48,8 @@ struct dataBattery {
     QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReportGraphDescription; /// масив описания графиков
+    QList<QImage> imgArrayReportGraph; /// масив графиков
 };
 
 #endif // DATAFILE_H

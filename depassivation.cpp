@@ -167,6 +167,8 @@ void MainWindow::on_btnDepassivation_clicked()
             dt = QDateTime::currentDateTime(); // текущее время
             ui->widgetDepassivation->graph(0)->clearData(); // очистить график
 
+            dateTime = QDateTime::currentDateTime(); /// время начала распассивации
+
             // цикл измерения
             while(-dt.msecsTo(starttime) < cycleTimeSec*1000) // пока время цикла проверки не вышло, продолжим измерять
             {
@@ -190,6 +192,12 @@ void MainWindow::on_btnDepassivation_clicked()
                 ui->widgetDepassivation->replot();
             }
 
+            /// добавим в массив графиков полученный график
+            ui->widgetDepassivation->savePng(QDir::tempPath()+"DepassivationGraph.png", 493, 526, 1.0, -1);
+            img.load(QDir::tempPath()+"DepassivationGraph.png");
+            imgArrayReportGraph.append(img);
+            sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Ток: %2 А. Время: %3.").arg(ui->rbDepassivation->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(settings.depassivation_current[k]).arg(dateTime.toString("hh:mm:ss")));
+
             if(bDeveloperState)
                 Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
@@ -211,7 +219,6 @@ void MainWindow::on_btnDepassivation_clicked()
         ui->btnBuildReport->setEnabled(true);
 
         /// заполняем массив проверок для отчета
-        dateTime = QDateTime::currentDateTime();
         sArrayReportDepassivation.append(
                     tr("<tr>"\
                        "    <td>%0</td>"\
@@ -221,6 +228,7 @@ void MainWindow::on_btnDepassivation_clicked()
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(sResult));
+
 #if 0
         str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));
         Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green");

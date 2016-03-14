@@ -193,6 +193,12 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
                 .arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2)
                 .arg(sResult));
 
+    /// добавим в массив графиков полученный график
+    ui->widgetClosedCircuitVoltagePowerUUTBB->savePng(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png", 413, 526, 1.0, -1);
+    img.load(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png");
+    imgArrayReportGraph.append(img);
+    sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltagePowerSupply->text()).arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dateTime.toString("hh:mm:ss")));
+
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)
     {
