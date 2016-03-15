@@ -206,6 +206,11 @@ MainWindow::MainWindow(QWidget *parent) :
     getCOMPorts();
     comboxSetData();
 
+    /// временно скрываем графики
+    ui->widgetClosedCircuitBattery->hide();
+    ui->widgetClosedCircuitVoltageGroup->hide();
+    ui->widgetClosedCircuitVoltagePowerUUTBB->hide();
+
     // состояния виджетов в зависимости от признака отладки
     //bDeveloperState = settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
     //triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.

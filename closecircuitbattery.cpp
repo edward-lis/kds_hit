@@ -209,6 +209,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
                 .arg(battery[iBatteryIndex].circuitbattery)
                 .arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2)
                 .arg(sResult));
+    /// добавить график когда будет нужно
 
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)
