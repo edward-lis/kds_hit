@@ -54,6 +54,13 @@
            <widget class="QComboBox" name="comboBoxCOMPort"/>
           </item>
           <item>
+           <widget class="QPushButton" name="btnCOMPortRefresh">
+            <property name="text">
+             <string>Обновить</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnCOMPortOpenClose">
             <property name="text">
              <string>Открыть</string>

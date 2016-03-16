@@ -227,6 +227,7 @@ private slots:
    void on_actionCheckSave_triggered();
    void on_actionCheckLoad_triggered();
    void on_btnBuildReport_clicked();
+   void on_btnCOMPortRefresh_clicked();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна

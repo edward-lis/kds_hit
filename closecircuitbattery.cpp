@@ -209,7 +209,12 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
                 .arg(battery[iBatteryIndex].circuitbattery)
                 .arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2)
                 .arg(sResult));
-    /// добавить график когда будет нужно
+
+    /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
+    /*ui->widgetClosedCircuitBattery->savePng(QDir::tempPath()+"ClosedCircuitBatteryGraph.png",  699, 504, 1.0, -1);
+    img.load(QDir::tempPath()+"ClosedCircuitBatteryGraph.png");
+    imgArrayReportGraph.append(img);
+    sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltageBattery->text()).arg(battery[iBatteryIndex].circuitbattery).arg(dateTime.toString("hh:mm:ss")));*/
 
     // проанализировать результаты
     if(codeADC >= codeLimit) // напряжение больше (норма)

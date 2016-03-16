@@ -790,6 +790,9 @@ void MainWindow::triggerDeveloperState() {
         ui->rbClosedCircuitVoltagePowerSupply->show();
         ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
+        ui->widgetClosedCircuitBattery->show();
+        ui->widgetClosedCircuitVoltageGroup->show();
+        ui->widgetClosedCircuitVoltagePowerUUTBB->show();
     } else {
         ui->rbInsulationResistanceUUTBB->hide();
         ui->cbInsulationResistanceUUTBB->hide();
@@ -800,6 +803,9 @@ void MainWindow::triggerDeveloperState() {
         ui->rbClosedCircuitVoltagePowerSupply->hide();
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
+        ui->widgetClosedCircuitBattery->hide();
+        ui->widgetClosedCircuitVoltageGroup->hide();
+        ui->widgetClosedCircuitVoltagePowerUUTBB->hide();
 
         int tab_count = ui->tabWidget->count();
         for (int i = 1; i < tab_count; i++) {
@@ -819,4 +825,3 @@ void MainWindow::triggerDeveloperState() {
         modelDepassivation->setItem(i+1, 0, item);
     }
 }
-

@@ -127,6 +127,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
             baRecvArray.clear();
             bPortOpen = true;
             ui->groupBoxDiagnosticDevice->setEnabled(true); // разрешить комбобокс выбора типа батареи и проверки её подключения
+            ui->btnCOMPortRefresh->setDisabled(true); /// отключаем кнопку обновления
         }
         else // если порт не открылся
         {
@@ -145,6 +146,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
         ui->groupBoxDiagnosticMode->setDisabled(true); // запретить бокс выбора режима диагностики
         ui->groupBoxCheckParams->setDisabled(true); // запретить бокс выбора параметра проверки ручного режима
         ui->groupBoxCheckParamsAutoMode->setDisabled(true); // запретить бокс выбора начальных параметров проверки автоматического режима
+        ui->btnCOMPortRefresh->setEnabled(true); /// включаем кнопку обновления
         bPortOpen = false;
         loop.exit(-1); // закончить цикл ожидания ответа
     }
@@ -162,4 +164,13 @@ void MainWindow::getCOMPorts()
         list << info.portName();
         ui->comboBoxCOMPort->addItems(list);
     }
+}
+
+/*!
+ * COM Порт - кнопка "обновления" списка портов.
+ */
+void MainWindow::on_btnCOMPortRefresh_clicked()
+{
+    ui->comboBoxCOMPort->clear();
+    getCOMPorts();
 }
