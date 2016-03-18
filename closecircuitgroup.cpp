@@ -227,11 +227,13 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2)
-                    .arg(sResult));
+                    .arg(sResult)
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
         /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
         /*ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );

@@ -66,6 +66,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
                                 "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
+                                "</td>"\
                             "</tr>";
         QString value;
         foreach (value, sArrayReportVoltageOnTheHousing) {
@@ -97,6 +100,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
                                 "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
+                                "</td>"\
                             "</tr>";
         QString value;
         foreach (value, sArrayReportInsulationResistance) {
@@ -126,6 +132,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
                                 "</td>"\
                             "</tr>";
         QString value;
@@ -157,6 +166,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
                                 "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
+                                "</td>"\
                             "</tr>";
         QString value;
         foreach (value, sArrayReportOpenCircuitVoltageBattery) {
@@ -187,6 +199,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
                                 "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
+                                "</td>"\
                             "</tr>";
         QString value;
         foreach (value, sArrayReportClosedCircuitVoltageGroup) {
@@ -213,6 +228,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
                                 "</td>"\
                             "</tr>";
         QString value;
@@ -243,6 +261,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "</td>"\
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
+                                "</td>"\
+                                "<td>"\
+                                    "<p><b>Режим</b></p>"\
                                 "</td>"\
                             "</tr>";
         QString value;
@@ -277,6 +298,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<td>"\
                                         "<p><b>Результат</b></p>"\
                                     "</td>"\
+                                    "<td>"\
+                                        "<p><b>Режим</b></p>"\
+                                    "</td>"\
                                 "</tr>";
             QString value;
             foreach (value, sArrayReportInsulationResistanceUUTBB) {
@@ -307,6 +331,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "<td>"\
                                         "<p><b>Результат</b></p>"\
                                     "</td>"\
+                                    "<td>"\
+                                        "<p><b>Режим</b></p>"\
+                                    "</td>"\
                                 "</tr>";
             QString value;
             foreach (value, sArrayReportOpenCircuitVoltagePowerSupply) {
@@ -336,6 +363,9 @@ void MainWindow::on_btnBuildReport_clicked()
                                     "</td>"\
                                     "<td>"\
                                         "<p><b>Результат</b></p>"\
+                                    "</td>"\
+                                    "<td>"\
+                                        "<p><b>Режим</b></p>"\
                                     "</td>"\
                                 "</tr>";
             QString value;

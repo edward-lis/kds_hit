@@ -204,11 +204,13 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
                    "    <td>%1</td>"\
                    "    <td>%2</td>"\
                    "    <td>%3</td>"\
+                   "    <td>%4</td>"\
                    "</tr>")
                 .arg(dateTime.toString("hh:mm:ss"))
                 .arg(battery[iBatteryIndex].circuitbattery)
                 .arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2)
-                .arg(sResult));
+                .arg(sResult)
+                .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
     /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
     /*ui->widgetClosedCircuitBattery->savePng(QDir::tempPath()+"ClosedCircuitBatteryGraph.png",  699, 504, 1.0, -1);

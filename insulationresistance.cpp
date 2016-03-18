@@ -196,11 +196,13 @@ void MainWindow::on_btnInsulationResistance_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
                     .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0)
-                    .arg(sResult));
+                    .arg(sResult)
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             if(!bModeManual)// если в автоматическом режиме

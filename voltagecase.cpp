@@ -153,11 +153,13 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_voltage_corpus[i])
                     .arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2)
-                    .arg(sResult));
+                    .arg(sResult)
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
         if(codeU > codeLimit) // напряжение больше (в кодах)
         {

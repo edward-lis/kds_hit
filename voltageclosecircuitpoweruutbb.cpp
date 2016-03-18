@@ -188,11 +188,13 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
                    "    <td>%1</td>"\
                    "    <td>%2</td>"\
                    "    <td>%3</td>"\
+                   "    <td>%4</td>"\
                    "</tr>")
                 .arg(dateTime.toString("hh:mm:ss"))
                 .arg(battery[iBatteryIndex].uutbb_closecircuitpower[0])
                 .arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2)
-                .arg(sResult));
+                .arg(sResult)
+                .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
     /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
     /*ui->widgetClosedCircuitVoltagePowerUUTBB->savePng(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png", 413, 526, 1.0, -1);

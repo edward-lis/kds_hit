@@ -152,6 +152,7 @@ void MainWindow::on_btnDepassivation_clicked()
         for(int k=0; k<3; k++)
         {
             cycleTimeSec = settings.time_depassivation[k];
+            ui->widgetDepassivation->graph(0)->setName(tr("Ток: %0 А").arg(settings.depassivation_current[k]));
             ui->widgetDepassivation->xAxis->setRange(0, cycleTimeSec+1); // длительность цикла
             label->setText(tr("%1) Идёт распассивация током %2 А...").arg(i).arg(QString::number(settings.depassivation_current[k])));
 
@@ -187,6 +188,7 @@ void MainWindow::on_btnDepassivation_clicked()
                 }
                 dt = QDateTime::currentDateTime(); // текущее время
                 x= -dt.msecsTo(starttime); // кол-во миллисекунд, прошедших с начала измерения
+
                 ui->widgetDepassivation->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
                 ui->widgetDepassivation->graph(0)->addData((double)x/1000, (double)fU);
                 ui->widgetDepassivation->replot();
@@ -196,7 +198,7 @@ void MainWindow::on_btnDepassivation_clicked()
             ui->widgetDepassivation->savePng(QDir::tempPath()+"DepassivationGraph.png", 493, 526, 1.0, -1);
             img.load(QDir::tempPath()+"DepassivationGraph.png");
             imgArrayReportGraph.append(img);
-            sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Ток: %2 А. Время: %3.").arg(ui->rbDepassivation->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(settings.depassivation_current[k]).arg(dateTime.toString("hh:mm:ss")));
+            sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbDepassivation->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dateTime.toString("hh:mm:ss")));
 
             if(bDeveloperState)
                 Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
@@ -224,10 +226,12 @@ void MainWindow::on_btnDepassivation_clicked()
                        "    <td>%0</td>"\
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
+                       "    <td>%3</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
-                    .arg(sResult));
+                    .arg(sResult)
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
 #if 0
         str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));

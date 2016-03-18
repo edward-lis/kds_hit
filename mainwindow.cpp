@@ -151,13 +151,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetDepassivation->addGraph(); // blue line
     ui->widgetDepassivation->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetDepassivation->graph(0)->clearData();
-    ui->widgetDepassivation->addGraph(); // blue dot
-    ui->widgetDepassivation->graph(1)->clearData();
-    ui->widgetDepassivation->graph(1)->setLineStyle(QCPGraph::lsNone);
-    ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
+    ui->widgetDepassivation->graph(0)->setName("Ток");
+    //ui->widgetDepassivation->addGraph(); // blue dot
+    //ui->widgetDepassivation->graph(1)->clearData();
+    //ui->widgetDepassivation->graph(1)->setLineStyle(QCPGraph::lsNone);
+    //ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
     ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetDepassivation->yAxis->setRange(24, 33);
+    ui->widgetDepassivation->legend->setVisible(true);
 
     /// описание графика для "Напряжение замкнутой цепи батареи"
     ui->widgetClosedCircuitBattery->addGraph(); // blue line
@@ -288,10 +290,13 @@ void MainWindow::comboxSetData() {
         }
     }
 
+    /// очищаем массив графиков
+    imgArrayReportGraph.clear();
+
     /// 1. Напряжения на корпусе
     ui->cbParamsAutoMode->addItem(tr("1. %0").arg(ui->rbVoltageOnTheHousing->text()));
     ui->cbVoltageOnTheHousing->clear();
-    sArrayReportInsulationResistance.clear(); /// очищаем массив проверок для отчета
+    sArrayReportVoltageOnTheHousing.clear(); /// очищаем массив проверок для отчета
 
     /// очистка и заполнение label*ов на вкладке и очистка массива с полученными параметрами проверки
     for (int i = 0; i < 2; i++) {

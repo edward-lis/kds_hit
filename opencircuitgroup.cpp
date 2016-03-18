@@ -167,11 +167,13 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
                        "    <td>%3</td>"\
+                       "    <td>%4</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
-                    .arg(sResult));
+                    .arg(sResult)
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)
