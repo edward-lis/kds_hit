@@ -226,6 +226,7 @@ private slots:
    void on_btnClosedCircuitVoltageGroup_clicked();
    void on_actionCheckSave_triggered();
    void on_actionCheckLoad_triggered();
+   void on_actionCheckReset_triggered();
    void on_btnBuildReport_clicked();
    void on_btnCOMPortRefresh_clicked();
 

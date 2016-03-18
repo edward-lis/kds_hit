@@ -825,3 +825,15 @@ void MainWindow::triggerDeveloperState() {
         modelDepassivation->setItem(i+1, 0, item);
     }
 }
+
+
+/*!
+ * Сброс результатов проверки
+ */
+void MainWindow::on_actionCheckReset_triggered()
+{
+    if (!QMessageBox::question(this, tr("КДС ХИТ"), tr(" Вы действительно хотите сбросить результаты проверки? "), tr("Да"), tr("Нет"))) {
+        ui->EventLog->clear();
+        comboxSetData();
+    }
+}

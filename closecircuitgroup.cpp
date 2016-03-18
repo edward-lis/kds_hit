@@ -230,7 +230,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
-                    .arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2)
+                    .arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2)
                     .arg(sResult));
 
         /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ

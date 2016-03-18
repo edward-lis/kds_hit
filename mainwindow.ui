@@ -2859,31 +2859,12 @@
     <property name="title">
      <string>Проверка</string>
     </property>
+    <addaction name="actionCheckReset"/>
     <addaction name="actionCheckSave"/>
     <addaction name="actionCheckLoad"/>
    </widget>
    <addaction name="menuCheck"/>
   </widget>
-  <action name="menuExit">
-   <property name="text">
-    <string>Выход</string>
-   </property>
-  </action>
-  <action name="menuCOMPort">
-   <property name="text">
-    <string>Порт</string>
-   </property>
-  </action>
-  <action name="menuReset">
-   <property name="text">
-    <string>Сброс</string>
-   </property>
-  </action>
-  <action name="action">
-   <property name="text">
-    <string>Сформировать файл-отчет</string>
-   </property>
-  </action>
   <action name="actionCheckSave">
    <property name="text">
     <string>Сохранить</string>
@@ -2894,9 +2875,9 @@
     <string>Загрузить</string>
    </property>
   </action>
-  <action name="action_2">
+  <action name="actionCheckReset">
    <property name="text">
-    <string>Выход</string>
+    <string>Сброс</string>
    </property>
   </action>
  </widget>
