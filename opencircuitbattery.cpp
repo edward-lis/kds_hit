@@ -177,6 +177,8 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
             }
         }
     }
+
+    if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 stop:
     if(ret == KDS_STOP) {
         ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " измерение прервано!");

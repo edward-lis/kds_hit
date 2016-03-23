@@ -293,6 +293,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             //ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
             //ui->rbModeDiagnosticAuto->setEnabled(false); // запрет автоматической диагностики
         }
+        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
     }// конец цикла проверок цепей
 stop:

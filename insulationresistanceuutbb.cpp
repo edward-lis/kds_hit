@@ -82,6 +82,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
     }
     else
     {
+        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistanceUUTBB->text()), tr("Перед проверкой необходимо отключить источник питания!"));
         ui->cbParamsAutoMode->setCurrentIndex(6); // переключаем режим комбокса на наш
         iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
         iMaxSteps = ui->cbSubParamsAutoMode->count();
@@ -245,7 +246,12 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
                 }
             }
         }
+
+        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
     }// конец цикла обхода всех точек измерения сопротивления изоляции
+    /// если в автоматическом режиме, выводим сообщение о необходимости включить источник питания
+    if(!bModeManual)
+        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistanceUUTBB->text()), tr("Проверка завершена, включите источник питания!"));
 stop:
     if(ret == KDS_STOP) {
         label->setText(sLabelText + " измерение прервано!");

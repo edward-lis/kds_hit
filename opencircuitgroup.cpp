@@ -181,7 +181,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
-        }
+        } else
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)

@@ -186,6 +186,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
 
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
         if(bModeManual) QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
+        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
     } // for
 stop:
     if(ret == KDS_STOP) {
