@@ -151,15 +151,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetDepassivation->addGraph(); // blue line
     ui->widgetDepassivation->graph(0)->setPen(QPen(Qt::blue));
     ui->widgetDepassivation->graph(0)->clearData();
-    ui->widgetDepassivation->graph(0)->setName("Ток");
+    //ui->widgetDepassivation->graph(0)->setName("Ток");
     //ui->widgetDepassivation->addGraph(); // blue dot
     //ui->widgetDepassivation->graph(1)->clearData();
     //ui->widgetDepassivation->graph(1)->setLineStyle(QCPGraph::lsNone);
     //ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
     ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetDepassivation->yAxis->setRange(24, 33);
-    ui->widgetDepassivation->legend->setVisible(true);
+    ui->widgetDepassivation->yAxis->setRange(24, 34);
+    //ui->widgetDepassivation->legend->setVisible(true);
+    widgetDepassivationTextLabel = new QCPItemText(ui->widgetDepassivation);
+    ui->widgetDepassivation->addItem(widgetDepassivationTextLabel);
+    widgetDepassivationTextLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter); // расположение вверху и по центру
+    widgetDepassivationTextLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+    widgetDepassivationTextLabel->position->setCoords(0.5, 0); // отступ сверху и от центра
+    widgetDepassivationTextLabel->setText(" Ток ");
+    widgetDepassivationTextLabel->setFont(QFont(font().family(), 16)); // шрифт и размер
+    //widgetDepassivationTextLabel->setPen(QPen(Qt::black)); // черная рамка
 
     /// описание графика для "Напряжение замкнутой цепи батареи"
     ui->widgetClosedCircuitBattery->addGraph(); // blue line

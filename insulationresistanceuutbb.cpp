@@ -220,6 +220,14 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
+        /// только для ручного режима, снимаем галку с провереной
+        if(bModeManual) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+            modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
+        }
+
         if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
             if(!bModeManual)// если в автоматическом режиме
             {

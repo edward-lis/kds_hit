@@ -85,6 +85,7 @@ private:
     QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportGraphDescription; /// масив описания графиков
     QList<QImage> imgArrayReportGraph; /// масив графиков
+    QCPItemText *widgetDepassivationTextLabel; /// лейбл на граффике распассивации
     QImage img;
     QString sLabelText;
     QString sResult; /// строка результата проверки "Норма" или "Не норма!"

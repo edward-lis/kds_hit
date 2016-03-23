@@ -297,7 +297,6 @@ void MainWindow::on_actionCheckLoad_triggered()
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             dArrayOpenCircuitVoltageGroup[i] = data.dArrayOpenCircuitVoltageGroup[i];
-            QStandardItem* item;
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(data.itemsOpenCircuitVoltageGroup[i+1], Qt::CheckStateRole);

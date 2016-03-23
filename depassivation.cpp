@@ -152,7 +152,8 @@ void MainWindow::on_btnDepassivation_clicked()
         for(int k=0; k<3; k++)
         {
             cycleTimeSec = settings.time_depassivation[k];
-            ui->widgetDepassivation->graph(0)->setName(tr("Ток: %0 А").arg(settings.depassivation_current[k]));
+            //ui->widgetDepassivation->graph(0)->setName(tr("Ток: %0 А").arg(settings.depassivation_current[k]));
+            widgetDepassivationTextLabel->setText(tr(" Ток: %0 А ").arg(settings.depassivation_current[k]));
             ui->widgetDepassivation->xAxis->setRange(0, cycleTimeSec+1); // длительность цикла
             label->setText(tr("%1) Идёт распассивация током %2 А...").arg(i).arg(QString::number(settings.depassivation_current[k])));
 
@@ -232,6 +233,12 @@ void MainWindow::on_btnDepassivation_clicked()
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+
+        /// снимаем галку с провереной
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i-1]));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Unchecked, Qt::CheckStateRole);
+        modelDepassivation->setItem(i, 0, item);
 
 #if 0
         str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));

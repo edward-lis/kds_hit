@@ -32,12 +32,15 @@ Source: ".\kds_hit.ini"; DestDir: "{app}"; Flags: ignoreversion;
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"; Flags: createonlyiffileexists; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Comment: "дЕХМЯРЮККХПНБЮРЭ {#MyAppName}"
-Name: "{group}\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0
-Name: "{userdesktop}\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Tasks: quicklaunchicon
+Name: "{group}\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Comment: "{#MyAppName}";
+Name: "{userdesktop}\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Comment: "{#MyAppName}"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\йдя ухр"; Filename: "{app}\kds_hit.exe"; IconFilename: "{app}\kds_hit.exe"; IconIndex: 0; Comment: "{#MyAppName}"; Tasks: quicklaunchicon
 
 [Run]
 Filename: "{app}\kds_hit.exe"; Flags: shellexec runasoriginaluser postinstall; Description: "гЮОСЯРХРЭ йдя ухр";
+
+[UninstallRun]
+Filename: "cmd.exe"; Parameters: "/c taskkill /f /im kds_hit.exe";
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"

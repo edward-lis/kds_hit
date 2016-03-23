@@ -241,6 +241,14 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         imgArrayReportGraph.append(img);
         sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltageGroup->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dateTime.toString("hh:mm:ss")));*/
 
+        /// только для ручного режима, снимаем галку с провереной
+        if(bModeManual) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+            modelClosedCircuitVoltageGroup->setItem(i+1, 0, item);
+        }
+
         // по окончанию цикла снять нагрузку, разобрать режим (!!! даже в ручном режиме)
         baSendArray = (baSendCommand="IDLE")+"#";
         timerSend->start(settings.delay_after_request_before_next_ADC1);
