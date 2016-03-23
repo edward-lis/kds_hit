@@ -196,8 +196,7 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
                 .arg(sResult)
                 .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-    if(!bModeManual)
-        ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+    if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
     /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
     /*ui->widgetClosedCircuitVoltagePowerUUTBB->savePng(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png", 413, 526, 1.0, -1);

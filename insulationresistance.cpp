@@ -72,7 +72,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
     }
     else
     {
-        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistance->text()), tr("Перед проверкой необходимо отключить источник питания!"));
+        /// в автоматическом режиме при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+        if(ui->cbIsImitator->isChecked())
+            QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistance->text()), tr("Перед проверкой необходимо отключить источник питания!"));
         ui->cbParamsAutoMode->setCurrentIndex(1); // переключаем режим комбокса на наш
         iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
         iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
@@ -223,12 +225,11 @@ void MainWindow::on_btnInsulationResistance_clicked()
             }
         }
 
-        if(!bModeManual)
-            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
     } // for
-    /// если в автоматическом режиме, выводим сообщение о необходимости включить источник питания
-    if(!bModeManual)
+    /// в автоматическом режиме при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+    if(!bModeManual and ui->cbIsImitator->isChecked())
         QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistance->text()), tr("Проверка завершена, включите источник питания!"));
 
 stop:

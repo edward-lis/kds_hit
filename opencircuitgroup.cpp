@@ -181,8 +181,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
-        } else
-            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        }
 
         // проанализировать результаты
         if(codeADC >= codeLimit) // напряжение больше (норма)
@@ -201,6 +200,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             // установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
             battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_FAULT;
         }
+
+        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
         // при напряжении меньше нормы в автоматическом режиме проверка продолжается
         /*if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
