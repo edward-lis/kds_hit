@@ -124,7 +124,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
 
         // будем щщитать сразу в коде, без перехода в вольты
         // пробежимся по точкам ф-ии, и высчитаем сопротивление согласно напряжению
-        for(j=0; j<settings.functionResist.size()-2; j++)
+        for(j=0; j<settings.functionResist.size()-1; j++)
         {
             //qDebug()<<"u"<<qPrintable(QString::number(u, 16))<<qPrintable(QString::number(settings.functionResist[j].codeADC, 16))<<qPrintable(QString::number(settings.functionResist[j+1].codeADC, 16));
             if((u > settings.functionResist[j].codeADC) && (u <= settings.functionResist[j+1].codeADC))

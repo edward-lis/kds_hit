@@ -114,6 +114,10 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         label->setText(sLabelText + " идет измерение...");
         label->setStyleSheet("QLabel { color : blue; }");
 
+        // обнулим результаты
+        strResist.clear();
+        resist = 0.0;
+
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
         timerSend->start(settings.delay_after_request_before_next_ADC2); // послать baSendArray в порт
@@ -141,12 +145,13 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
 
         // будем щщитать сразу в коде, без перехода в вольты
         // пробежимся по точкам ф-ии, и высчитаем сопротивление согласно напряжению
-        for(j=0; j<settings.functionResist.size()-2; j++)
+        qDebug()<<"settings.functionResist.size()"<<settings.functionResist.size();
+        for(j=0; j<settings.functionResist.size()-1; j++)
         {
-            //qDebug()<<"u"<<qPrintable(QString::number(u, 16))<<qPrintable(QString::number(settings.functionResist[j].codeADC, 16))<<qPrintable(QString::number(settings.functionResist[j+1].codeADC, 16));
+            qDebug()<<"j"<<j<<"u"<<qPrintable(QString::number(u, 16))<<qPrintable(QString::number(settings.functionResist[j].codeADC, 16))<<qPrintable(QString::number(settings.functionResist[j+1].codeADC, 16));
             if((u > settings.functionResist[j].codeADC) && (u <= settings.functionResist[j+1].codeADC))
             {
-                //qDebug()<<"resist=(-("<<settings.functionResist[j].codeADC<<"*"<<settings.functionResist[j+1].resist<<"-"<<settings.functionResist[j+1].codeADC<<"*"<<settings.functionResist[j].resist<<")-("<<settings.functionResist[j].resist<<"-"<<settings.functionResist[j+1].resist<<")*"<<u<<")/("<<settings.functionResist[j+1].codeADC<<"-"<<settings.functionResist[j].codeADC<<")";
+                qDebug()<<"resist=(-("<<settings.functionResist[j].codeADC<<"*"<<settings.functionResist[j+1].resist<<"-"<<settings.functionResist[j+1].codeADC<<"*"<<settings.functionResist[j].resist<<")-("<<settings.functionResist[j].resist<<"-"<<settings.functionResist[j+1].resist<<")*"<<u<<")/("<<settings.functionResist[j+1].codeADC<<"-"<<settings.functionResist[j].codeADC<<")";
                 resist = ( -(settings.functionResist[j].codeADC * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC - settings.functionResist[j].codeADC);
                 break;
             }
@@ -190,7 +195,7 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         {
             Log("Сопротивление изоляции: " + battery[iBatteryIndex].uutbb_resist[i] + "=" + strResist + "код АЦП= 0x" + QString("%1").arg((ushort)u, 0, 16), "green");
         }
-        if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist;
+        if(settings.verbose) qDebug()<<" u=0x"<<qPrintable(QString::number(u, 16))<<" resist="<<resist<<"settings.uutbb_isolation_resist_limit"<<settings.uutbb_isolation_resist_limit;
 
         // напечатать рез-т в закладку и в журнал
         if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {

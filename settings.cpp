@@ -77,7 +77,9 @@ void Settings::loadSettings()
     //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
 
     coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
-    offsetADC2 = settings.value("k2_offset", 0x0).toString().toUInt(&ok, 16);
+    //offsetADC2 = settings.value("k2_offset", 0x0).toString().toUInt(&ok, 16);
+    offsetADC2_plus = settings.value("k2_offset_plus", 0x0).toString().toUInt(&ok, 16);
+    offsetADC2_minus = settings.value("k2_offset_minus", 0x0).toString().toUInt(&ok, 16);
     //qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
            //<<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
     voltage_circuit_type = settings.value("voltage_circuit_type", 25.0).toFloat();
