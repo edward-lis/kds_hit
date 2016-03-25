@@ -185,9 +185,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
             sResult = "Норма";
             color = "green";
         }
-        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult));
+        label->setText(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 3).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
-        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult), color);
+        Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 3).arg(sResult), color);
 
         ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
@@ -203,14 +203,14 @@ void MainWindow::on_btnInsulationResistance_clicked()
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
-                    .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0)
+                    .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 3)
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
         if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
             if(!bModeManual)// если в автоматическом режиме
             {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0).arg(sResult), tr("Да"), tr("Нет"))) {
+                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 3).arg(sResult), tr("Да"), tr("Нет"))) {
                     bState = false;
                     ui->groupBoxCOMPort->setDisabled(bState);
                     ui->groupBoxDiagnosticMode->setDisabled(bState);

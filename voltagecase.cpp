@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QMessageBox>
+#include "math.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -127,7 +128,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             codeU = getRecvData(baRecvArray); // получить данные опроса
             ui->progressBar->setValue(ui->progressBar->value()+1);
 
-            voltageU = ((codeU-offset)*settings.coefADC2); // напряжение в вольтах
+            voltageU = fabs((codeU-offset)*settings.coefADC2); // напряжение в вольтах
             dArrayVoltageOnTheHousing[i] = voltageU;
             // если отладочный режим, напечатать отладочную инфу
             if(bDeveloperState)
