@@ -275,7 +275,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
             if (dArrayInsulationResistance[i] != -1) {
-                str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 0);
+                str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1);
                 QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
                 if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
                     sResult = "Не норма!";
@@ -433,7 +433,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
 
                 if (dArrayInsulationResistanceUUTBB[i] != -1) {
-                    str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 0);
+                    str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].uutbb_resist[i]).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 1);
                     QLabel * label = findChild<QLabel*>(tr("labelInsulationResistanceUUTBB%0").arg(i));
                     if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
                         sResult = "Не норма!";
