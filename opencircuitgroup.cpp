@@ -289,13 +289,35 @@ void MainWindow::itemChangedOpenCircuitVoltageGroup(QStandardItem* itm)
 {
     itm->text(); /// чтобы небыло варнинга при компиляции на неиспользование itm
     int count = 0;
+    QStandardItem *sitm;
+
+    /// Выбрать все/Отменить все
+    /*if (itm->row() == 1) {
+        sitm = modelOpenCircuitVoltageGroup->item(1, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        for(int i=2; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
+        {
+            sitm = modelOpenCircuitVoltageGroup->item(i, 0);
+            sitm->setCheckState(checkState);
+        }
+        if (checkState == Qt::Checked) {
+            ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(modelOpenCircuitVoltageGroup->rowCount()-2).arg(modelOpenCircuitVoltageGroup->rowCount()-2));
+            itm->setText("Отменить все");
+        } else {
+            ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: 0 из %0").arg(modelOpenCircuitVoltageGroup->rowCount()-2));
+            itm->setText("Выбрать все");
+        }
+        return;
+    }*/
+
     for(int i=1; i < modelOpenCircuitVoltageGroup->rowCount(); i++)
     {
-        QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i, 0);
+        sitm = modelOpenCircuitVoltageGroup->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState == Qt::Checked)
             count++;
     }
+
     ui->cbOpenCircuitVoltageGroup->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelOpenCircuitVoltageGroup->rowCount()-1));
     ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
 }

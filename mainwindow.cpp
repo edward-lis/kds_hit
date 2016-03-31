@@ -158,7 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->widgetDepassivation->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, Qt::blue, Qt::white, 7));
     ui->widgetDepassivation->xAxis->setLabel(tr("Время, c"));
     ui->widgetDepassivation->yAxis->setLabel(tr("Напряжение, В"));
-    ui->widgetDepassivation->yAxis->setRange(24, 34);
+    ui->widgetDepassivation->yAxis->setRange(24, 36);
     //ui->widgetDepassivation->legend->setVisible(true);
     widgetDepassivationTextLabel = new QCPItemText(ui->widgetDepassivation);
     ui->widgetDepassivation->addItem(widgetDepassivationTextLabel);
@@ -349,6 +349,12 @@ void MainWindow::comboxSetData() {
             label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
         }
     }
+
+    /// Выбрать все/Отменить все
+    /*item = new QStandardItem(QString("Отменить все"));
+    item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+    item->setData(Qt::Checked, Qt::CheckStateRole);
+    modelOpenCircuitVoltageGroup->setItem(1, 0, item);*/
 
     ui->cbOpenCircuitVoltageGroup->setModel(modelOpenCircuitVoltageGroup);
     ui->cbOpenCircuitVoltageGroup->setItemData(0, "DISABLE", Qt::UserRole-1);
