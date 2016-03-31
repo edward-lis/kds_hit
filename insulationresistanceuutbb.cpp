@@ -86,11 +86,11 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
-
+qDebug() << "iPowerState=" << iPowerState;
     /// при наличии галки имитатора, выводим сообщение о необходимости отключить источник питания
     if(ui->cbIsImitator->isChecked() and iPowerState != 2) {
         QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistanceUUTBB->text()), tr("Перед проверкой необходимо отключить источник питания!"));
-        iPowerState == 2; /// состояние отключенного источника питания
+        iPowerState = 2; /// состояние отключенного источника питания
     }
 
     // Пробежимся по списку точек измерения сопротивлений изоляции
