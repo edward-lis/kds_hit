@@ -211,6 +211,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     iBatteryIndex = 0;
+    iPowerState = 0; /// 0 - неизвестное состояние;
     //iStepOpenCircuitVoltageGroup = 0;
 
     getCOMPorts();
