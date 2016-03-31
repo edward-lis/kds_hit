@@ -87,6 +87,12 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
 
+    /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+    if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
+        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbOpenCircuitVoltageGroup->text()), tr("Перед проверкой необходимо включить источник питания!"));
+        iPowerState = 1; /// состояние включенного источника питания
+    }
+
     // Пробежимся по списку цепей
     for(i=iCurrentStep; i < iMaxSteps; i++)
     {

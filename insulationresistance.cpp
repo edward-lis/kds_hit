@@ -78,8 +78,10 @@ void MainWindow::on_btnInsulationResistance_clicked()
     }
 
     /// при наличии галки имитатора, выводим сообщение о необходимости отключить источник питания
-    if(ui->cbIsImitator->isChecked())
+    if(ui->cbIsImitator->isChecked() and iPowerState != 2) {
         QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistance->text()), tr("Перед проверкой необходимо отключить источник питания!"));
+        iPowerState = 2; /// состояние отключенного источника питания
+    }
 
     for(i=iCurrentStep; i<iMaxSteps; i++)
     {
@@ -229,10 +231,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
     } // for
-    /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
-    if(ui->cbIsImitator->isChecked())
-        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbInsulationResistance->text()), tr("Проверка завершена, включите источник питания!"));
-
 stop:
     if(ret == KDS_STOP) {
         label->setText(sLabelText + " измерение прервано!");

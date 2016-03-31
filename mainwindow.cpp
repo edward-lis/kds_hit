@@ -651,6 +651,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         ui->groupBoxDiagnosticMode->setDisabled(bState); // запрещаем бокс выбора режима диагностики
         ui->cbParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального параметра проверки автоматического режима
         ui->cbSubParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального под-параметра проверки автоматического режима
+        ui->btnBuildReport->setDisabled(bState); // запрещаем кнопку формирования отчета
         ((QPushButton*)sender())->setText("Стоп");
 
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++)
@@ -707,6 +708,7 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
     ui->groupBoxDiagnosticMode->setDisabled(bState); // разрешаем бокс выбора режима диагностики
     ui->cbParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального параметра проверки автоматического режима
     ui->cbSubParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального под-параметра проверки автоматического режима
+    ui->btnBuildReport->setDisabled(bState); // разрешаем кнопку формирования отчета
     ((QPushButton*)sender())->setText("Пуск");
 }
 

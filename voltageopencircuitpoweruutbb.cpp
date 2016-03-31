@@ -83,6 +83,12 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
     baSendCommand.clear();
     baRecvArray.clear();
 
+    /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+    if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
+        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), tr("Перед проверкой необходимо включить источник питания!"));
+        iPowerState = 1; /// состояние включенного источника питания
+    }
+
     /// формируем строку и пишем на label "идет измерение..."
     sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
     ui->labelOpenCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");

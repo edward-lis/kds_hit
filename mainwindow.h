@@ -92,6 +92,7 @@ private:
     QString str;
     QString color;
     QString paramMsg;
+    int iPowerState; /// 0 - неизвестное состояние; 1 - источник питания включен; 2 - источник питания отключен;
     bool bState;
     void getCOMPorts();
     void comboxSetData();

@@ -123,6 +123,12 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         goto stop;
     }
 
+    /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+    if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
+        QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbClosedCircuitVoltageGroup->text()), tr("Перед проверкой необходимо включить источник питания!"));
+        iPowerState = 1; /// состояние включенного источника питания
+    }
+
     // Пробежимся по списку цепей
     for(int i=iCurrentStep; i < iMaxSteps; i++)
     {
