@@ -362,16 +362,16 @@ void MainWindow::comboxSetData() {
     //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
     connect(modelOpenCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedOpenCircuitVoltageGroup(QStandardItem*)));
 
-    /// 3а. Напряжение разомкнутой цепи батареи
-    ui->cbParamsAutoMode->addItem(tr("3а. %0").arg(ui->rbOpenCircuitVoltageBattery->text()));
+    /// 4. Напряжение разомкнутой цепи батареи
+    ui->cbParamsAutoMode->addItem(tr("4. %0").arg(ui->rbOpenCircuitVoltageBattery->text()));
     ui->cbOpenCircuitVoltageBattery->clear();
     sArrayReportOpenCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbOpenCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
     ui->labelOpenCircuitVoltageBattery0->setText(tr("%0) \"%1\" не измерялось.").arg(1).arg(battery[iBatteryIndex].circuitbattery));
     ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : black; }");
 
-    /// 4. Напряжение замкнутой цепи группы
-    ui->cbParamsAutoMode->addItem(tr("4. %0").arg(ui->rbClosedCircuitVoltageGroup->text()));
+    /// 5. Напряжение замкнутой цепи группы
+    ui->cbParamsAutoMode->addItem(tr("5. %0").arg(ui->rbClosedCircuitVoltageGroup->text()));
     //ui->cbClosedCircuitVoltageGroup->clear();
     sArrayReportClosedCircuitVoltageGroup.clear(); /// очищаем массив проверок для отчета
     modelClosedCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
@@ -396,7 +396,7 @@ void MainWindow::comboxSetData() {
     //ui->cbClosedCircuitVoltageGroup->setCurrentIndex(0);
     connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
 
-    /// 4а. Распассивация
+    /// 6. Распассивация
     sArrayReportDepassivation.clear(); /// очищаем массив проверок для отчета
     modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
 
@@ -420,8 +420,8 @@ void MainWindow::comboxSetData() {
     ui->cbDepassivation->setItemText(0, tr("Выбрано: %0 из %1").arg(0).arg(battery[iBatteryIndex].group_num));
     connect(modelDepassivation, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedDepassivation(QStandardItem*)));
 
-    /// 5. Напряжение замкнутой цепи батареи
-    ui->cbParamsAutoMode->addItem(tr("5. %0").arg(ui->rbClosedCircuitVoltageBattery->text()));
+    /// 7. Напряжение замкнутой цепи батареи
+    ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbClosedCircuitVoltageBattery->text()));
     ui->cbClosedCircuitVoltageBattery->clear();
     sArrayReportClosedCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
@@ -429,9 +429,9 @@ void MainWindow::comboxSetData() {
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
     if (iBatteryIndex == 0 or iBatteryIndex == 1) {
-        /// 6. Сопротивление изоляции УУТББ
+        /// 8. Сопротивление изоляции УУТББ
         if (ui->cbIsUUTBB->isChecked())
-            ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
+            ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbInsulationResistanceUUTBB->clear();
         sArrayReportInsulationResistanceUUTBB.clear(); /// очищаем массив проверок для отчета
         modelInsulationResistanceUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
@@ -456,18 +456,18 @@ void MainWindow::comboxSetData() {
         //ui->cbOpenCircuitVoltageGroup->setCurrentIndex(0);
         connect(modelInsulationResistanceUUTBB, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistanceUUTBB(QStandardItem*)));
 
-        /// 7. Напряжение разомкнутой цепи БП
+        /// 9. Напряжение разомкнутой цепи БП
         if (ui->cbIsUUTBB->isChecked())
-            ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
+            ui->cbParamsAutoMode->addItem(tr("9. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         ui->cbOpenCircuitVoltagePowerSupply->clear();
         ui->cbOpenCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         ui->labelOpenCircuitVoltagePowerSupply0->setText(tr("1) \"%0\" не измерялось.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         ui->labelOpenCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : black; }");
         sArrayReportOpenCircuitVoltagePowerSupply.clear(); /// очищаем массив проверок для отчета
 
-        /// 8. Напряжение замкнутой цепи БП
+        /// 10. Напряжение замкнутой цепи БП
         if (ui->cbIsUUTBB->isChecked())
-            ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
+            ui->cbParamsAutoMode->addItem(tr("10. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
         ui->cbClosedCircuitVoltagePowerSupply->clear();
         ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         ui->labelClosedCircuitVoltagePowerSupply0->setText(tr("1) \"%0\" не измерялось.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
@@ -575,9 +575,9 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         //ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
         //ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
         //ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
-        ui->cbParamsAutoMode->addItem(tr("6. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
-        ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
-        ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
+        ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
+        ui->cbParamsAutoMode->addItem(tr("9. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
+        ui->cbParamsAutoMode->addItem(tr("10. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
     } else {
         ui->rbInsulationResistanceUUTBB->hide();
         ui->cbInsulationResistanceUUTBB->hide();
@@ -627,8 +627,6 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
 // нажата кнопка Старт(Стоп) автоматического режима диагностики
 void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
 {
-    qDebug() << ((QPushButton*)sender())->objectName();
-
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnStartStopAutoModeDiagnostic ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
         // остановить текущую проверку, выход
@@ -736,29 +734,29 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
             ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].circuitgroup[r]));
         break;
     case 3:
-        /// 3а. Напряжение разомкнутой цепи батареи
+        /// 4. Напряжение разомкнутой цепи батареи
         ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].circuitbattery));
         break;
     case 4:
-        /// 4. Напряжение замкнутой цепи группы
+        /// 5. Напряжение замкнутой цепи группы
         for (int r = 0; r < battery[iBatteryIndex].group_num; r++)
             ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].circuitgroup[r]));
         break;
     case 5:
-        /// 5. Напряжение замкнутой цепи батареи
+        /// 7. Напряжение замкнутой цепи батареи
         ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].circuitbattery));
         break;
     case 6:
-        /// 6. Сопротивление изоляции УУТББ
+        /// 8. Сопротивление изоляции УУТББ
         for (int r = 0; r < battery[iBatteryIndex].i_uutbb_resist_num; r++)
             ui->cbSubParamsAutoMode->addItem(tr("%0. %1").arg(r+1).arg(battery[iBatteryIndex].uutbb_resist[r]));
         break;
     case 7:
-        /// 7. Напряжение разомкнутой цепи БП
+        /// 9. Напряжение разомкнутой цепи БП
         ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         break;
     case 8:
-        /// 8. Напряжение замкнутой цепи БП
+        /// 10. Напряжение замкнутой цепи БП
         ui->cbSubParamsAutoMode->addItem(tr("1. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         ui->cbSubParamsAutoMode->addItem(tr("2. %0").arg(battery[iBatteryIndex].uutbb_closecircuitpower[1]));
         break;

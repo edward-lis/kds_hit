@@ -146,11 +146,11 @@ void MainWindow::on_btnBuildReport_clicked()
                 "</td>"\
             "</tr>";
     }
-    /// 3а. Напряжение разомкнутой цепи батареи
+    /// 4. Напряжение разомкнутой цепи батареи
     if (!sArrayReportOpenCircuitVoltageBattery.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>3а. "+ui->rbOpenCircuitVoltageBattery->text()+", В</b></p>"\
+                    "<p><b>4. "+ui->rbOpenCircuitVoltageBattery->text()+", В</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
@@ -179,11 +179,11 @@ void MainWindow::on_btnBuildReport_clicked()
                 "</td>"\
             "</tr>";
     }
-    /// 4. Напряжение замкнутой цепи группы
+    /// 5. Напряжение замкнутой цепи группы
     if (!sArrayReportClosedCircuitVoltageGroup.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>4. "+ui->rbClosedCircuitVoltageGroup->text()+", В</b></p>"\
+                    "<p><b>5. "+ui->rbClosedCircuitVoltageGroup->text()+", В</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
@@ -212,11 +212,11 @@ void MainWindow::on_btnBuildReport_clicked()
                 "</td>"\
             "</tr>";
     }
-    /// 4а. Распассивация
+    /// 6. Распассивация
     if (!sArrayReportDepassivation.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>4а. "+ui->rbDepassivation->text()+", В</b></p>"\
+                    "<p><b>6. "+ui->rbDepassivation->text()+", В</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
@@ -242,11 +242,11 @@ void MainWindow::on_btnBuildReport_clicked()
                 "</td>"\
             "</tr>";
     }
-    /// 5. Напряжение замкнутой цепи батареи
+    /// 7. Напряжение замкнутой цепи батареи
     if (!sArrayReportClosedCircuitVoltageBattery.isEmpty()) {
         sHtml += "<tr>"\
                 "<td>"\
-                    "<p><b>5. "+ui->rbClosedCircuitVoltageBattery->text()+", В</b></p>"\
+                    "<p><b>7. "+ui->rbClosedCircuitVoltageBattery->text()+", В</b></p>"\
                     "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                         "<tbody>"\
                             "<tr>"\
@@ -278,11 +278,11 @@ void MainWindow::on_btnBuildReport_clicked()
     /// только для батарей 9ER20P_20 или 9ER14PS_24
     if (ui->cbIsUUTBB->isChecked()) {
 
-        /// 6. Сопротивление изоляции УУТББ
+        /// 8. Сопротивление изоляции УУТББ
         if (!sArrayReportInsulationResistanceUUTBB.isEmpty()) {
             sHtml += "<tr>"\
                     "<td>"\
-                        "<p><b>6. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
+                        "<p><b>8. "+ui->rbInsulationResistanceUUTBB->text()+", МОм</b></p>"\
                         "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                             "<tbody>"\
                                 "<tr>"\
@@ -311,11 +311,11 @@ void MainWindow::on_btnBuildReport_clicked()
                     "</td>"\
                 "</tr>";
         }
-        /// 7. Напряжение разомкнутой цепи БП
+        /// 9. Напряжение разомкнутой цепи БП
         if (!sArrayReportOpenCircuitVoltagePowerSupply.isEmpty()) {
             sHtml += "<tr>"\
                     "<td>"\
-                        "<p><b>7. "+ui->rbOpenCircuitVoltagePowerSupply->text()+", В</b></p>"\
+                        "<p><b>9. "+ui->rbOpenCircuitVoltagePowerSupply->text()+", В</b></p>"\
                         "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                             "<tbody>"\
                                 "<tr>"\
@@ -344,11 +344,11 @@ void MainWindow::on_btnBuildReport_clicked()
                     "</td>"\
                 "</tr>";
         }
-        /// 8. Напряжение замкнутой цепи БП
+        /// 10. Напряжение замкнутой цепи БП
         if (!sArrayReportClosedCircuitVoltagePowerSupply.isEmpty()) {
             sHtml += "<tr>"\
                     "<td>"\
-                        "<p><b>8. "+ui->rbClosedCircuitVoltagePowerSupply->text()+", В</b></p>"\
+                        "<p><b>10. "+ui->rbClosedCircuitVoltagePowerSupply->text()+", В</b></p>"\
                         "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\" bordercolor=\"black\">"\
                             "<tbody>"\
                                 "<tr>"\

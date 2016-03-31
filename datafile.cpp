@@ -111,15 +111,15 @@ void MainWindow::on_actionCheckSave_triggered()
     data.icbParamsAutoMode = ui->cbParamsAutoMode->currentIndex();
     data.icbSubParamsAutoMode = ui->cbSubParamsAutoMode->currentIndex();
 
-    /// Напряжение на корпусе
+    /// 1. Напряжение на корпусе
     data.icbVoltageOnTheHousing = ui->cbVoltageOnTheHousing->currentIndex();
     data.dArrayVoltageOnTheHousing = dArrayVoltageOnTheHousing;
 
-    /// Сопротивление изоляции
+    /// 2. Сопротивление изоляции
     data.icbInsulationResistance = ui->cbInsulationResistance->currentIndex();
     data.dArrayInsulationResistance = dArrayInsulationResistance;
 
-    /// Напряжение разомкнутой цепи группы
+    /// 3. Напряжение разомкнутой цепи группы
     for (int r = 0; r < ui->cbOpenCircuitVoltageGroup->count(); r++)
     {
         QModelIndex index = ui->cbOpenCircuitVoltageGroup->model()->index(r, 0);
@@ -127,10 +127,10 @@ void MainWindow::on_actionCheckSave_triggered()
     }
     data.dArrayOpenCircuitVoltageGroup = dArrayOpenCircuitVoltageGroup;
 
-    /// Напряжение разомкнутой цепи батареи
+    /// 4 .Напряжение разомкнутой цепи батареи
     data.dArrayOpenCircuitVoltageBattery = dArrayOpenCircuitVoltageBattery;
 
-    /// Напряжение замкнутой цепи группы
+    /// 5. Напряжение замкнутой цепи группы
     for (int r = 0; r < ui->cbClosedCircuitVoltageGroup->count(); r++)
     {
         QModelIndex index = ui->cbClosedCircuitVoltageGroup->model()->index(r, 0);
@@ -138,7 +138,7 @@ void MainWindow::on_actionCheckSave_triggered()
     }
     data.dArrayClosedCircuitVoltageGroup = dArrayClosedCircuitVoltageGroup;
 
-    /// Распассивация /*переделать!*/
+    /// 6. Распассивация /*переделать!*/
     for (int i = 0; i < ui->cbDepassivation->count(); i++)
     {
         QModelIndex index = ui->cbDepassivation->model()->index(i, 0);
@@ -146,12 +146,12 @@ void MainWindow::on_actionCheckSave_triggered()
     }
     data.dArrayDepassivation = dArrayDepassivation;
 
-    /// Напряжение замкнутой цепи батареи
+    /// 7. Напряжение замкнутой цепи батареи
     data.dArrayClosedCircuitVoltageBattery = dArrayClosedCircuitVoltageBattery;
 
     /// только для батарей 9ER20P_20 или 9ER14PS_24
     if (iBatteryIndex == 0 or iBatteryIndex == 1) {
-        /// Сопротивление изоляции УУТББ
+        /// 8. Сопротивление изоляции УУТББ
         for (int r = 0; r < ui->cbInsulationResistanceUUTBB->count(); r++)
         {
             QModelIndex index = ui->cbInsulationResistanceUUTBB->model()->index(r, 0);
@@ -159,10 +159,10 @@ void MainWindow::on_actionCheckSave_triggered()
         }
         data.dArrayInsulationResistanceUUTBB = dArrayInsulationResistanceUUTBB;
 
-        /// Напряжение разомкнутой цепи БП
+        /// 9. Напряжение разомкнутой цепи БП
         data.dArrayOpenCircuitVoltagePowerSupply = dArrayOpenCircuitVoltagePowerSupply;
 
-        /// Напряжение замкнутой цепи БП
+        /// 10. Напряжение замкнутой цепи БП
         data.icbClosedCircuitVoltagePowerSupply = ui->cbClosedCircuitVoltagePowerSupply->currentIndex();
         data.dArrayClosedCircuitVoltagePowerSupply = dArrayClosedCircuitVoltagePowerSupply;
     }
@@ -321,7 +321,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
 
 
-        /// 3а. Напряжение разомкнутой цепи батареи
+        /// 4. Напряжение разомкнутой цепи батареи
         for (int i = 0; i < 1; i++) {
             dArrayOpenCircuitVoltageBattery[i] = data.dArrayOpenCircuitVoltageBattery[i];
             if (dArrayOpenCircuitVoltageBattery[i] != -1) {
@@ -343,7 +343,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
 
 
-        /// 4. Напряжение замкнутой цепи группы
+        /// 5. Напряжение замкнутой цепи группы
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             dArrayClosedCircuitVoltageGroup[i] = data.dArrayClosedCircuitVoltageGroup[i];
@@ -371,7 +371,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
 
 
-        /// Распассивация /*переделать!*/
+        /// 6. Распассивация /*переделать!*/
         for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
         {
             dArrayDepassivation[i] = data.dArrayDepassivation[i];
@@ -402,7 +402,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
 
 
-        /// 5. Напряжение замкнутой цепи батареи
+        /// 7. Напряжение замкнутой цепи батареи
         dArrayClosedCircuitVoltageBattery[0] = data.dArrayClosedCircuitVoltageBattery[0];
         if (dArrayClosedCircuitVoltageBattery[0] != -1) {
             str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2);
@@ -423,7 +423,7 @@ void MainWindow::on_actionCheckLoad_triggered()
 
         /// только для батарей 9ER20P_20 или 9ER14PS_24
         if (iBatteryIndex == 0 or iBatteryIndex == 1) {
-            /// 6. Сопротивление изоляции УУТББ
+            /// 8. Сопротивление изоляции УУТББ
             for (int i = 0; i < battery[iBatteryIndex].i_uutbb_resist_num; i++)
             {
                 dArrayInsulationResistanceUUTBB[i] = data.dArrayInsulationResistanceUUTBB[i];
@@ -451,7 +451,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
 
 
-            /// 7. Напряжение разомкнутой цепи БП
+            /// 9. Напряжение разомкнутой цепи БП
             dArrayOpenCircuitVoltagePowerSupply[0] = data.dArrayOpenCircuitVoltagePowerSupply[0];
             if (dArrayOpenCircuitVoltagePowerSupply[0] != -1) {
                 str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 0);
@@ -469,7 +469,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             }
 
 
-            /// 8. Напряжение замкнутой цепи БП
+            /// 10. Напряжение замкнутой цепи БП
             ui->cbClosedCircuitVoltagePowerSupply->setCurrentIndex(data.icbClosedCircuitVoltagePowerSupply);
 
             dArrayClosedCircuitVoltagePowerSupply[0] = data.dArrayClosedCircuitVoltagePowerSupply[0];
