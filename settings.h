@@ -50,6 +50,7 @@ public:
     float opencircuitbattery_limit;  ///< предельное напряжение разомкнутой цепи батареи, вольты
     float closecircuitgroup_limit; ///< предельное напряжение замкнутой цепи группы, вольт
     float closecircuitbattery_limit; ///< предельное напряжение замкнутой цепи батареи, вольты
+    int time_closecircuitgroup; ///< время проверки замкнутой цепи группы
     int time_closecircuitbattery; ///< время проверки замкнутой цепи батареи
     int number_depassivation_stage; ///< кол-во ступеней распассивации
     float depassivation_current[3]; ///< токи нагрузки замкнутых цепей групп по ступеням, амперы  (!!! 3=number_discharge_stage)

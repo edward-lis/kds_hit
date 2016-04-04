@@ -141,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetClosedCircuitVoltageGroup->graph(2)->setBrush(QBrush(QColor(255, 0, 0, 20)));
     ui->widgetClosedCircuitVoltageGroup->graph(2)->clearData();
     ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
-    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(settings.time_depassivation[2]+1, settings.closecircuitgroup_limit);
+    ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(settings.time_closecircuitgroup+1, settings.closecircuitgroup_limit);
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
     ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, settings.time_depassivation[2]+1);
     ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
@@ -412,7 +412,7 @@ void MainWindow::comboxSetData() {
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelDepassivation->setItem(i+1, 0, item);
             label->setText(tr("%0) \"%1\" не требуется.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-            label->setStyleSheet("QLabel { color : green; }");
+            //label->setStyleSheet("QLabel { color : green; }");
         }
     }
 

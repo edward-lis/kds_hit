@@ -224,6 +224,9 @@ void Settings::loadSettings()
     time_depassivation[1] = settings.value("time_depassivation_2", 300).toInt();
     time_depassivation[2] = settings.value("time_depassivation_3", 60).toInt();
 
+    // продолжительность проверки замкнутой цепи группы, секунды
+    time_closecircuitgroup = settings.value("time_closecircuitgroup", 60).toInt();
+
     // предельное сопротивление изоляции платы измерительной УУТББ, МОм
     uutbb_isolation_resist_limit = settings.value("uutbb_isolation_resist_limit", 5.0).toFloat();
     // предельные напряжение разомкнутой цепи блока питания УУТББ, 7.05 +/- 0.15 вольт

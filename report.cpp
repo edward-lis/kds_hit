@@ -229,9 +229,6 @@ void MainWindow::on_btnBuildReport_clicked()
                                 "<td>"\
                                     "<p><b>Результат</b></p>"\
                                 "</td>"\
-                                "<td>"\
-                                    "<p><b>Режим</b></p>"\
-                                "</td>"\
                             "</tr>";
         QString value;
         foreach (value, sArrayReportDepassivation) {

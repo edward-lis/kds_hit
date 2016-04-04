@@ -25,7 +25,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     QDateTime starttime; // время начала измерения
     QDateTime dt; // текущее время очередного измерения
     double x; // текущая координата Х
-    int cycleTimeSec=settings.time_depassivation[2]; // длительность цикла проверки в секундах
+    int cycleTimeSec=settings.time_closecircuitgroup; // длительность цикла проверки в секундах
     bool bFirstPoll=true; // первое измерение
     //int i=0; // номер цепи
     //QLabel *label; // надпись в закладке

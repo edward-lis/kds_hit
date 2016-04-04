@@ -217,7 +217,7 @@ void MainWindow::on_btnDepassivation_clicked()
             if(ret) goto stop;
         }
         //label->setText(tr("%1) Распассивация закончена").arg(i));
-        sLabelText = tr("%0) \"%1\"").arg(i).arg(battery[iBatteryIndex].circuitgroup[i]);
+        sLabelText = tr("%0) \"%1\"").arg(i).arg(battery[iBatteryIndex].circuitgroup[i-1]);
 
         sResult = "Выполнена";
         color = "green";
@@ -233,12 +233,10 @@ void MainWindow::on_btnDepassivation_clicked()
                        "    <td>%0</td>"\
                        "    <td>%1</td>"\
                        "    <td>%2</td>"\
-                       "    <td>%3</td>"\
                        "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
-                    .arg(sResult)
-                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+                    .arg(sResult));
 
         /// снимаем галку с провереной
         item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i-1]));
