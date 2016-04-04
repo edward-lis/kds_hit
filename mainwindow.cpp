@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(0, settings.closecircuitgroup_limit);
     ui->widgetClosedCircuitVoltageGroup->graph(2)->addData(settings.time_closecircuitgroup+1, settings.closecircuitgroup_limit);
     ui->widgetClosedCircuitVoltageGroup->xAxis->setLabel(tr("Время, c"));
-    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, settings.time_depassivation[2]+1);
+    ui->widgetClosedCircuitVoltageGroup->xAxis->setRange(0, settings.time_closecircuitgroup+1);
     ui->widgetClosedCircuitVoltageGroup->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetClosedCircuitVoltageGroup->yAxis->setRange(24, 33);
 
