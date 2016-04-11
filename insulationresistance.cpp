@@ -13,7 +13,6 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки сопротивления изоляции
 void MainWindow::on_btnInsulationResistance_clicked()
 {
-    //checkInsulationResistance(); return;
     QString str_num; // номер цепи
     quint16 u=0; // полученный код АЦП
     float resist=0; // получившееся сопротивление
@@ -21,7 +20,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
     int ret=0; // код возврата ошибки
     QString strResist; // строка с получившимся значением
     int i=0; // номер цепи
-    QLabel *label; // надпись в закладке
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -41,41 +39,21 @@ void MainWindow::on_btnInsulationResistance_clicked()
     timerPing->stop(); // остановить пинг
     bCheckInProgress = true; // вошли в состояние проверки
 
-    // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(true);
-    ui->groupBoxDiagnosticDevice->setDisabled(true);
-    ui->groupBoxDiagnosticMode->setDisabled(true);
-    ui->cbParamsAutoMode->setDisabled(true);
-    ui->cbSubParamsAutoMode->setDisabled(true);
-
-    // откроем вкладку
-    ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
-    ui->statusBar->showMessage(tr("Проверка ")+ui->rbInsulationResistance->text()+" ...");
-
-    if(bModeManual)// если в ручном режиме
-    {
-        // переименовать кнопку
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
-
-        i=ui->cbInsulationResistance->currentIndex();
-        iCurrentStep=i; // чтобы цикл for выполнился только раз в ручном.
-        iMaxSteps=i+1;
+    if (ui->rbModeDiagnosticManual->isChecked()) {  /// если в ручной режиме
+        setGUI(false);                              ///  отключаем интерфейс
+    } else {                                        /// если в автоматическом режиме
+        ui->cbParamsAutoMode->setCurrentIndex(1);   ///  переключаем режим комбокса на наш
     }
-    else
-    {
-        ui->cbParamsAutoMode->setCurrentIndex(1); // переключаем режим комбокса на наш
-        iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-        iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
-    }
+
+    /// устанавливаем стартовый шаг проверки
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbInsulationResistance->currentIndex();
+    /// устанавливаем кол-во шагов проверки
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : iCurrentStep+1;
+    ui->progressBar->setMaximum(2); /// установим максимум прогресс бара
+    ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text()); /// откроем вкладку
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1); /// и переходим на нее
+    ui->statusBar->showMessage(tr("Проверка %0 ...").arg(ui->rbInsulationResistance->text())); /// пишем в статус бар
+    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue"); /// пишем в журнал событий
 
     /// при наличии галки имитатора, выводим сообщение о необходимости отключить источник питания
     if(ui->cbIsImitator->isChecked() and iPowerState != 2) {
@@ -83,9 +61,8 @@ void MainWindow::on_btnInsulationResistance_clicked()
         iPowerState = 2; /// состояние отключенного источника питания
     }
 
-    for(i=iCurrentStep; i<iMaxSteps; i++)
+    for(i = iCurrentStep; i < iMaxSteps; i++)
     {
-        ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса
         ui->progressBar->reset();
 
         baSendArray.clear();
@@ -97,8 +74,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         label->setText(sLabelText + " идет измерение...");
         label->setStyleSheet("QLabel { color : blue; }");
-
-        label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i)); // если вдруг вывалимся из цикла, чтобы написать после стопа
 
         // сбросить коробочку
         baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
@@ -192,8 +167,6 @@ void MainWindow::on_btnInsulationResistance_clicked()
         label->setStyleSheet("QLabel { color : "+color+"; }");
         Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1).arg(sResult), color);
 
-        ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
-
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
         sArrayReportInsulationResistance.append(
@@ -231,6 +204,7 @@ void MainWindow::on_btnInsulationResistance_clicked()
         if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
     } // for
+
 stop:
     if(ret == KDS_STOP) {
         label->setText(sLabelText + " измерение прервано!");
@@ -252,140 +226,16 @@ stop:
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
 
-    if(bModeManual)
-    {
+    if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
+        setGUI(true); /// включаем интерфейс
         bState = false;
     }
 
-    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
-    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
-    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
-    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
-    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
-    ui->btnInsulationResistance->setText("Пуск");       // поменять текст на кнопке
+    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistance->text()), "blue");
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
     baSendCommand.clear();
     baRecvArray.clear();
-    ui->progressBar->reset();
+    ui->progressBar->reset(); /// сбросим прогресс бар
 }
-
-/*
- * Сопротивление изоляции
- */
-/*void MainWindow::checkInsulationResistance()
-{
-    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
-    ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbInsulationResistance->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
-    } else
-        ui->cbParamsAutoMode->setCurrentIndex(1); // переключаем режим комбокса на наш
-
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
-
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbInsulationResistance->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbInsulationResistance->count();
-    ui->progressBar->setMaximum(iMaxSteps);
-    ui->progressBar->setValue(iCurrentStep);
-
-    switch (iBatteryIndex) {
-    case 0: //9ER20P-20
-        for (int i = iCurrentStep; i < iMaxSteps; i++) {
-            if (!bState) return;
-            switch (i) {
-            case 0:
-                delay(1000);
-                dArrayInsulationResistance[i] = randMToN(19, 21); //число полученное с COM-порта
-                break;
-            case 1:
-                delay(1000);
-                dArrayInsulationResistance[i] = randMToN(19, 21); //число полученное с COM-порта
-                break;
-            case 2:
-                delay(1000);
-                dArrayInsulationResistance[i] = randMToN(19, 21); //число полученное с COM-порта
-                break;
-            case 3:
-                delay(1000);
-                dArrayInsulationResistance[i] = randMToN(19, 21); //число полученное с COM-порта
-                break;
-            default:
-                return;
-                break;
-            }
-
-            if(ui->rbModeDiagnosticManual->isChecked())
-                ui->cbInsulationResistance->setCurrentIndex(i);
-            else
-                ui->cbSubParamsAutoMode->setCurrentIndex(i);
-
-            str = tr("Сопротивление цепи \"%0\" = <b>%1</b> МОм.").arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
-            if (dArrayInsulationResistance[i] > settings.isolation_resistance_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
-            Log(str, color);
-            ui->btnBuildReport->setEnabled(true);
-            if (dArrayInsulationResistance[i] > settings.isolation_resistance_limit) {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    return;
-                }
-            }
-
-            ui->progressBar->setValue(i+1);
-        }
-        break;
-    case 1:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 2:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 3:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    default:
-        break;
-    }
-
-    Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistance->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        bState = false;
-        ui->groupBoxCOMPort->setEnabled(bState);
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Пуск");
-    }
-}*/

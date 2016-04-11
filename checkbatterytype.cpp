@@ -38,12 +38,18 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     ui->groupBoxDiagnosticDevice->setDisabled(true); /// скрываем параметры проверяемой батареи
     ui->groupBoxDiagnosticMode->setDisabled(true); /// скрываем выбор режима проверки
     ui->groupBoxCheckParams->setDisabled(true); /// скрываем проверяемые параметры ручного режима
-    ui->btnBuildReport->setDisabled(true); /// скрываем кнопку формирования отчета
+    ui->widgetCheckParamsButtons->setDisabled(true); /// скрываем кнопки ручного режима
+    ui->groupBoxCheckParamsAutoMode->setDisabled(true); /// скрываем проверяемые параметры автоматического режима
     //qDebug()<<U1<<U2;
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} //  костыль: если цикл уже работает - выйти обратно
-    ui->btnCheckConnectedBattery->setEnabled(false); // на время проверки запретить кнопку
     timerPing->stop(); // остановить пинг
+
+    /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
+    if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
+        QMessageBox::information(this, tr("Внимание! - %0").arg("Проверка батареи"), tr("Перед проверкой необходимо включить источник питания!"));
+        iPowerState = 1; /// состояние включенного источника питания
+    }
 
     ui->statusBar->showMessage(tr("Проверка типа подключенной батареи ..."));
     ui->progressBar->setRange(0,0);
@@ -130,8 +136,10 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
-            else
+            else {
                 ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
+                ui->widgetCheckParamsButtons->setEnabled(true); /// скрываем кнопки ручного режима
+            }
         }
     }
     if((0==x) && (1==y)) // 9ER20P-20
@@ -147,8 +155,10 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
-            else
+            else {
                 ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
+                ui->widgetCheckParamsButtons->setEnabled(true); /// скрываем кнопки ручного режима
+            }
         }
     }
     if((1==x) && (0==y)) // 9ЕR14PS-24 УУТББ
@@ -164,8 +174,10 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
-            else
+            else {
                 ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
+                ui->widgetCheckParamsButtons->setEnabled(true); /// скрываем кнопки ручного режима
+            }
         }
     }
     if((1==x) && (1==y)) //9ЕR14PS-24 или 9ER14P-24
@@ -181,8 +193,10 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
-            else
+            else {
                 ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
+                ui->widgetCheckParamsButtons->setEnabled(true); /// скрываем кнопки ручного режима
+            }
             QMessageBox::information(this, "Проверка подключенной батареи", "Подключена батарея "+battery[1].str_type_name+" или "+battery[2].str_type_name+"!");
         }
     }
@@ -199,14 +213,15 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
-            else
+            else {
                 ui->groupBoxCheckParams->setEnabled(true); /// разрешить выбрать параметр проверки ручного режима
+                ui->widgetCheckParamsButtons->setEnabled(true); /// скрываем кнопки ручного режима
+            }
         }
     }
 stop:
     ui->groupBoxCOMPort->setEnabled(true); /// разрешаем выбор сом-порта
     ui->groupBoxDiagnosticDevice->setEnabled(true); /// разрешаем параметры проверяемой батареи
-    ui->btnCheckConnectedBattery->setEnabled(true); // по окончанию проверки разрешить кнопку
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();

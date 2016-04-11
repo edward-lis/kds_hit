@@ -215,6 +215,7 @@ private slots:
    /// Переключение комбинацией клавиш Ctrl+D DeveloperState
    void triggerDeveloperState();// { bDeveloperState=!bDeveloperState; }
    //+++
+   void setGUI(bool state);
    void on_btnCOMPortOpenClose_clicked();
    void on_btnCheckConnectedBattery_clicked();
    void on_btnVoltageOnTheHousing_clicked();

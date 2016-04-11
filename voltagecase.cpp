@@ -13,7 +13,6 @@ extern QVector<Battery> battery;
 
 void MainWindow::on_btnVoltageOnTheHousing_clicked()
 {
-    //checkVoltageOnTheHousing(); return;
     int ret=0; // код возврата ошибки
     quint16 codeU=0; // код напряжение минус, плюс
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
@@ -21,8 +20,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     quint16 offset=0; // смещение, в зависимости от измерения напряжения на корпусе + или -
     float voltageU=0;
     int i=0; // номер цепи
-    //QLabel *label; // надпись в закладке
-    //qDebug()<<"on_btnVoltageOnTheHousing_clicked";
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -42,44 +39,21 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     timerPing->stop(); // остановить пинг
     bCheckInProgress = true; // вошли в состояние проверки
 
-    // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(true);
-    ui->groupBoxDiagnosticDevice->setDisabled(true);
-    ui->groupBoxDiagnosticMode->setDisabled(true);
-    ui->cbParamsAutoMode->setDisabled(true);
-    ui->cbSubParamsAutoMode->setDisabled(true);
-    // откроем вкладку
-    ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-    ui->statusBar->showMessage(tr("Проверка ")+ui->rbVoltageOnTheHousing->text()+" ...");
-    //ui->progressBar->setMaximum(4); // установить кол-во ступеней прогресса
-    ui->progressBar->setRange(0,0);
-//    ui->progressBar->reset();
-
-    if(bModeManual)// если в ручном режиме
-    {
-        // переименовать кнопку
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
-        ui->progressBar->setValue(ui->progressBar->value()+1);
-
-        i=ui->cbVoltageOnTheHousing->currentIndex();
-        iCurrentStep=i; // чтобы цикл for выполнился только раз в ручном.
-        iMaxSteps=i+1;
+    if (ui->rbModeDiagnosticManual->isChecked()) {  /// если в ручной режиме
+        setGUI(false);                              ///  отключаем интерфейс
+    } else {                                        /// если в автоматическом режиме
+        ui->cbParamsAutoMode->setCurrentIndex(0);   ///  переключаем режим комбокса на наш
     }
-    else
-    {
-        ui->cbParamsAutoMode->setCurrentIndex(0); // переключаем режим комбокса на наш
-        iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-        iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
-    }
+
+    /// устанавливаем стартовый шаг проверки
+    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
+    /// устанавливаем кол-во шагов проверки
+    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : iCurrentStep+1;
+    ui->progressBar->setMaximum(settings.voltagecase_num); /// установим максимум прогресс бара
+    ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text()); /// откроем вкладку
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1); /// и переходим на нее
+    ui->statusBar->showMessage(tr("Проверка %0 ...").arg(ui->rbVoltageOnTheHousing->text())); /// пишем в статус бар
+    Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue"); /// пишем в журнал событий
 
     /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
     if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
@@ -87,12 +61,13 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         iPowerState = 1; /// состояние включенного источника питания
     }
 
-    for(i=iCurrentStep; i<iMaxSteps; i++)
+    for(i = iCurrentStep; i < iMaxSteps; i++)
     {
-        // очистить буфера
+        /// очистить буфера
         baSendArray.clear();
         baSendCommand.clear();
         baRecvArray.clear();
+        ui->progressBar->setValue(0); /// установим прогресс бар в начальное положение
 
         /// формируем строку и пишем на label "идет измерение..."
         sLabelText = tr("%0) \"%1\"").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]);
@@ -108,7 +83,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
             ret=loop.exec();
             if(ret) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
-            //ui->progressBar->setValue(ui->progressBar->value()+1);
 
             if(i == 1) // если выбрана в комбобоксе такая цепь
             {
@@ -126,17 +100,18 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
             ret=loop.exec();
             if(ret) goto stop;
-            ui->progressBar->setValue(ui->progressBar->value()+1);
 
             baSendArray=baSendCommand+"?#";
             timerSend->start(settings.delay_after_start_before_request_voltagecase);
             ret=loop.exec();
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
-            ui->progressBar->setValue(ui->progressBar->value()+1);
 
             voltageU = fabs((codeU-offset)*settings.coefADC2); // напряжение в вольтах
             dArrayVoltageOnTheHousing[i] = voltageU;
+
+            ui->progressBar->setValue(ui->progressBar->value()+1);
+
             // если отладочный режим, напечатать отладочную инфу
             if(bDeveloperState)
             {
@@ -155,8 +130,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         label->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
         Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), color);
-
-        ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
@@ -184,10 +157,11 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                     qDebug()<<"переход в ручной режим";
                     Log("Останов проверки - переход в ручной режим", "blue");
                     bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState); // разрешить кнопку ком-порта???
-                    ui->groupBoxDiagnosticMode->setDisabled(bState); // разрешить группу выбора режима диагностики
-                    ui->cbParamsAutoMode->setDisabled(bState); // разрешить комбобокс пунктов автомата
-                    ui->cbSubParamsAutoMode->setDisabled(bState); // разрешать комбобокс подпунктов автомата
+                    ui->groupBoxCOMPort->setEnabled(true); // разрешить кнопку ком-порта???
+                    ui->groupBoxDiagnosticMode->setEnabled(true); // разрешить группу выбора режима диагностики
+                    //ui->groupBoxCheckParamsAutoMode->setEnabled(true); // разрешить группу выбора режима диагностики
+                    //ui->cbParamsAutoMode->setEnabled(true); // разрешить комбобокс пунктов автомата
+                    //ui->cbSubParamsAutoMode->setEnabled(true); // разрешать комбобокс подпунктов автомата
                     ((QPushButton*)sender())->setText("Пуск");
                     // остановить текущую проверку, выход
                     bCheckInProgress = false;
@@ -198,9 +172,12 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         }
 
         // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        if(bModeManual) QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
-        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        if (ui->rbModeDiagnosticManual->isChecked())
+            QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
+        else
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
     } // for
+
 stop:
     if(ret == KDS_STOP) {
         label->setText(sLabelText + " измерение прервано!");
@@ -223,134 +200,16 @@ stop:
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
 
-    if(bModeManual)
-    {
+    if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
+        setGUI(true); /// включаем интерфейс
         bState = false;
     }
 
-    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
-    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
-    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
-    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
-    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
-    ui->btnVoltageOnTheHousing->setText("Пуск");        // поменять текст на кнопке
+    Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear();
     baSendCommand.clear();
     baRecvArray.clear();
-
-    ui->progressBar->setMaximum(1); // stop progress
-    ui->progressBar->reset();
+    ui->progressBar->reset(); /// сбросим прогресс бар
 }
-
-/*
- * Напряжение на корпусе батареи
- */
-/*void MainWindow::checkVoltageOnTheHousing()
-{
-    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
-    ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
-    } else
-        ui->cbParamsAutoMode->setCurrentIndex(0); // переключаем режим комбокса на наш
-
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
-
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbVoltageOnTheHousing->count();
-    ui->progressBar->setMaximum(iMaxSteps);
-    ui->progressBar->setValue(iCurrentStep);
-
-    switch (iBatteryIndex) {
-    case 0: //9ER20P-20
-        for (int i = iCurrentStep; i < iMaxSteps; i++) {
-            if (!bState) return;
-            switch (i) {
-            case 0:
-                delay(1000);
-                dArrayVoltageOnTheHousing[i] = randMToN(0, 2); //число полученное с COM-порта
-                break;
-            case 1:
-                delay(1000);
-                dArrayVoltageOnTheHousing[i] = randMToN(0, 2); //число полученное с COM-порта
-                break;
-            default:
-                return;
-                break;
-            }
-
-            if(ui->rbModeDiagnosticManual->isChecked())
-                ui->cbVoltageOnTheHousing->setCurrentIndex(i);
-            else
-                ui->cbSubParamsAutoMode->setCurrentIndex(i);
-
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
-            if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
-            Log(str, color);
-            ui->btnBuildReport->setEnabled(true);
-            if (dArrayVoltageOnTheHousing[i] > settings.voltage_corpus_limit) {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    return;
-                }
-            }
-
-            ui->progressBar->setValue(i+1);
-        }
-        break;
-    case 1:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 2:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 3:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    default:
-        break;
-    }
-
-    Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        bState = false;
-        ui->groupBoxCOMPort->setEnabled(bState);
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Пуск");
-    }
-}*/

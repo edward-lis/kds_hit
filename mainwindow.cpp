@@ -110,11 +110,6 @@ MainWindow::MainWindow(QWidget *parent) :
     timerSend->setSingleShot(true);
     connect(timerSend, SIGNAL(timeout()), this, SLOT(sendSerialData())); // послать baSendArray в порт через некоторое время
 
-    //ui->btnCheckConnectedBattery->setEnabled(false); // по началу работы проверять нечего
-
-    //ui->groupBoxDiagnosticDevice->setDisabled(false); // пусть сразу разрешена вся группа. а вот кнопка "проверить тип батареи" разрешится после установления связи с коробком
-    //ui->groupBoxDiagnosticMode->setDisabled(false); //
-    //ui->groupBoxCheckParams->setDisabled(false);// !!!
     ui->rbInsulationResistanceUUTBB->hide();
     ui->cbInsulationResistanceUUTBB->hide();
     ui->btnInsulationResistanceUUTBB->hide();
@@ -189,26 +184,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetClosedCircuitBattery->yAxis->setLabel(tr("Напряжение, В"));
     ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);
 
-    /// удаляем все вкладки кроме первой - журнала событий(0), каждый раз удаляем вторую(1)
-    int tab_count = ui->tabWidget->count();
-    for (int i = 1; i < tab_count; i++) {
-        ui->tabWidget->removeTab(1);
-    }
-
     bState = false;
-    /// Заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
-    for (int i = 0; i < 35; i++) {
-        dArrayVoltageOnTheHousing.append(-1);
-        dArrayInsulationResistance.append(-1);
-        dArrayOpenCircuitVoltageGroup.append(-1);
-        dArrayOpenCircuitVoltageBattery.append(-1);
-        dArrayClosedCircuitVoltageGroup.append(-1);
-        dArrayDepassivation.append(-1);
-        dArrayClosedCircuitVoltageBattery.append(-1);
-        dArrayInsulationResistanceUUTBB.append(-1);
-        dArrayOpenCircuitVoltagePowerSupply.append(-1);
-        dArrayClosedCircuitVoltagePowerSupply.append(-1);
-    }
 
     iBatteryIndex = 0;
     iPowerState = 0; /// 0 - неизвестное состояние;
@@ -221,10 +197,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetClosedCircuitBattery->hide();
     ui->widgetClosedCircuitVoltageGroup->hide();
     ui->widgetClosedCircuitVoltagePowerUUTBB->hide();
-
-    // состояния виджетов в зависимости от признака отладки
-    //bDeveloperState = settings.bDeveloperState;// тут флаг, установленный из конф.файла, инвертируем
-    //triggerDeveloperState(); // потому что там внутри ф-ии он инвертируется обратно.
 }
 
 MainWindow::~MainWindow()
@@ -248,34 +220,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
  }
 
 
-/*double MainWindow::randMToN(double M, double N)
-{
-    double val = M + (rand() / ( RAND_MAX / (N-M) ) ) ;
-    QString str= QString::number(val, 'f', 1);
-    return str.toDouble();
-}*/
-
-/*
- * Задержка в милисекундах
- */
-/*void MainWindow::delay( int millisecondsToWait )
-{
-    QTime dieTime = QTime::currentTime().addMSecs( millisecondsToWait );
-    while( QTime::currentTime() < dieTime )
-    {
-        QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
-    }
-}*/
-
-
-
 /*!
  * Заполнение комбоксов
  * Вызывается при инициализации и выборе батареи.
  * Входные параметры: int iBatteryIndex
  */
 void MainWindow::comboxSetData() {
-    ui->cbParamsAutoMode->clear();
+    ui->cbParamsAutoMode->clear(); /// очищаем комбокс автоматического режима
 
     /// скрываем все вкладки кроме журнала событий
     int tab_count = ui->tabWidget->count();
@@ -283,20 +234,30 @@ void MainWindow::comboxSetData() {
         ui->tabWidget->removeTab(1);
     }
 
-    /// восстанавливаем значение масивов проверки в исходное
-    if (!dArrayVoltageOnTheHousing.isEmpty()) {
-        for (int i = 0; i < 35; i++) {
-            dArrayVoltageOnTheHousing[i];
-            dArrayInsulationResistance[i];
-            dArrayOpenCircuitVoltageGroup[i];
-            dArrayOpenCircuitVoltageBattery[i];
-            dArrayClosedCircuitVoltageGroup[i];
-            dArrayDepassivation[i];
-            dArrayClosedCircuitVoltageBattery[i];
-            dArrayInsulationResistanceUUTBB[i];
-            dArrayOpenCircuitVoltagePowerSupply[i];
-            dArrayClosedCircuitVoltagePowerSupply[i];
-        }
+    /// очищаем массивы проверок
+    dArrayVoltageOnTheHousing.clear();
+    dArrayInsulationResistance.clear();
+    dArrayOpenCircuitVoltageGroup.clear();
+    dArrayOpenCircuitVoltageBattery.clear();
+    dArrayClosedCircuitVoltageGroup.clear();
+    dArrayDepassivation.clear();
+    dArrayClosedCircuitVoltageBattery.clear();
+    dArrayInsulationResistanceUUTBB.clear();
+    dArrayOpenCircuitVoltagePowerSupply.clear();
+    dArrayClosedCircuitVoltagePowerSupply.clear();
+
+    /// заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
+    for (int i = 0; i < 35; i++) {
+        dArrayVoltageOnTheHousing.append(-1);
+        dArrayInsulationResistance.append(-1);
+        dArrayOpenCircuitVoltageGroup.append(-1);
+        dArrayOpenCircuitVoltageBattery.append(-1);
+        dArrayClosedCircuitVoltageGroup.append(-1);
+        dArrayDepassivation.append(-1);
+        dArrayClosedCircuitVoltageBattery.append(-1);
+        dArrayInsulationResistanceUUTBB.append(-1);
+        dArrayOpenCircuitVoltagePowerSupply.append(-1);
+        dArrayClosedCircuitVoltagePowerSupply.append(-1);
     }
 
     /// очищаем массив графиков
@@ -477,20 +438,21 @@ void MainWindow::comboxSetData() {
     }
 }
 
-/*
+/*!
  * Запись событий в журнал
  */
 void MainWindow::Log(QString message, QString color)
 {
     dateTime = QDateTime::currentDateTime();
-    QString sLogStr = (color == "green" or color == "red" or color == "blue") ? "<font color=\""+color+"\">"+message+"</font>" : message;
-    ui->EventLog->appendHtml(tr("%0").arg(dateTime.toString("hh:mm:ss.zzz") + " " + sLogStr));
+    str = (color == "green" or color == "red" or color == "blue") ? "<font color=\""+color+"\">"+message+"</font>" : message;
+    ui->EventLog->appendHtml(tr("%0").arg(dateTime.toString("hh:mm:ss.zzz") + " " + str));
 }
 
 // нажата радиокнопка режим Авто
 void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 {
     ui->groupBoxCheckParamsAutoMode->setEnabled(checked);
+    ui->widgetCheckParamsButtons->setDisabled(checked);
     bModeManual = false;
 }
 
@@ -498,6 +460,7 @@ void MainWindow::on_rbModeDiagnosticAuto_toggled(bool checked)
 void MainWindow::on_rbModeDiagnosticManual_toggled(bool checked)
 {
     ui->groupBoxCheckParams->setEnabled(checked);
+    ui->widgetCheckParamsButtons->setEnabled(checked);
     bModeManual = true;
 }
 
@@ -573,9 +536,6 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->show();
         ui->cbClosedCircuitVoltagePowerSupply->show();
         ui->btnClosedCircuitVoltagePowerSupply->show();
-        //ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
-        //ui->tabWidget->addTab(ui->tabOpenCircuitVoltagePowerSupply, ui->rbOpenCircuitVoltagePowerSupply->text());
-        //ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
         ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbParamsAutoMode->addItem(tr("9. %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         ui->cbParamsAutoMode->addItem(tr("10. %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()));
@@ -589,14 +549,6 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
         ui->rbClosedCircuitVoltagePowerSupply->hide();
         ui->cbClosedCircuitVoltagePowerSupply->hide();
         ui->btnClosedCircuitVoltagePowerSupply->hide();
-        /*int tab_count = ui->tabWidget->count();
-        for (int i = tab_count; ; i--) {
-            if (i < 1)
-                break;
-            if (ui->tabWidget->tabText(i) == ui->rbInsulationResistanceUUTBB->text() or ui->tabWidget->tabText(i) == ui->rbOpenCircuitVoltagePowerSupply->text() or ui->tabWidget->tabText(i) == ui->rbClosedCircuitVoltagePowerSupply->text()) {
-                ui->tabWidget->removeTab(i);
-            }
-        }*/
         ui->cbParamsAutoMode->removeItem(8);
         ui->cbParamsAutoMode->removeItem(7);
         ui->cbParamsAutoMode->removeItem(6);
@@ -613,7 +565,7 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     if (index == 0 or index == 1) {
         ui->cbIsUUTBB->setEnabled(true);
     } else {
-        ui->cbIsUUTBB->setEnabled(false);
+        ui->cbIsUUTBB->setDisabled(true);
         ui->cbIsUUTBB->setChecked(false);
     }
     iBatteryIndex = index;
@@ -623,6 +575,8 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     ui->groupBoxDiagnosticMode->setDisabled(true);
     ui->groupBoxCheckParams->setDisabled(true);
     ui->groupBoxCheckParamsAutoMode->setDisabled(true);
+    ui->btnBuildReport->setDisabled(true);
+    ui->widgetCheckParamsButtons->setDisabled(true);
 }
 
 // нажата кнопка Старт(Стоп) автоматического режима диагностики
@@ -644,56 +598,41 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         return;
     }
 
+    setGUI(false); /// отключаем интерфейс
+
     if (!bState) {
         Log("Начало проверки - Автоматический режим", "blue");
         bState = true;
 
-        ui->groupBoxCOMPort->setDisabled(bState); // запрещаем комбобокс COM-порта
-        ui->groupBoxDiagnosticMode->setDisabled(bState); // запрещаем бокс выбора режима диагностики
-        ui->cbParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального параметра проверки автоматического режима
-        ui->cbSubParamsAutoMode->setDisabled(bState); // запрещаем бокс выбора начального под-параметра проверки автоматического режима
-        ui->btnBuildReport->setDisabled(bState); // запрещаем кнопку формирования отчета
-        ((QPushButton*)sender())->setText("Стоп");
-
         for (int i = ui->cbParamsAutoMode->currentIndex(); i < ui->cbParamsAutoMode->count(); i++)
         {
-            qDebug()<<"i"<<i<<"ui->cbParamsAutoMode->count()"<<ui->cbParamsAutoMode->count()<<"bState"<<bState;
             if (!bState) break; // если прожали Стоп выходим из цикла
             switch (i) {
             case 0:
-                //checkVoltageOnTheHousing();
                 on_btnVoltageOnTheHousing_clicked();
                 break;
             case 1:
-                //checkInsulationResistance();
                 on_btnInsulationResistance_clicked();
                 break;
             case 2:
-                //checkOpenCircuitVoltageGroup();
                 on_btnOpenCircuitVoltageGroup_clicked();
                 break;
             case 3:
-                //checkOpenCircuitVoltageBattery();
                 on_btnOpenCircuitVoltageBattery_clicked();
                 break;
             case 4:
-                //checkClosedCircuitVoltageGroup();
                 on_btnClosedCircuitVoltageGroup_clicked();
                 break;
             case 5:
-                //checkClosedCircuitVoltageBattery();
                 on_btnClosedCircuitVoltageBattery_clicked();
                 break;
             case 6:
-                //checkInsulationResistanceUUTBB();
                 on_btnInsulationResistanceUUTBB_clicked();
                 break;
             case 7:
-                //checkOpenCircuitVoltagePowerSupply();
                 on_btnOpenCircuitVoltagePowerSupply_clicked();
                 break;
             case 8:
-                //checkClosedCircuitVoltagePowerSupply();
                 on_btnClosedCircuitVoltagePowerSupply_clicked();
                 break;
             default:
@@ -704,13 +643,8 @@ void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
         QMessageBox::information(this, ui->rbModeDiagnosticAuto->text(), "Проверка завершена!"); // выводим сообщение о завершении проверки
     }
 
+    setGUI(true); /// включаем интерфейс
     bState = false;
-    ui->groupBoxCOMPort->setDisabled(bState); // разрешаем комбобокс COM-порта
-    ui->groupBoxDiagnosticMode->setDisabled(bState); // разрешаем бокс выбора режима диагностики
-    ui->cbParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального параметра проверки автоматического режима
-    ui->cbSubParamsAutoMode->setDisabled(bState); // разрешаем бокс выбора начального под-параметра проверки автоматического режима
-    ui->btnBuildReport->setDisabled(bState); // разрешаем кнопку формирования отчета
-    ((QPushButton*)sender())->setText("Пуск");
 }
 
 void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
@@ -770,7 +704,6 @@ void MainWindow::on_cbParamsAutoMode_currentIndexChanged(int index)
 
 void MainWindow::triggerDeveloperState() {
     bDeveloperState=!bDeveloperState;
-    //qDebug() << "bDeveloperState =" << bDeveloperState;
     ui->btnCheckConnectedBattery->setEnabled(bDeveloperState);
     ui->groupBoxDiagnosticDevice->setEnabled(bDeveloperState);
     ui->groupBoxDiagnosticMode->setEnabled(bDeveloperState);
@@ -835,7 +768,6 @@ void MainWindow::triggerDeveloperState() {
 
     for (int i = 0; i < battery[iBatteryIndex].group_num; i++)
     {
-        QStandardItem* item;
         item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
         if(bDeveloperState)
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
@@ -854,6 +786,26 @@ void MainWindow::on_actionCheckReset_triggered()
 {
     if (!QMessageBox::question(this, tr("КДС ХИТ"), tr(" Вы действительно хотите сбросить результаты проверки? "), tr("Да"), tr("Нет"))) {
         ui->EventLog->clear();
+        ui->btnBuildReport->setDisabled(true);
         comboxSetData();
     }
 }
+
+/*!
+ * Отключение/Включение интерфейса
+ */
+void MainWindow::setGUI(bool state)
+{
+    ui->groupBoxCOMPort->setEnabled(state);                         /// запретить/разрешить группу последовательного порта
+    ui->groupBoxDiagnosticDevice->setEnabled(state);                /// запретить/разрешить группу выбора батареи
+    ui->groupBoxDiagnosticMode->setEnabled(state);                  /// запретить/разрешить группу выбора режима
+    ui->btnBuildReport->setEnabled(state);                          /// запретить/разрешить кнопку формирования отчета
+    ((QPushButton*)sender())->setText( (state) ? "Пуск" : "Стоп" ); /// поменять текст на кнопке
+    if (ui->rbModeDiagnosticManual->isChecked()) {                  /// если - ручной режим
+        ui->groupBoxCheckParams->setEnabled(state);                 ///  запретить/разрешить группу параметров проверки ручного режима
+    } else {                                                        /// если - автоматический режим
+        ui->cbParamsAutoMode->setEnabled(state);                    ///  запретить/разрешить комбобокс выбора пункта начала автоматического режима
+        ui->cbSubParamsAutoMode->setEnabled(state);                 ///  запретить/разрешить комбобокс выбора подпункта начала автоматического режима
+    }
+}
+

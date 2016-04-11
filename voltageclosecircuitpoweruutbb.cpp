@@ -70,12 +70,11 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
     timerPing->stop(); // остановить пинг
     bCheckInProgress = true; // вошли в состояние проверки
 
-    // запретим виджеты, чтоб не нажимались
-    ui->groupBoxCOMPort->setDisabled(true);
-    ui->groupBoxDiagnosticDevice->setDisabled(true);
-    ui->groupBoxDiagnosticMode->setDisabled(true);
-    ui->cbParamsAutoMode->setDisabled(true);
-    ui->cbSubParamsAutoMode->setDisabled(true);
+    if (ui->rbModeDiagnosticManual->isChecked()) {  /// если в ручной режиме
+        setGUI(false);                              ///  отключаем интерфейс
+    } else {                                        /// если в автоматическом режиме
+        ui->cbParamsAutoMode->setCurrentIndex(8);   ///  переключаем режим комбокса на наш
+    }
 
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
@@ -85,21 +84,11 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
 
     if(bModeManual)// если в ручном режиме
     {
-        // переименовать кнопку
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
         iCurrentStep=ui->cbClosedCircuitVoltagePowerSupply->currentIndex();
         iMaxSteps=iCurrentStep+1; // чтобы цикл for выполнился только раз в ручном.
     }
     else
     {
-        ui->cbParamsAutoMode->setCurrentIndex(8); // переключаем режим комбокса на наш
         iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
@@ -184,8 +173,6 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
     ui->labelClosedCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : "+color+"; }");
     Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult), color);
 
-    ui->btnBuildReport->setEnabled(true);
-
     /// заполняем массив проверок для отчета
     dateTime = QDateTime::currentDateTime();
     sArrayReportClosedCircuitVoltagePowerSupply.append(
@@ -247,17 +234,12 @@ stop:
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
 
-    if(bModeManual)
-    {
+    if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
+        setGUI(true); /// включаем интерфейс
         bState = false;
     }
 
-    ui->groupBoxCOMPort->setEnabled(true);              // кнопка последовательного порта
-    ui->groupBoxDiagnosticDevice->setEnabled(true);     // открыть группу выбора батареи
-    ui->groupBoxDiagnosticMode->setEnabled(true);       // окрыть группу выбора режима
-    ui->cbParamsAutoMode->setEnabled(true);             // открыть комбобокс выбора пункта начала автоматического режима
-    ui->cbSubParamsAutoMode->setEnabled(true);          // открыть комбобокс выбора подпункта начала автоматического режима
-    ui->btnClosedCircuitVoltagePowerSupply->setText("Пуск");// поменять текст на кнопке
+    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // очистить буфера команд.
@@ -265,114 +247,3 @@ stop:
     baRecvArray.clear();
     ui->progressBar->reset();
 }
-
-/*
- * Напряжение замкнутой цепи блока питания
- */
-/*void MainWindow::checkClosedCircuitVoltagePowerSupply()
-{
-    qDebug() << "sender=" << ((QPushButton*)sender())->objectName() << "bState=" << bState;
-    ui->tabWidget->addTab(ui->tabClosedCircuitVoltagePowerSupply, ui->rbClosedCircuitVoltagePowerSupply->text());
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-    Log(tr("Проверка начата - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        if(!bState) {
-            bState = true;
-            ui->groupBoxCheckParams->setEnabled(bState);
-            ((QPushButton*)sender())->setText("Стоп");
-        } else {
-            bState = false;
-            ((QPushButton*)sender())->setText("Пуск");
-        }
-    } else
-        ui->cbParamsAutoMode->setCurrentIndex(8); // переключаем режим комбокса на наш
-
-    ui->groupBoxCOMPort->setDisabled(bState);
-    ui->groupBoxDiagnosticDevice->setDisabled(bState);
-    ui->groupBoxDiagnosticMode->setDisabled(bState);
-    ui->cbParamsAutoMode->setDisabled(bState);
-    ui->cbSubParamsAutoMode->setDisabled(bState);
-
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbClosedCircuitVoltagePowerSupply->currentIndex();
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : ui->cbClosedCircuitVoltagePowerSupply->count();
-    ui->progressBar->setMaximum(iMaxSteps);
-    ui->progressBar->setValue(iCurrentStep);
-
-    switch (iBatteryIndex) {
-    case 0: //9ER20P-20
-        for (int i = iCurrentStep; i < iMaxSteps; i++) {
-            if (!bState) return;
-            switch (i) {
-            case 0:
-                delay(1000);
-                dArrayClosedCircuitVoltagePowerSupply[i] = randMToN(5, 6); //число полученное с COM-порта
-                break;
-            case 1:
-                delay(1000);
-                dArrayClosedCircuitVoltagePowerSupply[i] = randMToN(5, 6); //число полученное с COM-порта
-                break;
-            default:
-                return;
-                break;
-            }
-
-            if(ui->rbModeDiagnosticManual->isChecked())
-                ui->cbClosedCircuitVoltagePowerSupply->setCurrentIndex(i);
-            else
-                ui->cbSubParamsAutoMode->setCurrentIndex(i);
-
-            str = tr("Напряжение цепи \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[i]).arg(dArrayClosedCircuitVoltagePowerSupply[i]);
-            QLabel * label = findChild<QLabel*>(tr("labelClosedCircuitVoltagePowerSupply%0").arg(i));
-            if (dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) {
-                str += " Не норма.";
-                color = "red";
-            } else
-                color = "green";
-            label->setText(str);
-            label->setStyleSheet("QLabel { color : "+color+"; }");
-            Log(str, color);
-            ui->btnBuildReport->setEnabled(true);
-            if (dArrayClosedCircuitVoltagePowerSupply[i] > settings.uutbb_closecircuitpower_limit) {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltagePowerSupply->text(), tr("%0 Продолжить?").arg(str), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    return;
-                }
-            }
-
-            ui->progressBar->setValue(i+1);
-        }
-        break;
-    case 1:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 2:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    case 3:
-        Log("Действия проверки.", "green");
-        delay(1000);
-        break;
-    default:
-        break;
-    }
-
-    Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
-
-    if(ui->rbModeDiagnosticManual->isChecked()) {
-        bState = false;
-        ui->groupBoxCOMPort->setEnabled(bState);
-        ui->groupBoxDiagnosticDevice->setDisabled(bState);
-        ui->groupBoxDiagnosticMode->setDisabled(bState);
-        ui->cbParamsAutoMode->setDisabled(bState);
-        ui->cbSubParamsAutoMode->setDisabled(bState);
-        ((QPushButton*)sender())->setText("Пуск");
-    }
-}*/
