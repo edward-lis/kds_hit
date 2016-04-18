@@ -43,10 +43,19 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
         if( data.contains(baSendCommand) && data.contains("OK") ) // Команда#OK режима отработана/ совсем простенькая проверка на наличии в ответе OK
         {
             qDebug()<<"recvSerialData"<<data<<"command:"<<baSendCommand;
+            if(baSendCommand.contains("IDLE")) // если команда равна IDLE
+            {
+                // взять номер комплекта платы
+                bool ok;
+                int j=QString(data[data.indexOf("OK")+QString("OK").length()]).toInt(&ok);
+                if(ok)
+                    settings.board_counter = j;
+            }
             baRecvArray=data;
             emit signalSerialDataReady(); // сигнал - данные готовы. цикл ожидания закончится.
             if(bFirstPing) // если это был ответ на первый айдл, то продолжить пинг
             {
+                qDebug()<<"settings.board_counter"<<settings.board_counter;
                 bFirstPing = false;
                 sendPing();
                 ui->btnCheckConnectedBattery->setEnabled(true); // т.к. коробочка на связи и сбросилась в исходное, то разрешим кнопочку "Проверить батарею"
@@ -83,7 +92,7 @@ quint16 MainWindow::getRecvData(QByteArray baRecvArray)
 // нет ответа на запрос
 void MainWindow::procTimeoutResponse()
 {
-    qDebug()<<"procTimeoutResponse";
+    //qDebug()<<"procTimeoutResponse";
     ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
     //emit signalTimeoutResponse();
     if(loop.isRunning())

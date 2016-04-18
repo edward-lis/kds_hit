@@ -168,7 +168,7 @@ void MainWindow::on_btnDepassivation_clicked()
                 ret=loop.exec();
                 if(ret) goto stop;
                 codeADC = getRecvData(baRecvArray); // напряжение в коде
-                fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+                fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
                 // нарисуем график
                 if(firstMeasurement)
                 {

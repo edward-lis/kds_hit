@@ -17,7 +17,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.opencircuitgroup_limit_min/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
+    quint16 codeLimit=settings.opencircuitgroup_limit_min/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QString str_num; // номер цепи
     int i=0; // номер цепи
@@ -131,7 +131,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         ui->progressBar->setValue(ui->progressBar->value()+1);
         codeADC = getRecvData(baRecvArray);
 
-        fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+        fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
         dArrayOpenCircuitVoltageGroup[i] = fU;
 
         battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась

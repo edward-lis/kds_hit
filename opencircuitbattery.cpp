@@ -17,7 +17,7 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.opencircuitbattery_limit/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
+    quint16 codeLimit=settings.opencircuitbattery_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
@@ -107,7 +107,7 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     ui->progressBar->setValue(ui->progressBar->value()+1);
     codeADC = getRecvData(baRecvArray);
 
-    fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+    fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
     dArrayOpenCircuitVoltageBattery[0] = fU;
 
     if(bDeveloperState)

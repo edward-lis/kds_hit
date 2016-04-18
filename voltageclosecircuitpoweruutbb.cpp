@@ -19,7 +19,7 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.uutbb_closecircuitpower_limit/settings.coefADC1 + settings.offsetADC1; // код, пороговое напряжение.
+    quint16 codeLimit=settings.uutbb_closecircuitpower_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QDateTime starttime; // время начала измерения
     QDateTime dt; // текущее время очередного измерения
@@ -141,7 +141,7 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
         ret=loop.exec();
         if(ret) goto stop;
         codeADC = getRecvData(baRecvArray); // напряжение в коде
-        fU = ((codeADC-settings.offsetADC1)*settings.coefADC1); // напряжение в вольтах
+        fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
         // нарисуем график
         if(bFirstPoll)
         {

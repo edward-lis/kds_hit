@@ -16,6 +16,7 @@ Settings::Settings(QObject *parent) : QObject(parent)
     //qDebug() << "App path : " << qApp->applicationDirPath() << "/" << INI_FILE_NAME; // возвращает путь к папке с исполняемым файлом и ini-файлу
     //m_sSettingsFile = qApp->applicationDirPath() + "/" + INI_FILE_NAME;
     //QSettings settings(m_sSettingsFile, QSettings::NativeFormat);
+    board_number=4; // кол-во комплектов плат (два изделия и два ЗИПа)
 }
 
 void Settings::saveSettings()
@@ -70,18 +71,27 @@ void Settings::loadSettings()
     delay_after_start_before_request_voltagecase = settings.value("delay_after_start_before_request_voltagecase", 1000).toInt();
     voltagecase_num = settings.value("voltagecase_num", 5).toInt();
 
-    // Для чтения шестнадцатиричных данных
-    str = settings.value("k1_code", 1).toString();
-    coefADC1 = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);
-    offsetADC1 = settings.value("k1_offset", 0x0).toString().toUInt(&ok, 16);
-    //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
+    if(settings.beginReadArray("coefs"))
+    {
+    for(i=0; i<4; i++) // кол-во комплектов изделия - две основные платы, две в ЗИП
+    {
+        settings.setArrayIndex(i);
+        // Для чтения шестнадцатиричных данных
+        str = settings.value("k1_code", 1).toString();
+        coefADC1[i] = settings.value("k1_volt", 0).toFloat()/str.toUInt(&ok, 16);
+        offsetADC1[i] = settings.value("k1_offset", 0x0).toString().toUInt(&ok, 16);
+        //qDebug()<<"coef"<<QString::number(coefADC1)<<settings.value("k1_volt", 0).toFloat()<<str;
 
-    coefADC2 = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
-    //offsetADC2 = settings.value("k2_offset", 0x0).toString().toUInt(&ok, 16);
-    offsetADC2_plus = settings.value("k2_offset_plus", 0x0).toString().toUInt(&ok, 16);
-    offsetADC2_minus = settings.value("k2_offset_minus", 0x0).toString().toUInt(&ok, 16);
-    //qDebug()<<"coef"<<QString::number(coefADC2)<<settings.value("k2_volt", 0).toFloat()
-           //<<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
+        coefADC2[i] = settings.value("k2_volt", 0).toFloat()/settings.value("k2_code", 1).toString().toUInt(&ok, 16);
+        //offsetADC2 = settings.value("k2_offset", 0x0).toString().toUInt(&ok, 16);
+        offsetADC2_plus[i] = settings.value("k2_offset_plus", 0x0).toString().toUInt(&ok, 16);
+        offsetADC2_minus[i] = settings.value("k2_offset_minus", 0x0).toString().toUInt(&ok, 16);
+        //qDebug()<<"coef"<<QString::number(coefADC2[i])<<settings.value("k2_volt", 0).toFloat()
+        //<<qPrintable(QString::number(settings.value("k2_code", 1).toString().toUInt(&ok, 16), 16));// прочитать ключ как строку, преобразовать её в 16, напечатать как номер, преобразованный в 16, без кавычек
+    }
+    }
+    settings.endArray();
+
     voltage_circuit_type = settings.value("voltage_circuit_type", 25.0).toFloat();
     voltage_power_uutbb = settings.value("voltage_power_uutbb", 5.0).toFloat();
 
@@ -271,8 +281,12 @@ void Settings::loadSettings()
     {
         settings.setArrayIndex(i);
         functionResist[i].resist = settings.value("resist", 0).toInt(); // dec
-        functionResist[i].codeADC = settings.value("codeADC", 0).toString().toUInt(&ok, 16); // hex
+        functionResist[i].codeADC[0] = settings.value("codeADC_0", 0).toString().toUInt(&ok, 16); // hex
+        functionResist[i].codeADC[1] = settings.value("codeADC_1", 0).toString().toUInt(&ok, 16); // hex
+        functionResist[i].codeADC[2] = settings.value("codeADC_2", 0).toString().toUInt(&ok, 16); // hex
+        functionResist[i].codeADC[3] = settings.value("codeADC_3", 0).toString().toUInt(&ok, 16); // hex
     }
+    settings.endArray();
 
     // флаги и признаки цепей групп
     for(int i=0; i<4; i++)
@@ -313,6 +327,6 @@ void Settings::printSettings()
     qDebug()<<"Resistance function: dot's number="<<functionResist.size();
     for(i=0; i<functionResist.size(); i++)
     {
-        qDebug()<<i<<" R= "<<qPrintable(QString::number(functionResist[i].resist))<<", codeADC= 0x"<<qPrintable(QString::number(functionResist[i].codeADC, 16));
+        qDebug()<<i<<" R= "<<qPrintable(QString::number(functionResist[i].resist))<<", codeADC= 0x"<<qPrintable(QString::number(functionResist[i].codeADC[0], 16));
     }
 }

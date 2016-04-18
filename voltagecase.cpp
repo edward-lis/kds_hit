@@ -87,14 +87,14 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(i == 1) // если выбрана в комбобоксе такая цепь
             {
                 baSendArray=(baSendCommand="UcaseM")+"#";
-                offset = settings.offsetADC2_minus;
+                offset = settings.offsetADC2_minus[settings.board_counter];
             }
             else
             {
                 baSendArray=(baSendCommand="UcaseP")+"#";
-                offset = settings.offsetADC2_plus;
+                offset = settings.offsetADC2_plus[settings.board_counter];
             }
-            codeLimit=settings.voltage_corpus_limit/settings.coefADC2 + offset; // код, пороговое напряжение.
+            codeLimit=settings.voltage_corpus_limit/settings.coefADC2[settings.board_counter] + offset; // код, пороговое напряжение.
 
             if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
             timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
@@ -107,7 +107,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(ret) goto stop;
             codeU = getRecvData(baRecvArray); // получить данные опроса
 
-            voltageU = fabs((codeU-offset)*settings.coefADC2); // напряжение в вольтах
+            voltageU = fabs((codeU-offset)*settings.coefADC2[settings.board_counter]); // напряжение в вольтах
             dArrayVoltageOnTheHousing[i] = voltageU;
 
             ui->progressBar->setValue(ui->progressBar->value()+1);
@@ -115,7 +115,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             // если отладочный режим, напечатать отладочную инфу
             if(bDeveloperState)
             {
-                Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2)) + " код смещения offset =0x"+qPrintable(QString::number(offset, 16))+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
+                Log(QString("k = ") + qPrintable(QString::number(settings.coefADC2[settings.board_counter])) + " код смещения offset =0x"+qPrintable(QString::number(offset, 16))+ " код АЦП2 = 0x" + qPrintable(QString::number(codeU, 16)) + " U=k*(code-offset) = " + QString::number(voltageU), "green");
             }
         }
 

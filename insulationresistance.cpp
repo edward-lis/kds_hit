@@ -105,24 +105,24 @@ void MainWindow::on_btnInsulationResistance_clicked()
         for(j=0; j<settings.functionResist.size()-1; j++)
         {
             //qDebug()<<"u"<<qPrintable(QString::number(u, 16))<<qPrintable(QString::number(settings.functionResist[j].codeADC, 16))<<qPrintable(QString::number(settings.functionResist[j+1].codeADC, 16));
-            if((u > settings.functionResist[j].codeADC) && (u <= settings.functionResist[j+1].codeADC))
+            if((u > settings.functionResist[j].codeADC[settings.board_counter]) && (u <= settings.functionResist[j+1].codeADC[settings.board_counter]))
             {
                 //qDebug()<<"resist=(-("<<settings.functionResist[j].codeADC<<"*"<<settings.functionResist[j+1].resist<<"-"<<settings.functionResist[j+1].codeADC<<"*"<<settings.functionResist[j].resist<<")-("<<settings.functionResist[j].resist<<"-"<<settings.functionResist[j+1].resist<<")*"<<u<<")/("<<settings.functionResist[j+1].codeADC<<"-"<<settings.functionResist[j].codeADC<<")";
-                resist = ( -(settings.functionResist[j].codeADC * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC - settings.functionResist[j].codeADC);
+                resist = ( -(settings.functionResist[j].codeADC[settings.board_counter] * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC[settings.board_counter] * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC[settings.board_counter] - settings.functionResist[j].codeADC[settings.board_counter]);
                 break;
             }
         }
         // если напряжение меньше меньшего, то будем щщитать как первом отрезке ф-ии
-        if(u <= settings.functionResist[0].codeADC)
+        if(u <= settings.functionResist[0].codeADC[settings.board_counter])
         {
             j=0;
-            resist = ( -(settings.functionResist[j].codeADC * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC - settings.functionResist[j].codeADC);
+            resist = ( -(settings.functionResist[j].codeADC[settings.board_counter] * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC[settings.board_counter] * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC[settings.board_counter] - settings.functionResist[j].codeADC[settings.board_counter]);
         }
         // если напряжение больше большего, то будем щщитать как на последнем отрезке ф-ии
-        if(u>settings.functionResist[settings.functionResist.size()-1].codeADC)
+        if(u>settings.functionResist[settings.functionResist.size()-1].codeADC[settings.board_counter])
         {
             j=settings.functionResist.size()-2;
-            resist = ( -(settings.functionResist[j].codeADC * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC - settings.functionResist[j].codeADC);
+            resist = ( -(settings.functionResist[j].codeADC[settings.board_counter] * settings.functionResist[j+1].resist - settings.functionResist[j+1].codeADC[settings.board_counter] * settings.functionResist[j].resist) - (settings.functionResist[j].resist - settings.functionResist[j+1].resist) * u) / (settings.functionResist[j+1].codeADC[settings.board_counter] - settings.functionResist[j].codeADC[settings.board_counter]);
         }
         // если меньше нуля, то обнулим
         if(resist<0) resist=0; // не бывает отрицательного сопротивления
