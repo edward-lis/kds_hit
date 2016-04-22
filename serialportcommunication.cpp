@@ -161,7 +161,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
     }
 }
 
-/*
+/*!
  * COM Порт получения списка портов
  */
 void MainWindow::getCOMPorts()
@@ -170,7 +170,7 @@ void MainWindow::getCOMPorts()
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
         QStringList list;
-        list << info.portName();
+        list << info.portName()+" - "+info.manufacturer();
         ui->comboBoxCOMPort->addItems(list);
     }
 }
@@ -180,6 +180,5 @@ void MainWindow::getCOMPorts()
  */
 void MainWindow::on_btnCOMPortRefresh_clicked()
 {
-    ui->comboBoxCOMPort->clear();
     getCOMPorts();
 }

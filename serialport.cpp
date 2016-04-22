@@ -21,6 +21,8 @@ SerialPort::SerialPort(QObject *parent) : QObject(parent)
 
 bool SerialPort::openPort(QString portName)
 {
+    portName = portName.left(portName.indexOf(' ')); /// оставляем все до пробела
+
     bool result=false;
     if (serial)
     {
