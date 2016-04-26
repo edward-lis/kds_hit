@@ -21,8 +21,8 @@ struct dataBattery {
     bool bModeDiagnosticManual; /// признак ручного режима диагностики
     int icbParamsAutoMode; /// индекс комбокса параметра проверки в автоматического режима
     int icbSubParamsAutoMode; /// индекс комбокса подпараметра проверки в автоматического режима
-    int icbVoltageOnTheHousing; //// индекс комбкса "Напряжения на корпусе"
-    int icbInsulationResistance; //// индекс комбокса "Сопротивления изоляции"
+    QList<QVariant> itemsVoltageOnTheHousing; //// состояние чекбоксов "Напряжения на корпусе"
+    QList<QVariant> itemsInsulationResistance; //// состояние чекбоксов "Сопротивления изоляции"
     int icbClosedCircuitVoltagePowerSupply; //// индекс "Напряжение замкнутой цепи БП"
     QList<QVariant> itemsOpenCircuitVoltageGroup; //// состояние чекбоксов "Напряжение разомкнутой цепи группы"
     QList<QVariant> itemsClosedCircuitVoltageGroup; //// состояние чекбоксов "Напряжение замкнутой цепи группы"

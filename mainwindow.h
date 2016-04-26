@@ -52,11 +52,14 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QStandardItemModel *modelVoltageOnTheHousing;
+    QStandardItemModel *modelInsulationResistance;
     QStandardItemModel *modelClosedCircuitVoltageGroup;
     QStandardItemModel *modelDepassivation;
     QStandardItemModel *modelOpenCircuitVoltageGroup;
     QStandardItemModel *modelInsulationResistanceUUTBB;
     QStandardItem *item;
+    QModelIndex index;
     QLabel *label; // надпись в закладке
     QDateTime dateTime; /// время окончания проверки для отчета
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
@@ -149,17 +152,6 @@ private:
 
 public slots:
     void Log(QString message, QString color);
-    /*void delay(int millisecondsToWait);
-    void checkVoltageOnTheHousing();
-    void checkInsulationResistance();
-    void checkOpenCircuitVoltageGroup();
-    void checkOpenCircuitVoltageBattery();
-    void checkClosedCircuitVoltageGroup();
-    void checkDepassivation();
-    void checkClosedCircuitVoltageBattery();
-    void checkInsulationResistanceUUTBB();
-    void checkOpenCircuitVoltagePowerSupply();
-    void checkClosedCircuitVoltagePowerSupply();*/
 
 signals:
     //+++ Edward
@@ -177,6 +169,8 @@ signals:
    //+++
 
 private slots:
+   void itemChangedVoltageOnTheHousing(QStandardItem* itm);
+   void itemChangedInsulationResistance(QStandardItem* itm);
    void itemChangedOpenCircuitVoltageGroup(QStandardItem* itm);
    void itemChangedClosedCircuitVoltageGroup(QStandardItem* itm);
    void itemChangedDepassivation(QStandardItem* itm);

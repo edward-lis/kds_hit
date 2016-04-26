@@ -19,8 +19,8 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.bModeDiagnosticManual
             << data.icbParamsAutoMode
             << data.icbSubParamsAutoMode
-            << data.icbVoltageOnTheHousing
-            << data.icbInsulationResistance
+            << data.itemsVoltageOnTheHousing
+            << data.itemsInsulationResistance
             << data.itemsOpenCircuitVoltageGroup
             << data.itemsClosedCircuitVoltageGroup
             << data.itemsDepassivation
@@ -62,8 +62,8 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.bModeDiagnosticManual
             >> data.icbParamsAutoMode
             >> data.icbSubParamsAutoMode
-            >> data.icbVoltageOnTheHousing
-            >> data.icbInsulationResistance
+            >> data.itemsVoltageOnTheHousing
+            >> data.itemsInsulationResistance
             >> data.itemsOpenCircuitVoltageGroup
             >> data.itemsClosedCircuitVoltageGroup
             >> data.itemsDepassivation
@@ -112,17 +112,25 @@ void MainWindow::on_actionCheckSave_triggered()
     data.icbSubParamsAutoMode = ui->cbSubParamsAutoMode->currentIndex();
 
     /// 1. Напряжение на корпусе
-    data.icbVoltageOnTheHousing = ui->cbVoltageOnTheHousing->currentIndex();
+    for (int r = 0; r < ui->cbVoltageOnTheHousing->count(); r++)
+    {
+        index = ui->cbVoltageOnTheHousing->model()->index(r, 0);
+        data.itemsVoltageOnTheHousing.append(index.data(Qt::CheckStateRole));
+    }
     data.dArrayVoltageOnTheHousing = dArrayVoltageOnTheHousing;
 
     /// 2. Сопротивление изоляции
-    data.icbInsulationResistance = ui->cbInsulationResistance->currentIndex();
+    for (int r = 0; r < ui->cbInsulationResistance->count(); r++)
+    {
+        index = ui->cbInsulationResistance->model()->index(r, 0);
+        data.itemsInsulationResistance.append(index.data(Qt::CheckStateRole));
+    }
     data.dArrayInsulationResistance = dArrayInsulationResistance;
 
     /// 3. Напряжение разомкнутой цепи группы
     for (int r = 0; r < ui->cbOpenCircuitVoltageGroup->count(); r++)
     {
-        QModelIndex index = ui->cbOpenCircuitVoltageGroup->model()->index(r, 0);
+        index = ui->cbOpenCircuitVoltageGroup->model()->index(r, 0);
         data.itemsOpenCircuitVoltageGroup.append(index.data(Qt::CheckStateRole));
     }
     data.dArrayOpenCircuitVoltageGroup = dArrayOpenCircuitVoltageGroup;
@@ -133,7 +141,7 @@ void MainWindow::on_actionCheckSave_triggered()
     /// 5. Напряжение замкнутой цепи группы
     for (int r = 0; r < ui->cbClosedCircuitVoltageGroup->count(); r++)
     {
-        QModelIndex index = ui->cbClosedCircuitVoltageGroup->model()->index(r, 0);
+        index = ui->cbClosedCircuitVoltageGroup->model()->index(r, 0);
         data.itemsClosedCircuitVoltageGroup.append(index.data(Qt::CheckStateRole));
     }
     data.dArrayClosedCircuitVoltageGroup = dArrayClosedCircuitVoltageGroup;
@@ -141,7 +149,7 @@ void MainWindow::on_actionCheckSave_triggered()
     /// 6. Распассивация /*переделать!*/
     for (int i = 0; i < ui->cbDepassivation->count(); i++)
     {
-        QModelIndex index = ui->cbDepassivation->model()->index(i, 0);
+        index = ui->cbDepassivation->model()->index(i, 0);
         data.itemsDepassivation.append(index.data(Qt::CheckStateRole));
     }
     data.dArrayDepassivation = dArrayDepassivation;
@@ -154,7 +162,7 @@ void MainWindow::on_actionCheckSave_triggered()
         /// 8. Сопротивление изоляции УУТББ
         for (int r = 0; r < ui->cbInsulationResistanceUUTBB->count(); r++)
         {
-            QModelIndex index = ui->cbInsulationResistanceUUTBB->model()->index(r, 0);
+            index = ui->cbInsulationResistanceUUTBB->model()->index(r, 0);
             data.itemsInsulationResistanceUUTBB.append(index.data(Qt::CheckStateRole));
         }
         data.dArrayInsulationResistanceUUTBB = dArrayInsulationResistanceUUTBB;
@@ -249,9 +257,13 @@ void MainWindow::on_actionCheckLoad_triggered()
         imgArrayReportGraph = data.imgArrayReportGraph;
 
         /// 1. Напряжения на корпусе
-        ui->cbVoltageOnTheHousing->setCurrentIndex(data.icbVoltageOnTheHousing);
         for (int i = 0; i < 2; i++) {
             dArrayVoltageOnTheHousing[i] = data.dArrayVoltageOnTheHousing[i];
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(data.itemsVoltageOnTheHousing[i+1], Qt::CheckStateRole);
+            modelVoltageOnTheHousing->setItem(i+1, 0, item);
+
             if (dArrayVoltageOnTheHousing[i] != -1) {
                 str = tr("%0) \"%1\" = <b>%2</b> В.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2);
                 label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
@@ -271,9 +283,13 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
 
         /// 2. Сопротивление изоляции
-        ui->cbInsulationResistance->setCurrentIndex(data.icbInsulationResistance);
         for (int i = 0; i < battery[iBatteryIndex].i_isolation_resistance_num; i++) {
             dArrayInsulationResistance[i] = data.dArrayInsulationResistance[i];
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_isolation_resistance[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(data.itemsInsulationResistance[i+1], Qt::CheckStateRole);
+            modelInsulationResistance->setItem(i+1, 0, item);
+
             if (dArrayInsulationResistance[i] != -1) {
                 str = tr("%0) \"%1\" = <b>%2</b> МОм.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1);
                 label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));

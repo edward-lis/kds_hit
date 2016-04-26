@@ -33,6 +33,15 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
+    } else {
+        /// по началу проверки очистим все label'ы и полученные результаты
+        for (int i = 0; i < 2; i++) {
+            dArrayVoltageOnTheHousing[i] = -1;
+            label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
+            label->setStyleSheet("QLabel { color : black; }");
+            label->clear();
+            label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+        }
     }
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // костыль: если цикл уже работает - выйти обратно
@@ -45,15 +54,23 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         ui->cbParamsAutoMode->setCurrentIndex(0);   ///  переключаем режим комбокса на наш
     }
 
-    /// устанавливаем стартовый шаг проверки
-    iCurrentStep = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->currentIndex() : ui->cbVoltageOnTheHousing->currentIndex();
-    /// устанавливаем кол-во шагов проверки
-    iMaxSteps = (ui->rbModeDiagnosticAuto->isChecked()) ? ui->cbSubParamsAutoMode->count() : iCurrentStep+1;
     ui->progressBar->setMaximum(settings.voltagecase_num); /// установим максимум прогресс бара
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text()); /// откроем вкладку
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1); /// и переходим на нее
     ui->statusBar->showMessage(tr("Проверка %0 ...").arg(ui->rbVoltageOnTheHousing->text())); /// пишем в статус бар
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue"); /// пишем в журнал событий
+
+    if(bModeManual)// если в ручном режиме
+    {
+        //i=ui->cbOpenCircuitVoltageGroup->currentIndex();
+        iCurrentStep=0; // в ручном начнём сначала
+        iMaxSteps=modelVoltageOnTheHousing->rowCount()-1; // -1 с учётом первой строки в комбобоксе
+    }
+    else
+    {
+        iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
+        iMaxSteps = ui->cbSubParamsAutoMode->count();
+    }
 
     /// при наличии галки имитатора, выводим сообщение о необходимости включить источник питания
     if(ui->cbIsImitator->isChecked() and iPowerState != 1) {
@@ -63,6 +80,13 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
 
     for(i = iCurrentStep; i < iMaxSteps; i++)
     {
+        if(bModeManual) // в ручном будем идти по чекбоксам
+        {
+            QStandardItem *sitm = modelVoltageOnTheHousing->item(i+1, 0); // взять очередной номер
+            Qt::CheckState checkState = sitm->checkState(); // и его состояние
+            if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
+        }
+
         /// очистить буфера
         baSendArray.clear();
         baSendCommand.clear();
@@ -147,6 +171,14 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
+        /// только для ручного режима, снимаем галку с провереной
+        if(bModeManual) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Unchecked, Qt::CheckStateRole);
+            modelVoltageOnTheHousing->setItem(i+1, 0, item);
+        }
+
         if(codeU > codeLimit) // напряжение больше (в кодах)
         {
             if(!bModeManual)// если в автоматическом режиме
@@ -212,4 +244,23 @@ stop:
     baSendCommand.clear();
     baRecvArray.clear();
     ui->progressBar->reset(); /// сбросим прогресс бар
+}
+
+// слот вызывается при изменении чекбоксов элементов списка комбобокса
+void MainWindow::itemChangedVoltageOnTheHousing(QStandardItem* itm)
+{
+    itm->text(); /// чтобы небыло варнинга при компиляции на неиспользование itm
+    int count = 0;
+    QStandardItem *sitm;
+
+    for(int i=1; i < modelVoltageOnTheHousing->rowCount(); i++)
+    {
+        sitm = modelVoltageOnTheHousing->item(i, 0);
+        Qt::CheckState checkState = sitm->checkState();
+        if (checkState == Qt::Checked)
+            count++;
+    }
+
+    ui->cbVoltageOnTheHousing->setItemText(0, tr("Выбрано: %0 из %1").arg(count).arg(modelVoltageOnTheHousing->rowCount()-1));
+    ui->cbVoltageOnTheHousing->setCurrentIndex(0);
 }

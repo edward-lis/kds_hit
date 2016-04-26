@@ -267,30 +267,53 @@ void MainWindow::comboxSetData() {
     ui->cbParamsAutoMode->addItem(tr("1. %0").arg(ui->rbVoltageOnTheHousing->text()));
     ui->cbVoltageOnTheHousing->clear();
     sArrayReportVoltageOnTheHousing.clear(); /// очищаем массив проверок для отчета
+    modelVoltageOnTheHousing = new QStandardItemModel(2, 1);
 
     /// очистка и заполнение label*ов на вкладке и очистка массива с полученными параметрами проверки
     for (int i = 0; i < 2; i++) {
         label = findChild<QLabel*>(tr("labelVoltageOnTheHousing%0").arg(i));
-        label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]));
         label->setStyleSheet("QLabel { color : black; }");
-        ui->cbVoltageOnTheHousing->addItem(battery[iBatteryIndex].str_voltage_corpus[i]);
+        label->clear();
+        item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+        item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        item->setData(Qt::Checked, Qt::CheckStateRole);
+        modelVoltageOnTheHousing->setItem(i+1, 0, item);
+        label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].str_voltage_corpus[i]));
+
     }
+
+    ui->cbVoltageOnTheHousing->setModel(modelVoltageOnTheHousing);
+    ui->cbVoltageOnTheHousing->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbVoltageOnTheHousing->setItemText(0, tr("Выбрано: %0 из %1").arg(2).arg(2));
+    //ui->cbVoltageOnTheHousing->setCurrentIndex(0);
+    connect(modelVoltageOnTheHousing, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedVoltageOnTheHousing(QStandardItem*)));
+
 
     /// 2. Сопротивление изоляции
     ui->cbParamsAutoMode->addItem(tr("2. %0").arg(ui->rbInsulationResistance->text()));
     ui->cbInsulationResistance->clear();
     sArrayReportInsulationResistance.clear(); /// очищаем массив проверок для отчета
+    modelInsulationResistance = new QStandardItemModel(battery[iBatteryIndex].i_isolation_resistance_num, 1);
 
     /// проходимся по всем label'ам
     for (int i = 0; i < 4; i++) {
         label = findChild<QLabel*>(tr("labelInsulationResistance%0").arg(i));
         label->setStyleSheet("QLabel { color : black; }");
         label->clear();
-        if (i < battery[iBatteryIndex].i_isolation_resistance_num) { /// еще две пары если батарея 9ER20P_20 или 9ER20P_28
+        if (i < battery[iBatteryIndex].i_isolation_resistance_num) {
+            item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_isolation_resistance[i]));
+            item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setData(Qt::Checked, Qt::CheckStateRole);
+            modelInsulationResistance->setItem(i+1, 0, item);
             label->setText(tr("%0) \"%1\" не измерялось.").arg(i+1).arg(battery[iBatteryIndex].str_isolation_resistance[i]));
-            ui->cbInsulationResistance->addItem(battery[iBatteryIndex].str_isolation_resistance[i]);
         }
     }
+
+    ui->cbInsulationResistance->setModel(modelInsulationResistance);
+    ui->cbInsulationResistance->setItemData(0, "DISABLE", Qt::UserRole-1);
+    ui->cbInsulationResistance->setItemText(0, tr("Выбрано: %0 из %1").arg(battery[iBatteryIndex].i_isolation_resistance_num).arg(battery[iBatteryIndex].i_isolation_resistance_num));
+    //ui->cbInsulationResistance->setCurrentIndex(0);
+    connect(modelInsulationResistance, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedInsulationResistance(QStandardItem*)));
 
     /// 3. Напряжение разомкнутой цепи группы
     ui->cbParamsAutoMode->addItem(tr("3. %0").arg(ui->rbOpenCircuitVoltageGroup->text()));
