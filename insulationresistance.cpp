@@ -109,8 +109,9 @@ void MainWindow::on_btnInsulationResistance_clicked()
         ui->progressBar->setValue(ui->progressBar->value()+1);
 
         // собрать режим
-        str_num.sprintf(" %02i", bModeManual?battery[iBatteryIndex].isolation_resistance_nn[ui->cbInsulationResistance->currentIndex()]:battery[iBatteryIndex].isolation_resistance_nn[i]); // напечатать номер точки измерения изоляции
+        str_num.sprintf(" %02i", bModeManual?battery[iBatteryIndex].isolation_resistance_nn[i]:battery[iBatteryIndex].isolation_resistance_nn[i]); // напечатать номер точки измерения изоляции
         baSendArray=(baSendCommand="Rins")+str_num.toLocal8Bit()+"#";
+
         if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
         timerSend->start(settings.delay_after_IDLE_before_other); // послать baSendArray в порт через некоторое время
         ret=loop.exec();
