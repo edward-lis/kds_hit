@@ -17,7 +17,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.closecircuitbattery_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
+    //quint16 codeLimit=settings.closecircuitbattery_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QDateTime starttime; // время начала измерения
     QDateTime dt; // текущее время очередного измерения
@@ -94,7 +94,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         if(bAllCircuitsFail)
         {
             QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка батареи под нагрузкой запрещена.");
-            bState = false;
+            bState = false; /// выходим из режима проверки
             goto stop;
         }
     }
@@ -201,23 +201,11 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     imgArrayReportGraph.append(img);
     sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltageBattery->text()).arg(battery[iBatteryIndex].circuitbattery).arg(dateTime.toString("hh:mm:ss")));*/
 
-    // проанализировать результаты
-    if(codeADC >= codeLimit) // напряжение больше (норма)
+    /// проанализировать результаты ПО ТЗ НЕ НУЖНО ПРЕКРАЩАТЬ РЕЖИМ!
+    /*if(codeADC < codeLimit) /// напряжение меньше (не норма)
     {
-        //Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-        //ui->labelClosedCircuitVoltageBattery0->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Норма.");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
-    }
-    else // напряжение меньше (не норма)
-    {
-        //Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-        //ui->labelClosedCircuitVoltageBattery0->setText("НЗЦб = "+QString::number(fU, 'f', 2)+" В.  Не норма!");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи батареи"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-        ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
         bState = false;
-    }
+    }*/
 
 stop:
     if(ret == KDS_STOP) {
@@ -242,7 +230,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageBattery->text()), "blue");

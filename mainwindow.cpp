@@ -248,12 +248,13 @@ void MainWindow::comboxSetData() {
 
     /// заполняем масивы чтобы в дальнейшем можно обратиться к конкретному индексу
     for (int i = 0; i < 35; i++) {
+        //iFlagsCircuitGroup.append(-1);
         dArrayVoltageOnTheHousing.append(-1);
         dArrayInsulationResistance.append(-1);
         dArrayOpenCircuitVoltageGroup.append(-1);
         dArrayOpenCircuitVoltageBattery.append(-1);
         dArrayClosedCircuitVoltageGroup.append(-1);
-        dArrayDepassivation.append(-1);
+        dArrayDepassivation.append(-1); /// не нужен
         dArrayClosedCircuitVoltageBattery.append(-1);
         dArrayInsulationResistanceUUTBB.append(-1);
         dArrayOpenCircuitVoltagePowerSupply.append(-1);
@@ -605,19 +606,17 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
 // нажата кнопка Старт(Стоп) автоматического режима диагностики
 void MainWindow::on_btnStartStopAutoModeDiagnostic_clicked()
 {
-    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnStartStopAutoModeDiagnostic ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
-    {
+    if(bCheckInProgress) { // если зашли в эту ф-ию по нажатию кнопки btnStartStopAutoModeDiagnostic ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
         // остановить текущую проверку, выход
         bCheckInProgress = false;
         timerSend->stop(); // остановить посылку очередной команды в порт
         timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
         //qDebug()<<"loop.isRunning()"<<loop.isRunning();
-        if(loop.isRunning())
-        {
+        if(loop.isRunning()) {
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
-        bState = false;
 
+        bState = false;
         return;
     }
 

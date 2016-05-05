@@ -65,7 +65,7 @@ private:
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
     int iCurrentStep;
     int iMaxSteps;
-    QList<int> imDepassivation;
+    //QList<int> iFlagsCircuitGroup;
     QList<double> dArrayVoltageOnTheHousing;
     QList<double> dArrayInsulationResistance;
     QList<double> dArrayOpenCircuitVoltageGroup;

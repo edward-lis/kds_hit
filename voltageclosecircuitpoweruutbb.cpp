@@ -189,29 +189,21 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
                 .arg(sResult)
                 .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-    if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+    if(!bModeManual) { /// автоматический режим
+        /// в автоматическом режиме пролистываем комбокс подпараметров проверки
+        ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+
+        /// проанализировать результаты
+        if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+            bState = false; /// выходим из режима проверки
+        }
+    }
 
     /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
     /*ui->widgetClosedCircuitVoltagePowerUUTBB->savePng(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png", 413, 526, 1.0, -1);
     img.load(QDir::tempPath()+"ClosedCircuitVoltagePowerUUTBBGraph.png");
     imgArrayReportGraph.append(img);
     sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbClosedCircuitVoltagePowerSupply->text()).arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]).arg(dateTime.toString("hh:mm:ss")));*/
-
-    // проанализировать результаты
-    if(codeADC >= codeLimit) // напряжение больше (норма)
-    {
-        //Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи БП УУТББ"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
-    }
-    else // напряжение меньше (не норма)
-    {
-        // Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        // без нагрузки показывать нет смысла if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи БП УУТББ"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-        ui->rbModeDiagnosticManual->setChecked(true); // переключить в ручной принудительно
-        bState = false;
-    }
 
 stop:
     if(ret == KDS_STOP) {
@@ -236,7 +228,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");

@@ -171,43 +171,24 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-        /// только для ручного режима, снимаем галку с провереной
-        if(bModeManual) {
+        if(bModeManual) { /// ручной режим
+            /// снимаем галку с провереной
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_voltage_corpus[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelVoltageOnTheHousing->setItem(i+1, 0, item);
-        }
+        } else { /// автоматический режим
+            /// в автоматическом режиме пролистываем комбокс подпараметров проверки
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
-        if(codeU > codeLimit) // напряжение больше (в кодах)
-        {
-            if(!bModeManual)// если в автоматическом режиме
-            {
-                //if(!bModeManual && !bDeveloperState)QMessageBox::critical(this, "Не норма!", "Напряжение цепи "+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU)+" В больше нормы");// !!!
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет")))
-                {
-                    qDebug()<<"переход в ручной режим";
-                    Log("Останов проверки - переход в ручной режим", "blue");
-                    bState = false;
-                    ui->groupBoxCOMPort->setEnabled(true); // разрешить кнопку ком-порта???
-                    ui->groupBoxDiagnosticMode->setEnabled(true); // разрешить группу выбора режима диагностики
-                    //ui->groupBoxCheckParamsAutoMode->setEnabled(true); // разрешить группу выбора режима диагностики
-                    //ui->cbParamsAutoMode->setEnabled(true); // разрешить комбобокс пунктов автомата
-                    //ui->cbSubParamsAutoMode->setEnabled(true); // разрешать комбобокс подпунктов автомата
-                    ((QPushButton*)sender())->setText("Пуск");
-                    // остановить текущую проверку, выход
-                    bCheckInProgress = false;
-                    emit ui->rbModeDiagnosticManual->setChecked(true);
+            if(codeU > codeLimit) { /// напряжение больше в кодах (не норма)
+                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
+                    bState = false; /// выходим из режима проверки
+                    bCheckInProgress = false; /// остановить текущую проверку, выход
                     break;
                 }
             }
         }
-
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        if (ui->rbModeDiagnosticManual->isChecked())
-            QMessageBox::information(this, tr("Напряжение на корпусе"), tr("Напряжение цепи ")+battery[iBatteryIndex].str_voltage_corpus[ui->cbVoltageOnTheHousing->currentIndex()]+" = "+QString::number(voltageU, 'f', 2)+" В");
-        else
-            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
     } // for
 
 stop:
@@ -234,7 +215,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");

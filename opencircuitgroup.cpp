@@ -23,15 +23,13 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     int i=0; // номер цепи
     //QLabel *label; // надпись в закладке
 
-    if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
-    {
+    if(bCheckInProgress) { // если зашли в эту ф-ию по нажатию кнопки btnVoltageOnTheHousing ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
         // остановить текущую проверку, выход
         bCheckInProgress = false;
         timerSend->stop(); // остановить посылку очередной команды в порт
         timeoutResponse->stop(); // остановить предыдущий таймаут (если был, конечно)
         qDebug()<<"loop.isRunning()"<<loop.isRunning();
-        if(loop.isRunning())
-        {
+        if(loop.isRunning()) {
             loop.exit(KDS_STOP); // прекратить цикл ожидания посылки/ожидания ответа от коробочки
         }
         return;
@@ -63,14 +61,11 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     Log(tr("Проверка начата - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");
     ui->statusBar->showMessage(tr("Проверка ")+ui->rbOpenCircuitVoltageGroup->text()+" ...");
 
-    if(bModeManual)// если в ручном режиме
-    {
+    if(bModeManual) { // если в ручном режиме
         //i=ui->cbOpenCircuitVoltageGroup->currentIndex();
         iCurrentStep=0; // в ручном начнём сначала
         iMaxSteps=modelOpenCircuitVoltageGroup->rowCount()-1; // -1 с учётом первой строки в комбобоксе
-    }
-    else
-    {
+    } else {
         iCurrentStep = ui->cbSubParamsAutoMode->currentIndex();
         iMaxSteps = ui->cbSubParamsAutoMode->count();
     }
@@ -82,10 +77,8 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
     }
 
     // Пробежимся по списку цепей
-    for(i=iCurrentStep; i < iMaxSteps; i++)
-    {
-        if(bModeManual) // в ручном будем идти по чекбоксам
-        {
+    for(i=iCurrentStep; i < iMaxSteps; i++) {
+        if(bModeManual) { // в ручном будем идти по чекбоксам
             QStandardItem *sitm = modelOpenCircuitVoltageGroup->item(i+1, 0); // взять очередной номер
             Qt::CheckState checkState = sitm->checkState(); // и его состояние
             if (checkState != Qt::Checked) continue; // если не отмечено, то следующий.
@@ -135,23 +128,23 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
         dArrayOpenCircuitVoltageGroup[i] = fU;
 
         battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_OCG_TESTED; // установить флаг - цепь проверялась
+
         if(bDeveloperState)
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
         // напечатать рез-т в закладку и в журнал
-        if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min){
+        if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
             sResult = "Не норма!";
             color = "red";
-        }
-        else {
+            //iFlagsCircuitGroup[i] = -1; /// устанавливаем флаг проверки запрещена
+        } else {
             sResult = "Норма";
             color = "green";
+            //iFlagsCircuitGroup[i] = 0; /// устанавливаем флаг нормальной выполненой проверки
         }
         label->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
         Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), color);
-
-        ui->btnBuildReport->setEnabled(true);
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
@@ -169,55 +162,31 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-        /// только для ручного режима, снимаем галку с провереной
-        if(bModeManual) {
+        if(bModeManual) { /// ручной режим
+            /// снимаем галку с провереной
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelOpenCircuitVoltageGroup->setItem(i+1, 0, item);
+        } else { /// автоматический режим
+            /// в автоматическом режиме пролистываем комбокс подпараметров проверки
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
         }
 
-        // проанализировать результаты
-        if(codeADC >= codeLimit) // напряжение больше (норма)
-        {
-            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
-            // добавить цепь в список исправных
-            battery[iBatteryIndex].b_flag_circuit[i] &= ~CIRCUIT_FAULT; // снять флаг - цепь неисправна
-        }
-        else // напряжение меньше (не норма)
-        {
-            //Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма! Проверка группы под нагрузкой запрещена.", "red");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-            // установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
+        /// проанализировать результаты
+        if(codeADC >= codeLimit) { /// напряжение больше (норма)
+            /// добавить цепь в список исправных
+            battery[iBatteryIndex].b_flag_circuit[i] &= ~CIRCUIT_FAULT; /// снять флаг - цепь неисправна
+        } else { /// напряжение меньше (не норма)
+            /// установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
             battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_FAULT;
-        }
 
-        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
-
-        // при напряжении меньше нормы в автоматическом режиме проверка продолжается
-        /*if (dArrayOpenCircuitVoltageGroup[i] < settings.opencircuitgroup_limit_min) {
-            if(!bModeManual)// если в автоматическом режиме
-            {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageGroup->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    // остановить текущую проверку, выход
-                    bCheckInProgress = false;
-                    ui->rbModeDiagnosticManual->setChecked(true);
-                    break;
-                }
+            if (!bModeManual and QMessageBox::question(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltageGroup->text()), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
+                bState = false; /// выходим из режима проверки
+                bCheckInProgress = false; /// остановить текущую проверку, выход
+                break;
             }
-        }*/
-
-        // флаги цепи qDebug()<<"battery[iBatteryIndex].b_flag_circuit[i-1]"<<battery[iBatteryIndex].b_flag_circuit[i];
-
+        }
     }//for
 
 stop:
@@ -243,7 +212,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltageGroup->text()), "blue");

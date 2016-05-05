@@ -61,7 +61,7 @@ void MainWindow::on_btnDepassivation_clicked()
             else if(!(battery[iBatteryIndex].b_flag_circuit[i] & CIRCUIT_DEPASS) || (checkState != Qt::Checked))
             {
                 label->setText(tr("%0) %1 не требуется.").arg(i+1).arg(battery[iBatteryIndex].circuitgroup[i]));
-                label->setStyleSheet("QLabel { color : green; }");
+                label->setStyleSheet("QLabel { color : black; }");
             }
             else
             {
@@ -198,7 +198,7 @@ void MainWindow::on_btnDepassivation_clicked()
             ret=loop.exec();
             if(ret) goto stop;
         }
-        //label->setText(tr("%1) Распассивация закончена").arg(i));
+
         sLabelText = tr("%0) \"%1\"").arg(i).arg(battery[iBatteryIndex].circuitgroup[i-1]);
 
         sResult = "Выполнена";
@@ -223,44 +223,6 @@ void MainWindow::on_btnDepassivation_clicked()
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setData(Qt::Unchecked, Qt::CheckStateRole);
         modelDepassivation->setItem(i, 0, item);
-
-#if 0
-        str = tr("%1) между контактом 1 соединителя Х3 «Х3-» и контактом %1 соединителя Х4 «4» = <b>%2</b>").arg(i).arg(QString::number(fU));
-        Log(str, (fU < settings.closecircuitgroup_limit) ? "red" : "green");
-        // проанализировать результаты
-        if(codeADC >= codeLimit) // напряжение больше (норма)
-        {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
-        }
-        else // напряжение меньше (не норма)
-        {
-            Log("Напряжение цепи "+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-            // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-            if(bModeManual) QMessageBox::information(this, tr("Напряжение замкнутой цепи группы"), tr("Напряжение цепи ")+battery[iBatteryIndex].circuitgroup[i-1]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-            // !!! добавить цепь в список распассивируемых
-            //int rett = QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"));
-            switch (QMessageBox::question(this, "Внимание - "+ui->rbClosedCircuitVoltageGroup->text(), tr("%1 \nпродолжить?").arg(str), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
-            case 0:
-                break;
-            case 1:
-                imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
-                ui->cbDepassivation->addItem(battery[iBatteryIndex].circuitgroup[iStepClosedCircuitVoltageGroup-1]);
-                Log(tr("%1) %1 - Х4 «4» добавлен для распассивации.").arg(iStepClosedCircuitVoltageGroup-1), "blue");
-                break;
-            case 2:
-                //ui->btnClosedCircuitVoltageGroup_2->setEnabled(true);
-                bState = true;
-                return; // !!! тут как-то надо выйти из цикла, чтобы разобрать режим
-                break;
-            default:
-                break;
-            }
-            ui->rbModeDiagnosticManual->setChecked(true);
-            ui->rbModeDiagnosticAuto->setEnabled(false);
-        }
-#endif
     }// конец цикла проверок цепей
 
 stop:

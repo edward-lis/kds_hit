@@ -201,8 +201,6 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         label->setStyleSheet("QLabel { color : "+color+"; }");
         Log(tr("%0 = <b>%1</b> МОм. %2").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 1).arg(sResult), color);
 
-        ui->btnBuildReport->setEnabled(true); // разрешить кнопку отчёта
-
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
         sArrayReportInsulationResistanceUUTBB.append(
@@ -219,33 +217,24 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-        /// только для ручного режима, снимаем галку с провереной
-        if(bModeManual) {
+        if(bModeManual) { /// ручной режим
+            /// снимаем галку с провереной
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].uutbb_resist[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelInsulationResistanceUUTBB->setItem(i+1, 0, item);
-        }
+        } else { /// автоматический режим
+            /// в автоматическом режиме пролистываем комбокс подпараметров проверки
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
-        if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
-            if(!bModeManual)// если в автоматическом режиме
-            {
+            if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
                 if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    // остановить текущую проверку, выход
-                    bCheckInProgress = false;
-                    ui->rbModeDiagnosticManual->setChecked(true);
+                    bState = false; /// выходим из режима проверки
+                    bCheckInProgress = false; /// остановить текущую проверку, выход
                     break;
                 }
             }
         }
-
-        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
     }// конец цикла обхода всех точек измерения сопротивления изоляции
 
 stop:
@@ -271,7 +260,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistanceUUTBB->text()), "blue");

@@ -140,30 +140,12 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
                 .arg(sResult)
                 .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-    // проанализировать результаты
-    if(codeADC >= codeLimit) // напряжение больше (норма)
-    {
-        //Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Норма.", "blue");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи БП УУТББ"), tr("Напряжение цепи ")+battery[iBatteryIndex].uutbb_closecircuitpower[0]+" = "+QString::number(fU, 'f', 2)+" В\nНорма");
-    }
-    else // напряжение меньше (не норма)
-    {
-        //Log("Напряжение цепи "+battery[iBatteryIndex].circuitbattery+" = "+QString::number(fU, 'f', 2)+" В.  Не норма!.", "red");
-        // если ручной режим, то выдать окно сообщения, и только потом разобрать режим измерения.
-        if(bModeManual) QMessageBox::information(this, tr("Напряжение разомкнутой цепи БП УУТББ"), tr("Напряжение цепи ")+battery[iBatteryIndex].uutbb_closecircuitpower[0]+" = "+QString::number(fU, 'f', 2)+" В\nНе норма!");
-        else
-        {
-            QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 = %1 В. %2 Проверка под нагрузкой запрещена.").arg(sLabelText).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult), tr("Да"));
-            bState = false;
-            ui->groupBoxCOMPort->setDisabled(bState);
-            ui->groupBoxDiagnosticMode->setDisabled(bState);
-            ui->cbParamsAutoMode->setDisabled(bState);
-            ui->cbSubParamsAutoMode->setDisabled(bState);
-            ((QPushButton*)sender())->setText("Пуск");
-            // остановить текущую проверку, выход
-            bCheckInProgress = false;
-            ui->rbModeDiagnosticManual->setChecked(true);
+    /// проанализировать результаты
+    if(!bModeManual) { /// автоматический режим
+        if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltageBattery->text()), tr("%0 = %1 В. %2 Проверка под нагрузкой запрещена.").arg(sLabelText).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult));
+            bState = false; /// выходим из режима проверки
+            bCheckInProgress = false; /// остановить текущую проверку, выход
         }
     }
 
@@ -190,7 +172,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), "blue");

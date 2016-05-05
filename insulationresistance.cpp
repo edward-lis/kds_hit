@@ -209,34 +209,24 @@ void MainWindow::on_btnInsulationResistance_clicked()
                     .arg(sResult)
                     .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
 
-        /// только для ручного режима, снимаем галку с провереной
-        if(bModeManual) {
+        if(bModeManual) { /// ручной режим
+            /// снимаем галку с провереной
             item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].str_isolation_resistance[i]));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
             item->setData(Qt::Unchecked, Qt::CheckStateRole);
             modelInsulationResistance->setItem(i+1, 0, item);
-        }
+        } else { /// автоматический режим
+            /// в автоматическом режиме пролистываем комбокс подпараметров проверки
+            ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
-        if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) {
-            if(!bModeManual)// если в автоматическом режиме
-            {
+            if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) { /// сопротивление меньше нормы (не норма)
                 if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false;
-                    ui->groupBoxCOMPort->setDisabled(bState);
-                    ui->groupBoxDiagnosticMode->setDisabled(bState);
-                    ui->cbParamsAutoMode->setDisabled(bState);
-                    ui->cbSubParamsAutoMode->setDisabled(bState);
-                    ((QPushButton*)sender())->setText("Пуск");
-                    // остановить текущую проверку, выход
-                    bCheckInProgress = false;
-                    emit ui->rbModeDiagnosticManual->setChecked(true);
+                    bState = false; /// выходим из режима проверки
+                    bCheckInProgress = false; /// остановить текущую проверку, выход
                     break;
                 }
             }
         }
-
-        if(!bModeManual) ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
-
     } // for
 
 stop:
@@ -262,7 +252,6 @@ stop:
 
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
-        bState = false;
     }
 
     Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistance->text()), "blue");
