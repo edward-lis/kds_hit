@@ -15,13 +15,14 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения замкнутой цепи БП УУТББ
 void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
 {
+    /// если НРЦбп меньше нормы то запрещаем проверку НЗЦбп
     if (dArrayOpenCircuitVoltagePowerSupply[0] < settings.uutbb_opencircuitpower_limit_min) {
         if (dArrayOpenCircuitVoltagePowerSupply[0] == -1) { /// если не проверялось
-            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltageBattery->text()), tr("%0 не проверялось. Проверка под нагрузкой запрещена.")
-                .arg(ui->rbOpenCircuitVoltageBattery->text()));
+            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), tr("%0 не проверялось. Проверка под нагрузкой запрещена.")
+                .arg(ui->rbOpenCircuitVoltagePowerSupply->text()));
         } else {
-            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltageBattery->text()), tr("%0 меньше нормы %1 В. Проверка под нагрузкой запрещена.")
-                .arg(ui->rbOpenCircuitVoltageBattery->text())
+            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), tr("%0 - Не норма! %1 В. Проверка под нагрузкой запрещена.")
+                .arg(ui->rbOpenCircuitVoltagePowerSupply->text())
                 .arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2));
         }
         bState = false; /// выходим из режима проверки
