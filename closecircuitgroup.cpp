@@ -27,8 +27,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     double x; // текущая координата Х
     int cycleTimeSec=settings.time_closecircuitgroup; // длительность цикла проверки в секундах
     bool bFirstPoll=true; // первое измерение
-    //int i=0; // номер цепи
-    //QLabel *label; // надпись в закладке
+    int i=0; // номер цепи
 
     if(bCheckInProgress) // если зашли в эту ф-ию по нажатию кнопки ("Стоп"), будучи уже в состоянии проверки, значит стоп режима
     {
@@ -118,8 +117,32 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         iPowerState = 1; /// состояние включенного источника питания
     }
 
+    /// таблица - верх
+    sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+               "    <tbody>"\
+               "        <tr>"\
+               "            <td colspan=\"4\">&nbsp;<strong>%0(%1)&nbsp;</strong><br/><em>&nbsp;Предельные значения: не менее %2 В</em></td>"\
+               "        </tr>"\
+               "        <tr>"\
+               "            <td width=\"11%\">"\
+               "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"57%\">"\
+               "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"15%\">"\
+               "                <p>&nbsp;<b>Значение</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"17%\">"\
+               "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
+               "            </td>"\
+               "        </tr>")
+            .arg(ui->rbClosedCircuitVoltageGroup->text())
+            .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
+            .arg(settings.closecircuitgroup_limit);
+
     // Пробежимся по списку цепей
-    for(int i=iCurrentStep; i < iMaxSteps; i++)
+    for(i = iCurrentStep; i < iMaxSteps; i++)
     {
         if(bModeManual) // в ручном будем идти по чекбоксам
         {
@@ -214,19 +237,16 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
-        sArrayReportClosedCircuitVoltageGroup.append(
-                    tr("<tr>"\
-                       "    <td>%0</td>"\
-                       "    <td>%1</td>"\
-                       "    <td>%2</td>"\
-                       "    <td>%3</td>"\
-                       "    <td>%4</td>"\
-                       "</tr>")
+        sHtml += tr("<tr>"\
+                    "    <td><p>&nbsp;%0&nbsp;</td>"\
+                    "    <td><p>&nbsp;%1&nbsp;</td>"\
+                    "    <td><p>&nbsp;%2&nbsp;</td>"\
+                    "    <td><p>&nbsp;%3&nbsp;</td>"\
+                    "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
                     .arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2)
-                    .arg(sResult)
-                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+                    .arg(sResult);
 
         /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
         /*ui->widgetClosedCircuitVoltageGroup->savePng(QDir::tempPath()+"ClosedCircuitVoltageGroupGraph.png",  699, 606, 1.0, -1 );
@@ -254,28 +274,29 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         if(codeADC < codeLimit) { /// напряжение меньше (не норма)
             /// добавить цепь в список распассивируемых
             switch (QMessageBox::question(this, tr("Внимание - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
+            case 0: /// Да - продолжаем проверку
+                break;
             case 1:
                 //imDepassivation.append(iStepClosedCircuitVoltageGroup-1);
                 label->setText("*" + label->text());
                 battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_DEPASS; /// добавить признак, что группе нужна депассивация
                 break;
-            case 2:
+            default: /// Нет - прекратить проверку(Все значения кроме 0 и 1)
                 bState = false; /// выходим из режима проверки
-                bCheckInProgress = false; /// выйти из цикла, разобрать режим
-                //goto stop;
-                break;
-            default:
+                goto stop;
                 break;
             }
         }
     }// конец цикла проверок цепей
 
 stop:
-    qDebug() << "FFF";
     if(ret == KDS_STOP) {
         label->setText(sLabelText + " измерение прервано!");
         label->setStyleSheet("QLabel { color : red; }");
         Log(sLabelText + " измерение прервано!", "red");
+        sHtml += tr("<tr><td>&nbsp;%0&nbsp;</td><td>&nbsp;%1&nbsp;</td><td colspan=\"2\"><p>&nbsp;Измерение прервано!&nbsp;</td></tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].circuitgroup[i]);
     }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
@@ -295,6 +316,12 @@ stop:
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
     }
+
+    /// таблица - низ
+    sHtml +="   </tbody>"\
+            "</table>"\
+            "<br/>";
+    sArrayReport.append(sHtml); /// добавляем таблицу в массив проверок
 
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), "blue");
 

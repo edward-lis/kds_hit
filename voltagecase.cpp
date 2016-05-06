@@ -58,6 +58,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
     ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text()); /// откроем вкладку
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1); /// и переходим на нее
     ui->statusBar->showMessage(tr("Проверка %0 ...").arg(ui->rbVoltageOnTheHousing->text())); /// пишем в статус бар
+
     Log(tr("Проверка начата - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue"); /// пишем в журнал событий
 
     if(bModeManual)// если в ручном режиме
@@ -77,6 +78,30 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbVoltageOnTheHousing->text()), tr("Перед проверкой необходимо включить источник питания!"));
         iPowerState = 1; /// состояние включенного источника питания
     }
+
+    /// таблица - верх
+    sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+               "    <tbody>"\
+               "        <tr>"\
+               "            <td colspan=\"4\">&nbsp;<strong>%0(%1)&nbsp;</strong><br/><em>&nbsp;Предельные значения: не более %2 В</em></td>"\
+               "        </tr>"\
+               "        <tr>"\
+               "            <td width=\"11%\">"\
+               "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"57%\">"\
+               "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"15%\">"\
+               "                <p>&nbsp;<b>Значение</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"17%\">"\
+               "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
+               "            </td>"\
+               "        </tr>")
+            .arg(ui->rbVoltageOnTheHousing->text())
+            .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
+            .arg(settings.voltage_corpus_limit);
 
     for(i = iCurrentStep; i < iMaxSteps; i++)
     {
@@ -118,6 +143,7 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
                 baSendArray=(baSendCommand="UcaseP")+"#";
                 offset = settings.offsetADC2_plus[settings.board_counter];
             }
+
             codeLimit=settings.voltage_corpus_limit/settings.coefADC2[settings.board_counter] + offset; // код, пороговое напряжение.
 
             if(bDeveloperState) Log(QString("Sending ") + qPrintable(baSendArray), "blue");
@@ -157,19 +183,16 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
-        sArrayReportVoltageOnTheHousing.append(
-                    tr("<tr>"\
-                       "    <td>%0</td>"\
-                       "    <td>%1</td>"\
-                       "    <td>%2</td>"\
-                       "    <td>%3</td>"\
-                       "    <td>%4</td>"\
-                       "</tr>")
+        sHtml += tr("<tr>"\
+                    "    <td><p>&nbsp;%0&nbsp;</td>"\
+                    "    <td><p>&nbsp;%1&nbsp;</td>"\
+                    "    <td><p>&nbsp;%2&nbsp;</td>"\
+                    "    <td><p>&nbsp;%3&nbsp;</td>"\
+                    "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_voltage_corpus[i])
                     .arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2)
-                    .arg(sResult)
-                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+                    .arg(sResult);
 
         if(bModeManual) { /// ручной режим
             /// снимаем галку с провереной
@@ -184,7 +207,6 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
             if(codeU > codeLimit) { /// напряжение больше в кодах (не норма)
                 if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
                     bState = false; /// выходим из режима проверки
-                    bCheckInProgress = false; /// остановить текущую проверку, выход
                     break;
                 }
             }
@@ -196,14 +218,18 @@ stop:
         label->setText(sLabelText + " измерение прервано!");
         label->setStyleSheet("QLabel { color : red; }");
         Log(sLabelText + " измерение прервано!", "red");
+        sHtml += tr("<tr><td>&nbsp;%0&nbsp;</td><td>&nbsp;%1&nbsp;</td><td colspan=\"2\"><p>&nbsp;Измерение прервано!&nbsp;</td></tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].str_voltage_corpus[i]);
     }
+
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC2);
     loop.exec();
     ui->progressBar->setValue(ui->progressBar->value()+1);
 
-    bCheckInProgress = false; // вышли из состояния проверки
+    bCheckInProgress = false; /// остановить текущую проверку, выход
 
     // если отладочный режим, напечатать отладочную инфу
     if(bDeveloperState)
@@ -216,6 +242,12 @@ stop:
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
     }
+
+    /// таблица - низ
+    sHtml +="   </tbody>"\
+            "</table>"\
+            "<br/>";
+    sArrayReport.append(sHtml); /// добавляем таблицу в массив проверок
 
     Log(tr("Проверка завершена - %1").arg(ui->rbVoltageOnTheHousing->text()), "blue");
 

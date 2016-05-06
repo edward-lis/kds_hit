@@ -33,6 +33,7 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     quint16 typeb=0; // напряжение цепи 28
     quint16 uocpb; // напряжение БП УУТББ
     //int ret=0;
+    iPowerState = 0; /// сбрасываем состояние включенного/отключенного источника питания
 
     ui->groupBoxCOMPort->setDisabled(true); /// скрываем выбор сом-порта
     ui->groupBoxDiagnosticDevice->setDisabled(true); /// скрываем параметры проверяемой батареи

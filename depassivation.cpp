@@ -26,6 +26,7 @@ void MainWindow::on_btnDepassivation_clicked()
     double x; // текущая координата Х
     int cycleTimeSec=0; // длительность цикла проверки в секундах
     bool firstMeasurement=true; // первое измерение
+    int i=0; // номер цепи
 
     baSendArray.clear();
     baSendCommand.clear();
@@ -37,8 +38,27 @@ void MainWindow::on_btnDepassivation_clicked()
         iPowerState = 1; /// состояние включенного источника питания
     }
 
+    /// таблица - верх
+    sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+               "    <tbody>"\
+               "        <tr>"\
+               "            <td colspan=\"3\">&nbsp;<strong>%0&nbsp;</strong></td>"\
+               "        </tr>"\
+               "        <tr>"\
+               "            <td width=\"11%\">"\
+               "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"72%\">"\
+               "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"17%\">"\
+               "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
+               "            </td>"\
+               "        </tr>")
+            .arg(ui->rbDepassivation->text());
+
     // написать про группы, в зависимости от признаков и флагов
-    for(int i = 0; i < 28; i++)
+    for(i = 0; i < 28; i++)
     {
         dArrayDepassivation[i] = -1;
         label = findChild<QLabel*>(tr("labelDepassivation%0").arg(i));
@@ -208,15 +228,14 @@ void MainWindow::on_btnDepassivation_clicked()
         Log(tr("%0 %1").arg(sLabelText).arg(sResult), color);
 
         /// заполняем массив проверок для отчета
-        sArrayReportDepassivation.append(
-                    tr("<tr>"\
-                       "    <td>%0</td>"\
-                       "    <td>%1</td>"\
-                       "    <td>%2</td>"\
-                       "</tr>")
+        sHtml += tr("<tr>"\
+                    "    <td><p>&nbsp;%0&nbsp;</td>"\
+                    "    <td><p>&nbsp;%1&nbsp;</td>"\
+                    "    <td><p>&nbsp;%2&nbsp;</td>"\
+                    "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
-                    .arg(sResult));
+                    .arg(sResult);
 
         /// снимаем галку с провереной
         item = new QStandardItem(QString("%0").arg(battery[iBatteryIndex].circuitgroup[i-1]));
@@ -241,9 +260,12 @@ stop:
         else if(ret == KDS_STOP) Log(tr("Stop checking!"), "red");
     }
     if(ret == KDS_STOP) {
-        label->setText(sLabelText + " измерение прервано!");
+        label->setText(sLabelText + " распассивация прервана!");
         label->setStyleSheet("QLabel { color : red; }");
-        Log(sLabelText + " измерение прервано!", "red");
+        Log(sLabelText + " распассивация прервана!", "red");
+        sHtml += tr("<tr><td>&nbsp;%0&nbsp;</td><td>&nbsp;%1&nbsp;</td><td><p>&nbsp;распассивация прервана!&nbsp;</td></tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].circuitgroup[i]);
     }
 
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
@@ -252,6 +274,12 @@ stop:
     baRecvArray.clear();
 
     setGUI(true); /// включаем интерфейс
+
+    /// таблица - низ
+    sHtml +="   </tbody>"\
+            "</table>"\
+            "<br/>";
+    sArrayReport.append(sHtml); /// добавляем таблицу в массив проверок
 
     Log(tr("Проверка завершена - %1").arg(ui->rbDepassivation->text()), "blue");
 }

@@ -36,16 +36,7 @@ QDataStream &operator<<( QDataStream &stream, const dataBattery &data )
             << data.dArrayInsulationResistanceUUTBB
             << data.dArrayOpenCircuitVoltagePowerSupply
             << data.dArrayClosedCircuitVoltagePowerSupply
-            << data.sArrayReportVoltageOnTheHousing
-            << data.sArrayReportInsulationResistance
-            << data.sArrayReportOpenCircuitVoltageGroup
-            << data.sArrayReportOpenCircuitVoltageBattery
-            << data.sArrayReportDepassivation
-            << data.sArrayReportClosedCircuitVoltageGroup
-            << data.sArrayReportClosedCircuitVoltageBattery
-            << data.sArrayReportInsulationResistanceUUTBB
-            << data.sArrayReportOpenCircuitVoltagePowerSupply
-            << data.sArrayReportClosedCircuitVoltagePowerSupply
+            << data.sArrayReport
             << data.sArrayReportGraphDescription
             << data.imgArrayReportGraph;
 }
@@ -79,16 +70,7 @@ QDataStream &operator>>( QDataStream &stream, dataBattery &data )
             >> data.dArrayInsulationResistanceUUTBB
             >> data.dArrayOpenCircuitVoltagePowerSupply
             >> data.dArrayClosedCircuitVoltagePowerSupply
-            >> data.sArrayReportVoltageOnTheHousing
-            >> data.sArrayReportInsulationResistance
-            >> data.sArrayReportOpenCircuitVoltageGroup
-            >> data.sArrayReportOpenCircuitVoltageBattery
-            >> data.sArrayReportDepassivation
-            >> data.sArrayReportClosedCircuitVoltageGroup
-            >> data.sArrayReportClosedCircuitVoltageBattery
-            >> data.sArrayReportInsulationResistanceUUTBB
-            >> data.sArrayReportOpenCircuitVoltagePowerSupply
-            >> data.sArrayReportClosedCircuitVoltagePowerSupply
+            >> data.sArrayReport
             >> data.sArrayReportGraphDescription
             >> data.imgArrayReportGraph;
 }
@@ -176,16 +158,7 @@ void MainWindow::on_actionCheckSave_triggered()
     }
 
     /// выполненые проверки для отчета
-    data.sArrayReportVoltageOnTheHousing = sArrayReportVoltageOnTheHousing;
-    data.sArrayReportInsulationResistance = sArrayReportInsulationResistance;
-    data.sArrayReportOpenCircuitVoltageGroup = sArrayReportOpenCircuitVoltageGroup;
-    data.sArrayReportOpenCircuitVoltageBattery = sArrayReportOpenCircuitVoltageBattery;
-    data.sArrayReportDepassivation = sArrayReportDepassivation;
-    data.sArrayReportClosedCircuitVoltageGroup = sArrayReportClosedCircuitVoltageGroup;
-    data.sArrayReportClosedCircuitVoltageBattery = sArrayReportClosedCircuitVoltageBattery;
-    data.sArrayReportInsulationResistanceUUTBB = sArrayReportInsulationResistanceUUTBB;
-    data.sArrayReportOpenCircuitVoltagePowerSupply = sArrayReportOpenCircuitVoltagePowerSupply;
-    data.sArrayReportClosedCircuitVoltagePowerSupply = sArrayReportClosedCircuitVoltagePowerSupply;
+    data.sArrayReport = sArrayReport;
     data.sArrayReportGraphDescription = sArrayReportGraphDescription;
     data.imgArrayReportGraph = imgArrayReportGraph;
 
@@ -243,16 +216,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         ui->cbSubParamsAutoMode->setCurrentIndex(data.icbSubParamsAutoMode);
 
         /// выполненые проверки для отчета
-        sArrayReportVoltageOnTheHousing = data.sArrayReportVoltageOnTheHousing;
-        sArrayReportInsulationResistance = data.sArrayReportInsulationResistance;
-        sArrayReportOpenCircuitVoltageGroup = data.sArrayReportOpenCircuitVoltageGroup;
-        sArrayReportOpenCircuitVoltageBattery = data.sArrayReportOpenCircuitVoltageBattery;
-        sArrayReportDepassivation = data.sArrayReportDepassivation;
-        sArrayReportClosedCircuitVoltageGroup = data.sArrayReportClosedCircuitVoltageGroup;
-        sArrayReportClosedCircuitVoltageBattery = data.sArrayReportClosedCircuitVoltageBattery;
-        sArrayReportInsulationResistanceUUTBB = data.sArrayReportInsulationResistanceUUTBB;
-        sArrayReportOpenCircuitVoltagePowerSupply = data.sArrayReportOpenCircuitVoltagePowerSupply;
-        sArrayReportClosedCircuitVoltagePowerSupply = data.sArrayReportClosedCircuitVoltagePowerSupply;
+        sArrayReport = data.sArrayReport;
         sArrayReportGraphDescription = data.sArrayReportGraphDescription;
         imgArrayReportGraph = data.imgArrayReportGraph;
 
@@ -279,7 +243,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportVoltageOnTheHousing.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabVoltageOnTheHousing, ui->rbVoltageOnTheHousing->text());
 
         /// 2. Сопротивление изоляции
@@ -305,7 +269,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportInsulationResistance.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabInsulationResistance, ui->rbInsulationResistance->text());
 
 
@@ -339,7 +303,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportOpenCircuitVoltageGroup.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageGroup, ui->rbOpenCircuitVoltageGroup->text());
 
 
@@ -361,7 +325,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportOpenCircuitVoltageBattery.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabOpenCircuitVoltageBattery, ui->rbOpenCircuitVoltageBattery->text());
 
 
@@ -391,7 +355,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportClosedCircuitVoltageGroup.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabClosedCircuitVoltageGroup, ui->rbClosedCircuitVoltageGroup->text());
 
 
@@ -422,7 +386,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                 label->setStyleSheet("QLabel { color : "+color+"; }");
             }
         }
-        if (!sArrayReportDepassivation.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabDepassivation, ui->rbDepassivation->text());
 
 
@@ -441,7 +405,7 @@ void MainWindow::on_actionCheckLoad_triggered()
             ui->labelClosedCircuitVoltageBattery0->setText(str+" "+sResult);
             ui->labelClosedCircuitVoltageBattery0->setStyleSheet("QLabel { color : "+color+"; }");
         }
-        if (!sArrayReportClosedCircuitVoltageBattery.isEmpty())
+        if (!sArrayReport.isEmpty())
             ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
 
 
@@ -471,7 +435,7 @@ void MainWindow::on_actionCheckLoad_triggered()
                     label->setStyleSheet("QLabel { color : "+color+"; }");
                 }
             }
-            if (!sArrayReportInsulationResistanceUUTBB.isEmpty())
+            if (!sArrayReport.isEmpty())
                 ui->tabWidget->addTab(ui->tabInsulationResistanceUUTBB, ui->rbInsulationResistanceUUTBB->text());
 
 

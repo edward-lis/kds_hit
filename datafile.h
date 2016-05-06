@@ -38,16 +38,7 @@ struct dataBattery {
     QList<double> dArrayInsulationResistanceUUTBB; /// масив текущих значений проверок
     QList<double> dArrayOpenCircuitVoltagePowerSupply; /// масив текущих значений проверок
     QList<double> dArrayClosedCircuitVoltagePowerSupply; /// масив текущих значений проверок
-    QList<QString> sArrayReportVoltageOnTheHousing; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportInsulationResistance; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltageGroup; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltageBattery; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltageGroup; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportDepassivation; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltageBattery; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReport; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportGraphDescription; /// масив описания графиков
     QList<QImage> imgArrayReportGraph; /// масив графиков
 };

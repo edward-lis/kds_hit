@@ -79,6 +79,30 @@ void MainWindow::on_btnInsulationResistance_clicked()
         iPowerState = 2; /// состояние отключенного источника питания
     }
 
+    /// таблица - верх
+    sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+               "    <tbody>"\
+               "        <tr>"\
+               "            <td colspan=\"4\">&nbsp;<strong>%0(%1)&nbsp;</strong><br/><em>&nbsp;Предельные значения: не менее %2 МОм</em></td>"\
+               "        </tr>"\
+               "        <tr>"\
+               "            <td width=\"11%\">"\
+               "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"57%\">"\
+               "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"15%\">"\
+               "                <p>&nbsp;<b>Значение</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"17%\">"\
+               "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
+               "            </td>"\
+               "        </tr>")
+            .arg(ui->rbInsulationResistance->text())
+            .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
+            .arg(settings.isolation_resistance_limit/1000000);
+
     for(i = iCurrentStep; i < iMaxSteps; i++)
     {
         if(bModeManual) // в ручном будем идти по чекбоксам
@@ -195,19 +219,16 @@ void MainWindow::on_btnInsulationResistance_clicked()
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
-        sArrayReportInsulationResistance.append(
-                    tr("<tr>"\
-                       "    <td>%0</td>"\
-                       "    <td>%1</td>"\
-                       "    <td>%2</td>"\
-                       "    <td>%3</td>"\
-                       "    <td>%4</td>"\
-                       "</tr>")
+        sHtml += tr("<tr>"\
+                    "    <td><p>&nbsp;%0&nbsp;</td>"\
+                    "    <td><p>&nbsp;%1&nbsp;</td>"\
+                    "    <td><p>&nbsp;%2&nbsp;</td>"\
+                    "    <td><p>&nbsp;%3&nbsp;</td>"\
+                    "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].str_isolation_resistance[i])
                     .arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1)
-                    .arg(sResult)
-                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+                    .arg(sResult);
 
         if(bModeManual) { /// ручной режим
             /// снимаем галку с провереной
@@ -234,6 +255,9 @@ stop:
         label->setText(sLabelText + " измерение прервано!");
         label->setStyleSheet("QLabel { color : red; }");
         Log(sLabelText + " измерение прервано!", "red");
+        sHtml += tr("<tr><td>&nbsp;%0&nbsp;</td><td>&nbsp;%1&nbsp;</td><td colspan=\"2\"><p>&nbsp;Измерение прервано!&nbsp;</td></tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].str_isolation_resistance[i]);
     }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
@@ -253,6 +277,12 @@ stop:
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
     }
+
+    /// таблица - низ
+    sHtml +="   </tbody>"\
+            "</table>"\
+            "<br/>";
+    sArrayReport.append(sHtml); /// добавляем таблицу в массив проверок
 
     Log(tr("Проверка завершена - %1").arg(ui->rbInsulationResistance->text()), "blue");
 

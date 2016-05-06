@@ -15,11 +15,23 @@ extern QVector<Battery> battery;
 // Нажата кнопка проверки напряжения замкнутой цепи БП УУТББ
 void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
 {
-    //checkClosedCircuitVoltagePowerSupply(); return;
+    if (dArrayOpenCircuitVoltagePowerSupply[0] < settings.uutbb_opencircuitpower_limit_min) {
+        if (dArrayOpenCircuitVoltagePowerSupply[0] == -1) { /// если не проверялось
+            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltageBattery->text()), tr("%0 не проверялось. Проверка под нагрузкой запрещена.")
+                .arg(ui->rbOpenCircuitVoltageBattery->text()));
+        } else {
+            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbClosedCircuitVoltageBattery->text()), tr("%0 меньше нормы %1 В. Проверка под нагрузкой запрещена.")
+                .arg(ui->rbOpenCircuitVoltageBattery->text())
+                .arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2));
+        }
+        bState = false; /// выходим из режима проверки
+        return; /// дальше не идем
+    }
+
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.uutbb_closecircuitpower_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
+    //quint16 codeLimit=settings.uutbb_closecircuitpower_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QDateTime starttime; // время начала измерения
     QDateTime dt; // текущее время очередного измерения
@@ -106,6 +118,30 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
         iPowerState = 1; /// состояние включенного источника питания
     }
 
+    /// таблица - верх
+    sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+               "    <tbody>"\
+               "        <tr>"\
+               "            <td colspan=\"4\">&nbsp;<strong>%0(%1)&nbsp;</strong><br/><em>&nbsp;Предельные значения: не менее %2 В</em></td>"\
+               "        </tr>"\
+               "        <tr>"\
+               "            <td width=\"11%\">"\
+               "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"57%\">"\
+               "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"15%\">"\
+               "                <p>&nbsp;<b>Значение</b>&nbsp;</p>"\
+               "            </td>"\
+               "            <td width=\"17%\">"\
+               "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
+               "            </td>"\
+               "        </tr>")
+            .arg(ui->rbClosedCircuitVoltagePowerSupply->text())
+            .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
+            .arg(settings.uutbb_closecircuitpower_limit);
+
     /// формируем строку и пишем на label "идет измерение..."
     sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
     ui->labelClosedCircuitVoltagePowerSupply0->setText(sLabelText + " идет измерение...");
@@ -175,28 +211,25 @@ void MainWindow::on_btnClosedCircuitVoltagePowerSupply_clicked()
 
     /// заполняем массив проверок для отчета
     dateTime = QDateTime::currentDateTime();
-    sArrayReportClosedCircuitVoltagePowerSupply.append(
-                tr("<tr>"\
-                   "    <td>%0</td>"\
-                   "    <td>%1</td>"\
-                   "    <td>%2</td>"\
-                   "    <td>%3</td>"\
-                   "    <td>%4</td>"\
-                   "</tr>")
+    sHtml += tr("<tr>"\
+                "    <td><p>&nbsp;%0&nbsp;</td>"\
+                "    <td><p>&nbsp;%1&nbsp;</td>"\
+                "    <td><p>&nbsp;%2&nbsp;</td>"\
+                "    <td><p>&nbsp;%3&nbsp;</td>"\
+                "</tr>")
                 .arg(dateTime.toString("hh:mm:ss"))
                 .arg(battery[iBatteryIndex].uutbb_closecircuitpower[0])
                 .arg(dArrayClosedCircuitVoltagePowerSupply[0], 0, 'f', 2)
-                .arg(sResult)
-                .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический" : "Ручной"));
+                .arg(sResult);
 
     if(!bModeManual) { /// автоматический режим
         /// в автоматическом режиме пролистываем комбокс подпараметров проверки
         ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
 
         /// проанализировать результаты
-        if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+        /*if(codeADC < codeLimit) { /// напряжение меньше (не норма)
             bState = false; /// выходим из режима проверки
-        }
+        }*/
     }
 
     /// добавим в массив графиков полученный график ВРЕМЕННО СКРЫТ
@@ -210,12 +243,16 @@ stop:
         label->setText(sLabelText + " измерение прервано!");
         label->setStyleSheet("QLabel { color : red; }");
         Log(sLabelText + " измерение прервано!", "red");
+        sHtml += tr("<tr><td>&nbsp;%0&nbsp;</td><td>&nbsp;%1&nbsp;</td><td colspan=\"2\"><p>&nbsp;Измерение прервано!&nbsp;</td></tr>")
+                .arg(dateTime.toString("hh:mm:ss"))
+                .arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
     }
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#";
     timerSend->start(settings.delay_after_request_before_next_ADC1);
     ret=loop.exec();
 
+    bState = false; /// выходим из режима проверки
     bCheckInProgress = false; // вышли из состояния проверки
 
     // если отладочный режим, напечатать отладочную инфу
@@ -229,6 +266,12 @@ stop:
     if (ui->rbModeDiagnosticManual->isChecked()) { /// если в ручной режиме
         setGUI(true); /// включаем интерфейс
     }
+
+    /// таблица - низ
+    sHtml +="   </tbody>"\
+            "</table>"\
+            "<br/>";
+    sArrayReport.append(sHtml); /// добавляем таблицу в массив проверок
 
     Log(tr("Проверка завершена - %1").arg(ui->rbClosedCircuitVoltagePowerSupply->text()), "blue");
 

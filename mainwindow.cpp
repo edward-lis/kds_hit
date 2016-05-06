@@ -267,7 +267,7 @@ void MainWindow::comboxSetData() {
     /// 1. Напряжения на корпусе
     ui->cbParamsAutoMode->addItem(tr("1. %0").arg(ui->rbVoltageOnTheHousing->text()));
     ui->cbVoltageOnTheHousing->clear();
-    sArrayReportVoltageOnTheHousing.clear(); /// очищаем массив проверок для отчета
+    sArrayReport.clear(); /// очищаем массив проверок для отчета
     modelVoltageOnTheHousing = new QStandardItemModel(2, 1);
 
     /// очистка и заполнение label*ов на вкладке и очистка массива с полученными параметрами проверки
@@ -293,7 +293,6 @@ void MainWindow::comboxSetData() {
     /// 2. Сопротивление изоляции
     ui->cbParamsAutoMode->addItem(tr("2. %0").arg(ui->rbInsulationResistance->text()));
     ui->cbInsulationResistance->clear();
-    sArrayReportInsulationResistance.clear(); /// очищаем массив проверок для отчета
     modelInsulationResistance = new QStandardItemModel(battery[iBatteryIndex].i_isolation_resistance_num, 1);
 
     /// проходимся по всем label'ам
@@ -319,7 +318,6 @@ void MainWindow::comboxSetData() {
     /// 3. Напряжение разомкнутой цепи группы
     ui->cbParamsAutoMode->addItem(tr("3. %0").arg(ui->rbOpenCircuitVoltageGroup->text()));
     //ui->cbOpenCircuitVoltageGroup->clear();
-    sArrayReportOpenCircuitVoltageGroup.clear(); /// очищаем массив проверок для отчета
     modelOpenCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
 
     /// проходимся по всем label'ам
@@ -351,7 +349,6 @@ void MainWindow::comboxSetData() {
     /// 4. Напряжение разомкнутой цепи батареи
     ui->cbParamsAutoMode->addItem(tr("4. %0").arg(ui->rbOpenCircuitVoltageBattery->text()));
     ui->cbOpenCircuitVoltageBattery->clear();
-    sArrayReportOpenCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbOpenCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
     ui->labelOpenCircuitVoltageBattery0->setText(tr("%0) \"%1\" не измерялось.").arg(1).arg(battery[iBatteryIndex].circuitbattery));
     ui->labelOpenCircuitVoltageBattery0->setStyleSheet("QLabel { color : black; }");
@@ -359,7 +356,6 @@ void MainWindow::comboxSetData() {
     /// 5. Напряжение замкнутой цепи группы
     ui->cbParamsAutoMode->addItem(tr("5. %0").arg(ui->rbClosedCircuitVoltageGroup->text()));
     //ui->cbClosedCircuitVoltageGroup->clear();
-    sArrayReportClosedCircuitVoltageGroup.clear(); /// очищаем массив проверок для отчета
     modelClosedCircuitVoltageGroup = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
 
     /// проходимся по всем label'ам
@@ -383,7 +379,6 @@ void MainWindow::comboxSetData() {
     connect(modelClosedCircuitVoltageGroup, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(itemChangedClosedCircuitVoltageGroup(QStandardItem*)));
 
     /// 6. Распассивация
-    sArrayReportDepassivation.clear(); /// очищаем массив проверок для отчета
     modelDepassivation = new QStandardItemModel(battery[iBatteryIndex].group_num, 1);
 
     /// проходимся по всем label'ам
@@ -409,7 +404,6 @@ void MainWindow::comboxSetData() {
     /// 7. Напряжение замкнутой цепи батареи
     ui->cbParamsAutoMode->addItem(tr("7. %0").arg(ui->rbClosedCircuitVoltageBattery->text()));
     ui->cbClosedCircuitVoltageBattery->clear();
-    sArrayReportClosedCircuitVoltageBattery.clear(); /// очищаем массив проверок для отчета
     ui->cbClosedCircuitVoltageBattery->addItem(battery[iBatteryIndex].circuitbattery);
     ui->labelClosedCircuitVoltageBattery0->setText(tr("%0) \"%1\" не измерялось.").arg(1).arg(battery[iBatteryIndex].circuitbattery));
 
@@ -419,7 +413,6 @@ void MainWindow::comboxSetData() {
         if (ui->cbIsUUTBB->isChecked())
             ui->cbParamsAutoMode->addItem(tr("8. %0").arg(ui->rbInsulationResistanceUUTBB->text()));
         ui->cbInsulationResistanceUUTBB->clear();
-        sArrayReportInsulationResistanceUUTBB.clear(); /// очищаем массив проверок для отчета
         modelInsulationResistanceUUTBB = new QStandardItemModel(battery[iBatteryIndex].i_uutbb_resist_num, 1);
 
         /// проходимся по всем label'ам
@@ -449,7 +442,6 @@ void MainWindow::comboxSetData() {
         ui->cbOpenCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         ui->labelOpenCircuitVoltagePowerSupply0->setText(tr("1) \"%0\" не измерялось.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         ui->labelOpenCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : black; }");
-        sArrayReportOpenCircuitVoltagePowerSupply.clear(); /// очищаем массив проверок для отчета
 
         /// 10. Напряжение замкнутой цепи БП
         if (ui->cbIsUUTBB->isChecked())
@@ -458,7 +450,6 @@ void MainWindow::comboxSetData() {
         ui->cbClosedCircuitVoltagePowerSupply->addItem(battery[iBatteryIndex].uutbb_closecircuitpower[0]);
         ui->labelClosedCircuitVoltagePowerSupply0->setText(tr("1) \"%0\" не измерялось.").arg(battery[iBatteryIndex].uutbb_closecircuitpower[0]));
         ui->labelClosedCircuitVoltagePowerSupply0->setStyleSheet("QLabel { color : black; }");
-        sArrayReportClosedCircuitVoltagePowerSupply.clear(); /// очищаем массив проверок для отчета
     }
 }
 
@@ -818,6 +809,7 @@ void MainWindow::on_actionCheckReset_triggered()
  */
 void MainWindow::setGUI(bool state)
 {
+    ui->menuBar->setEnabled(state);                                 /// запретить/разрешить верхнее меню
     ui->groupBoxCOMPort->setEnabled(state);                         /// запретить/разрешить группу последовательного порта
     ui->groupBoxDiagnosticDevice->setEnabled(state);                /// запретить/разрешить группу выбора батареи
     ui->groupBoxDiagnosticMode->setEnabled(state);                  /// запретить/разрешить группу выбора режима

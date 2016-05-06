@@ -63,6 +63,7 @@ private:
     QLabel *label; // надпись в закладке
     QDateTime dateTime; /// время окончания проверки для отчета
     int iBatteryIndex; ///< номер/индекс текущей батареи в массиве батарей.
+    int iPowerState; /// 0 - неизвестное состояние; 1 - источник питания включен; 2 - источник питания отключен;
     int iCurrentStep;
     int iMaxSteps;
     //QList<int> iFlagsCircuitGroup;
@@ -76,26 +77,17 @@ private:
     QList<double> dArrayInsulationResistanceUUTBB;
     QList<double> dArrayOpenCircuitVoltagePowerSupply;
     QList<double> dArrayClosedCircuitVoltagePowerSupply;
-    QList<QString> sArrayReportVoltageOnTheHousing; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportInsulationResistance; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltageGroup; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltageBattery; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltageGroup; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportDepassivation; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltageBattery; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportInsulationResistanceUUTBB; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportOpenCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
-    QList<QString> sArrayReportClosedCircuitVoltagePowerSupply; /// масив выполненых проверк для отчета
+    QList<QString> sArrayReport; /// масив выполненых проверк для отчета
     QList<QString> sArrayReportGraphDescription; /// масив описания графиков
     QList<QImage> imgArrayReportGraph; /// масив графиков
     QCPItemText *widgetDepassivationTextLabel; /// лейбл на граффике распассивации
     QImage img;
     QString sLabelText;
     QString sResult; /// строка результата проверки "Норма" или "Не норма!"
+    QString sHtml;
     QString str;
     QString color;
     QString paramMsg;
-    int iPowerState; /// 0 - неизвестное состояние; 1 - источник питания включен; 2 - источник питания отключен;
     bool bState;
     void getCOMPorts();
     void comboxSetData();

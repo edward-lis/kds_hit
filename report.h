@@ -10,7 +10,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-QString sHtml;
-
 #endif // REPORT_H
 

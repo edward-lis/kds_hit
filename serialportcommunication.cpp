@@ -95,6 +95,14 @@ void MainWindow::procTimeoutResponse()
     //qDebug()<<"procTimeoutResponse";
     ui->statusBar->showMessage(tr(OFFLINE)); // напишем нет связи
     //emit signalTimeoutResponse();
+    /// отключаем интерфейс, возобновление проверки только через проверку подключенной батареи
+    ui->groupBoxDiagnosticMode->setDisabled(true);
+    ui->groupBoxCheckParams->setDisabled(true);
+    ui->groupBoxCheckParamsAutoMode->setDisabled(true);
+    ui->btnBuildReport->setDisabled(true);
+    ui->progressBar->reset(); /// сбросим прогресс бар
+    bState = false; /// выходим из режима проверки
+
     if(loop.isRunning())
     {
         loop.exit(KDS_TIMEOUT); // вывалиться из цикла ожидания приёма с кодом ошибки таймаута
@@ -156,6 +164,16 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
         ui->groupBoxCheckParams->setDisabled(true); // запретить бокс выбора параметра проверки ручного режима
         ui->groupBoxCheckParamsAutoMode->setDisabled(true); // запретить бокс выбора начальных параметров проверки автоматического режима
         ui->btnCOMPortRefresh->setEnabled(true); /// включаем кнопку обновления
+        ui->btnVoltageOnTheHousing->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnInsulationResistance->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnOpenCircuitVoltageGroup->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnOpenCircuitVoltageBattery->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnClosedCircuitVoltageGroup->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnDepassivation->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnClosedCircuitVoltageBattery->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnInsulationResistanceUUTBB->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnOpenCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
+        ui->btnClosedCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
         bPortOpen = false;
         loop.exit(-1); // закончить цикл ожидания ответа
     }
