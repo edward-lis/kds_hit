@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     voltageclosecircuitpoweruutbb.cpp \
     voltageopencircuitpoweruutbb.cpp \
     depassivation.cpp \
-    closecircuitbattery.cpp
+    closecircuitbattery.cpp \
+    putsuuutbb.cpp
 
 HEADERS  += mainwindow.h \
     serialport.h \
