@@ -185,6 +185,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetClosedCircuitBattery->yAxis->setRange(24, 33);
 
     bState = false;
+    bConnect = true; /// состояние связи (true - есть, false - нет связи)
 
     iBatteryIndex = 0;
     iPowerState = 0; /// 0 - неизвестное состояние;
@@ -573,6 +574,7 @@ void MainWindow::on_cbIsUUTBB_toggled(bool checked)
     ui->groupBoxDiagnosticMode->setDisabled(true);
     ui->groupBoxCheckParams->setDisabled(true);
     ui->groupBoxCheckParamsAutoMode->setDisabled(true);
+    ui->menuPUTSU->setDisabled(true); /// запрещаем меню ПУ ТСУ
 }
 
 void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
@@ -592,6 +594,7 @@ void MainWindow::on_comboBoxBatteryList_currentIndexChanged(int index)
     ui->groupBoxCheckParamsAutoMode->setDisabled(true);
     ui->btnBuildReport->setDisabled(true);
     ui->widgetCheckParamsButtons->setDisabled(true);
+    ui->menuPUTSU->setDisabled(true); /// запрещаем меню ПУ ТСУ
 }
 
 // нажата кнопка Старт(Стоп) автоматического режима диагностики
@@ -823,3 +826,20 @@ void MainWindow::setGUI(bool state)
     }
 }
 
+/*!
+ * \brief MainWindow::on_actionPUTSUOn_triggered
+ */
+void MainWindow::on_actionPUTSUOn_triggered()
+{
+    qDebug() << "PUTSU Send StubX6#";
+    Log("[ПУ ТСУ]: включен.", "green");
+}
+
+/*!
+ * \brief MainWindow::on_actionPUTSUOff_triggered
+ */
+void MainWindow::on_actionPUTSUOff_triggered()
+{
+    qDebug() << "PUTSU Send Idle#";
+    Log("[ПУ ТСУ]: отключен.", "red");
+}

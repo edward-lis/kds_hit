@@ -107,7 +107,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     if(bAllCircuitsFail)
     {
         QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка цепей под нагрузкой запрещена.");
-        bState = false;
+        //bState = false;
         goto stop;
     }
 

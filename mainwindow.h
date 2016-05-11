@@ -89,6 +89,7 @@ private:
     QString color;
     QString paramMsg;
     bool bState;
+    bool bConnect; /// состояние связи (есть или нет)
     void getCOMPorts();
     void comboxSetData();
     //float param; /// для отладки, потом убрать
@@ -218,6 +219,10 @@ private slots:
    void on_actionCheckReset_triggered();
    void on_btnBuildReport_clicked();
    void on_btnCOMPortRefresh_clicked();
+
+   void on_actionPUTSUOn_triggered();
+
+   void on_actionPUTSUOff_triggered();
 
 protected:
     //virtual void showEvent(QShowEvent *e); // перегруз ф-ии для выпуска сигнала после отрисовки окна

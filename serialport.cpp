@@ -61,11 +61,9 @@ bool SerialPort::openPort(QString portName)
         serial->setStopBits(QSerialPort::OneStop);
         serial->setFlowControl(QSerialPort::NoFlowControl);
         result = serial->open(QIODevice::ReadWrite);
-        if (result)
-        {
+        if (result) {
             qDebug()<<"Open serial port "<<serial->portName()<<" Speed"<<serial->baudRate();
-        } else
-        {
+        } else {
             qDebug()<<"Error open serial port "<<portName;
         }
     }

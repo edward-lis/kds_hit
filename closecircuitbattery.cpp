@@ -94,7 +94,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         if(bAllCircuitsFail)
         {
             QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка батареи под нагрузкой запрещена.");
-            bState = false; /// выходим из режима проверки
+            //bState = false; /// выходим из режима проверки
             goto stop;
         }
     }

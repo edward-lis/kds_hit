@@ -35,6 +35,7 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
     //int ret=0;
     iPowerState = 0; /// сбрасываем состояние включенного/отключенного источника питания
 
+    ui->menuBar->setDisabled(true); /// запрещаем верхнее меню
     ui->groupBoxCOMPort->setDisabled(true); /// скрываем выбор сом-порта
     ui->groupBoxDiagnosticDevice->setDisabled(true); /// скрываем параметры проверяемой батареи
     ui->groupBoxDiagnosticMode->setDisabled(true); /// скрываем выбор режима проверки
@@ -134,6 +135,8 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         else
         {
             Log("Подключена батарея "+battery[0].str_type_name+" УУТББ", "blue");
+            ui->menuBar->setEnabled(true); /// запретить/разрешить верхнее меню
+            ui->menuPUTSU->setEnabled(true); /// разрешаем меню ПУ ТСУ
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима
@@ -172,6 +175,8 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
         else
         {
             Log("Подключена батарея "+battery[1].str_type_name+" УУТББ", "blue");
+            ui->menuBar->setEnabled(true); /// разрешить верхнее меню
+            ui->menuPUTSU->setEnabled(true); /// разрешаем меню ПУ ТСУ
             ui->groupBoxDiagnosticMode->setEnabled(true); /// разрешаем выбрать режим диагностики
             if (ui->rbModeDiagnosticAuto->isChecked())
                 ui->groupBoxCheckParamsAutoMode->setEnabled(true); /// разрешаем выбрать начальный параметр проверки автоматического режима

@@ -18,6 +18,11 @@ void MainWindow::recvSerialData(quint8 operation_code, const QByteArray data)
         {
             //qDebug()<<"ping correct";
             ui->statusBar->showMessage(tr(ONLINE)); // напишем в строке статуса, что связь есть, только при нормальном пинге
+            if (!bConnect) {
+                ui->tabWidget->setCurrentIndex(0); /// переходим на вкладку "журнал событий"
+                Log("Связь установлена, необходимо выполнить проверку подтипа подключенной батареи!", "green");
+                bConnect = true;
+            }
             if(bFirstPing) // если первый ответ после установления связи
             {
                 // сбросить коробок, послать IDLE
@@ -100,6 +105,18 @@ void MainWindow::procTimeoutResponse()
     ui->groupBoxCheckParams->setDisabled(true);
     ui->groupBoxCheckParamsAutoMode->setDisabled(true);
     ui->btnBuildReport->setDisabled(true);
+    ui->btnCOMPortRefresh->setEnabled(true); /// включаем кнопку обновления
+    ui->btnVoltageOnTheHousing->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnInsulationResistance->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnOpenCircuitVoltageGroup->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnOpenCircuitVoltageBattery->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnClosedCircuitVoltageGroup->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnDepassivation->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnClosedCircuitVoltageBattery->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnInsulationResistanceUUTBB->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnOpenCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
+    ui->btnClosedCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
+    ui->menuPUTSU->setDisabled(true); /// запрещаем меню ПУ ТСУ
     ui->progressBar->reset(); /// сбросим прогресс бар
     bState = false; /// выходим из режима проверки
 
@@ -108,6 +125,9 @@ void MainWindow::procTimeoutResponse()
         loop.exit(KDS_TIMEOUT); // вывалиться из цикла ожидания приёма с кодом ошибки таймаута
         baRecvArray.clear(); // очистить массив перед следующим приёмом
     }
+    ui->tabWidget->setCurrentIndex(0); /// переходим на вкладку "журнал событий"
+    Log("Связь потеряна!", "red");
+    if (bConnect) bConnect = false;
 }
 
 // послать пинг
@@ -174,6 +194,7 @@ void MainWindow::on_btnCOMPortOpenClose_clicked()
         ui->btnInsulationResistanceUUTBB->setDisabled(true); /// отключаем кнопки проверок
         ui->btnOpenCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
         ui->btnClosedCircuitVoltagePowerSupply->setDisabled(true); /// отключаем кнопки проверок
+        ui->menuPUTSU->setDisabled(true); /// запрещаем меню ПУ ТСУ
         bPortOpen = false;
         loop.exit(-1); // закончить цикл ожидания ответа
     }

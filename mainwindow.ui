@@ -2863,7 +2863,18 @@
     <addaction name="actionCheckSave"/>
     <addaction name="actionCheckLoad"/>
    </widget>
+   <widget class="QMenu" name="menuPUTSU">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>ПУ ТСУ</string>
+    </property>
+    <addaction name="actionPUTSUOn"/>
+    <addaction name="actionPUTSUOff"/>
+   </widget>
    <addaction name="menuCheck"/>
+   <addaction name="menuPUTSU"/>
   </widget>
   <action name="actionCheckSave">
    <property name="text">
@@ -2878,6 +2889,16 @@
   <action name="actionCheckReset">
    <property name="text">
     <string>Сброс</string>
+   </property>
+  </action>
+  <action name="actionPUTSUOn">
+   <property name="text">
+    <string>Включить</string>
+   </property>
+  </action>
+  <action name="actionPUTSUOff">
+   <property name="text">
+    <string>Отключить</string>
    </property>
   </action>
  </widget>
