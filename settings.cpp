@@ -221,6 +221,10 @@ void Settings::loadSettings()
     closecircuitgroup_limit = settings.value("closecircuitgroup_limit", 27.0).toFloat();
     // предельное напряжение замкнутой цепи батареи, вольты
     closecircuitbattery_limit = settings.value("closecircuitbattery_limit", 30.0).toFloat();
+    // потери на кабеле, напряжение замкнутой цепи группы, вольт
+    closecircuitgroup_loss = settings.value("closecircuitgroup_loss", 0.3).toFloat();
+    // потери на кабеле, напряжение замкнутой цепи батареи, вольты
+    closecircuitbattery_loss = settings.value("closecircuitbattery_loss", 0.3).toFloat();
     // время проверки замкнутой цепи батареи
     time_closecircuitbattery = settings.value("time_closecircuitbattery", 30).toInt();
     // кол-во ступеней проверки замкнутых цепей групп под нагрузкой

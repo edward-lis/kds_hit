@@ -185,7 +185,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
 
     ui->progressBar->setValue(ui->progressBar->value()+1);
 
-    dArrayClosedCircuitVoltageBattery[0] = fU;
+    dArrayClosedCircuitVoltageBattery[0] = fU + settings.closecircuitbattery_loss; /// добавляем к результату потери на кабеле
 
     if(bDeveloperState)
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");

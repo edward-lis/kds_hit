@@ -19,7 +19,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     quint16 codeADC=0; // принятый код АЦП
     float fU=0; // принятое напряжение в вольтах
     // код порогового напряжения = пороговое напряжение В / коэфф. (вес разряда) + смещение (в коде)
-    quint16 codeLimit=settings.closecircuitgroup_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
+    //quint16 codeLimit=settings.closecircuitgroup_limit/settings.coefADC1[settings.board_counter] + settings.offsetADC1[settings.board_counter]; // код, пороговое напряжение.
     int ret=0; // код возврата ошибки
     QString str_num; // номер цепи
     QDateTime starttime; // время начала измерения
@@ -217,7 +217,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->widgetClosedCircuitVoltageGroup->replot();
         }
 
-        dArrayClosedCircuitVoltageGroup[i] = fU;
+        dArrayClosedCircuitVoltageGroup[i] = fU + settings.closecircuitgroup_loss; /// добавляем к результату потери на кабеле
 
         if(bDeveloperState) // если отладочный режим, написать в лог код АЦП
             Log("Цепь "+battery[iBatteryIndex].circuitgroup[i]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
@@ -271,7 +271,8 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         if(ret) goto stop;
 
         /// проанализировать результаты, в кодах
-        if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+        //if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+        if(dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) { /// напряжение меньше (не норма)
             /// добавить цепь в список распассивируемых
             switch (QMessageBox::question(this, tr("Внимание - %1").arg(ui->rbClosedCircuitVoltageGroup->text()), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Да, необходима \"Распассивация\""), tr("Нет"))) {
             case 0: /// Да - продолжаем проверку
