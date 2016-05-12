@@ -207,7 +207,7 @@ void MainWindow::on_btnDepassivation_clicked()
             ui->widgetDepassivation->savePng(QDir::tempPath()+"DepassivationGraph.png", 493, 526, 1.0, -1);
             img.load(QDir::tempPath()+"DepassivationGraph.png");
             imgArrayReportGraph.append(img);
-            sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbDepassivation->text()).arg(battery[iBatteryIndex].circuitgroup[i]).arg(dateTime.toString("hh:mm:ss")));
+            sArrayReportGraphDescription.append(tr("График. %0. Цепь: \"%1\". Время: %2.").arg(ui->rbDepassivation->text()).arg(battery[iBatteryIndex].circuitgroup[i-1]).arg(dateTime.toString("hh:mm:ss")));
 
             if(bDeveloperState)
                 Log("Цепь "+battery[iBatteryIndex].circuitgroup[i-1]+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
@@ -234,7 +234,7 @@ void MainWindow::on_btnDepassivation_clicked()
                     "    <td><p>&nbsp;%2&nbsp;</td>"\
                     "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
-                    .arg(battery[iBatteryIndex].circuitgroup[i])
+                    .arg(battery[iBatteryIndex].circuitgroup[i-1])
                     .arg(sResult);
 
         /// снимаем галку с провереной
