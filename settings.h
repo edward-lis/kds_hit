@@ -51,6 +51,7 @@ public:
     float opencircuitbattery_limit;  ///< предельное напряжение разомкнутой цепи батареи, вольты
     float closecircuitgroup_limit; ///< предельное напряжение замкнутой цепи группы, вольт
     float closecircuitbattery_limit; ///< предельное напряжение замкнутой цепи батареи, вольты
+    float closecircuitbattery_imitator_limit; ///< предельное напряжение замкнутой цепи батареи для имитатора, вольты
     float closecircuitgroup_loss; ///< потери на кабеле,  напряжение замкнутой цепи группы, вольт
     float closecircuitbattery_loss; ///< потери на кабеле,  напряжение замкнутой цепи батареи, вольты
     int time_closecircuitgroup; ///< время проверки замкнутой цепи группы

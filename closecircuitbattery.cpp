@@ -133,7 +133,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
                "        </tr>")
             .arg(ui->rbClosedCircuitVoltageBattery->text())
             .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
-            .arg(settings.closecircuitbattery_limit);
+            .arg((ui->cbIsImitator->isChecked()) ? settings.closecircuitbattery_imitator_limit : settings.closecircuitbattery_limit);
 
     /// формируем строку и пишем на label "идет измерение..."
     sLabelText = tr("1) \"%0\"").arg(battery[iBatteryIndex].circuitbattery);
@@ -191,7 +191,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         Log("Цепь "+battery[iBatteryIndex].circuitbattery+" Receive "+qPrintable(baRecvArray)+" codeADC1=0x"+QString("%1").arg((ushort)codeADC, 0, 16), "blue");
 
     // напечатать рез-т в закладку и в журнал
-    if (dArrayClosedCircuitVoltageBattery[0] < settings.closecircuitbattery_limit) {
+    if (dArrayClosedCircuitVoltageBattery[0] < ((ui->cbIsImitator->isChecked()) ? settings.closecircuitbattery_imitator_limit : settings.closecircuitbattery_limit)) {
         sResult = "Не норма!";
         color = "red";
     }

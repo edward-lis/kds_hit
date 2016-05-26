@@ -394,7 +394,7 @@ void MainWindow::on_actionCheckLoad_triggered()
         dArrayClosedCircuitVoltageBattery[0] = data.dArrayClosedCircuitVoltageBattery[0];
         if (dArrayClosedCircuitVoltageBattery[0] != -1) {
             str = tr("1) \"%0\" = <b>%1</b> В.").arg(battery[iBatteryIndex].circuitbattery).arg(dArrayClosedCircuitVoltageBattery[0], 0, 'f', 2);
-            if (dArrayClosedCircuitVoltageBattery[0] < settings.closecircuitbattery_limit) {
+            if (dArrayClosedCircuitVoltageBattery[0] < ((ui->cbIsImitator->isChecked()) ? settings.closecircuitbattery_imitator_limit : settings.closecircuitbattery_limit)) {
                 sResult = "Не норма!";
                 color = "red";
             }

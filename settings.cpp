@@ -221,6 +221,8 @@ void Settings::loadSettings()
     closecircuitgroup_limit = settings.value("closecircuitgroup_limit", 27.0).toFloat();
     // предельное напряжение замкнутой цепи батареи, вольты
     closecircuitbattery_limit = settings.value("closecircuitbattery_limit", 30.0).toFloat();
+    // предельное напряжение замкнутой цепи батареи для имитатора, вольты
+    closecircuitbattery_imitator_limit = settings.value("closecircuitbattery_imitator_limit", 28.5).toFloat();
     // потери на кабеле, напряжение замкнутой цепи группы, вольт
     closecircuitgroup_loss = settings.value("closecircuitgroup_loss", 0.3).toFloat();
     // потери на кабеле, напряжение замкнутой цепи батареи, вольты
