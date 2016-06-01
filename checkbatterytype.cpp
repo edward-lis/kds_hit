@@ -228,6 +228,26 @@ void MainWindow::on_btnCheckConnectedBattery_clicked()
 stop:
     ui->groupBoxCOMPort->setEnabled(true); /// разрешаем выбор сом-порта
     ui->groupBoxDiagnosticDevice->setEnabled(true); /// разрешаем параметры проверяемой батареи
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbVoltageOnTheHousing->isChecked())
+        ui->btnVoltageOnTheHousing->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbInsulationResistance->isChecked())
+        ui->btnInsulationResistance->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbOpenCircuitVoltageGroup->isChecked())
+        ui->btnOpenCircuitVoltageGroup->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbOpenCircuitVoltageBattery->isChecked())
+        ui->btnOpenCircuitVoltageBattery->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbClosedCircuitVoltageGroup->isChecked())
+        ui->btnClosedCircuitVoltageGroup->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbDepassivation->isChecked())
+        ui->btnDepassivation->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbClosedCircuitVoltageBattery->isChecked())
+        ui->btnClosedCircuitVoltageBattery->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbInsulationResistanceUUTBB->isChecked())
+        ui->btnInsulationResistanceUUTBB->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbOpenCircuitVoltagePowerSupply->isChecked())
+        ui->btnOpenCircuitVoltagePowerSupply->setEnabled(true); /// разрешаем кнопку текущей проверки
+    if (ui->rbModeDiagnosticManual->isChecked() & ui->rbClosedCircuitVoltagePowerSupply->isChecked())
+        ui->btnClosedCircuitVoltagePowerSupply->setEnabled(true); /// разрешаем кнопку текущей проверки
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
     baSendArray.clear(); // надо ли?
     baSendCommand.clear();

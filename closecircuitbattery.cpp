@@ -93,7 +93,23 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
 
         if(bAllCircuitsFail)
         {
-            QMessageBox::information(this, "Внимание!", "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка батареи под нагрузкой запрещена.");
+            QMessageBox::information(this, tr("Внимание! - %0").arg(ui->rbClosedCircuitVoltageBattery->text()), "Все цепи меньше нормы или не проверялись под нагрузкой.\nПроверка батареи под нагрузкой запрещена.");
+
+            /// таблица - верх
+            sHtml = tr("<table border=\"1\" width=\"100%\" cellpadding=\"3\" cellspacing=\"0\" bordercolor=\"black\">"\
+                       "    <tbody>"\
+                       "        <tr>"\
+                       "            <td>&nbsp;<strong>%0(%1)&nbsp;</strong><br/><em>&nbsp;Предельные значения: не менее %2 В</em></td>"\
+                       "        </tr>"\
+                       "        <tr>"\
+                       "            <td width=\"100%\">"\
+                       "                <p>&nbsp;Все цепи меньше нормы или не проверялись под нагрузкой. Проверка цепей под нагрузкой запрещена.&nbsp;</p>"\
+                       "            </td>"\
+                       "        </tr>")
+                    .arg(ui->rbClosedCircuitVoltageBattery->text())
+                    .arg((ui->rbModeDiagnosticAuto->isChecked()) ? "Автоматический режим" : "Ручной режим")
+                    .arg((ui->cbIsImitator->isChecked()) ? settings.closecircuitbattery_imitator_limit : settings.closecircuitbattery_limit);
+
             //bState = false; /// выходим из режима проверки
             goto stop;
         }
