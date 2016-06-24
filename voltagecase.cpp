@@ -203,14 +203,15 @@ void MainWindow::on_btnVoltageOnTheHousing_clicked()
         } else { /// автоматический режим
             /// в автоматическом режиме пролистываем комбокс подпараметров проверки
             ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        }
 
-            if(codeU > codeLimit) { /// напряжение больше в кодах (не норма)
-                if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false; /// выходим из режима проверки
-                    break;
-                }
+        if(codeU > codeLimit) { /// напряжение больше в кодах (не норма)
+            if (QMessageBox::question(this, "Внимание - "+ui->rbVoltageOnTheHousing->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayVoltageOnTheHousing[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
+                bState = false; /// выходим из режима проверки
+                break;
             }
         }
+
     } // for
 
 stop:

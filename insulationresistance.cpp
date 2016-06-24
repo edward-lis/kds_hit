@@ -239,13 +239,13 @@ void MainWindow::on_btnInsulationResistance_clicked()
         } else { /// автоматический режим
             /// в автоматическом режиме пролистываем комбокс подпараметров проверки
             ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        }
 
-            if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) { /// сопротивление меньше нормы (не норма)
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false; /// выходим из режима проверки
-                    bCheckInProgress = false; /// остановить текущую проверку, выход
-                    break;
-                }
+        if (dArrayInsulationResistance[i] < settings.isolation_resistance_limit) { /// сопротивление меньше нормы (не норма)
+            if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistance->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistance[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
+                bState = false; /// выходим из режима проверки
+                bCheckInProgress = false; /// остановить текущую проверку, выход
+                break;
             }
         }
     } // for

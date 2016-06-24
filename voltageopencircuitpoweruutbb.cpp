@@ -163,11 +163,9 @@ void MainWindow::on_btnOpenCircuitVoltagePowerSupply_clicked()
                 .arg(sResult);
 
     /// проанализировать результаты
-    if(!bModeManual) { /// автоматический режим
-        if(codeADC < codeLimit) { /// напряжение меньше (не норма)
-            QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), tr("%0 = %1 В. %2 Проверка под нагрузкой запрещена.").arg(sLabelText).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult));
-            bState = false; /// выходим из режима проверки
-        }
+    if(codeADC < codeLimit) { /// напряжение меньше (не норма)
+        QMessageBox::information(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltagePowerSupply->text()), tr("%0 = %1 В. %2 Проверка под нагрузкой запрещена.").arg(sLabelText).arg(dArrayOpenCircuitVoltagePowerSupply[0], 0, 'f', 2).arg(sResult));
+        bState = false; /// выходим из режима проверки
     }
 
 stop:

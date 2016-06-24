@@ -246,12 +246,12 @@ void MainWindow::on_btnInsulationResistanceUUTBB_clicked()
         } else { /// автоматический режим
             /// в автоматическом режиме пролистываем комбокс подпараметров проверки
             ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+        }
 
-            if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
-                if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
-                    bState = false; /// выходим из режима проверки
-                    break;
-                }
+        if (dArrayInsulationResistanceUUTBB[i] < settings.uutbb_isolation_resist_limit) {
+            if (QMessageBox::question(this, "Внимание - "+ui->rbInsulationResistanceUUTBB->text(), tr("%0 = %1 МОм. %2 Продолжить?").arg(sLabelText).arg(dArrayInsulationResistanceUUTBB[i]/1000000, 0, 'f', 1).arg(sResult), tr("Да"), tr("Нет"))) {
+                bState = false; /// выходим из режима проверки
+                break;
             }
         }
     }// конец цикла обхода всех точек измерения сопротивления изоляции

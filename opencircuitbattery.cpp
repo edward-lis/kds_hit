@@ -165,15 +165,16 @@ void MainWindow::on_btnOpenCircuitVoltageBattery_clicked()
     if(!bModeManual) { /// автоматический режим
         /// в автоматическом режиме пролистываем комбокс подпараметров проверки
         ui->cbSubParamsAutoMode->setCurrentIndex(ui->cbSubParamsAutoMode->currentIndex()+1);
+    }
 
-        /// проанализировать результаты
-        if(codeADC < codeLimit) { /// напряжение меньше нормы (не норма)
-            if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
-                bState = false; /// выходим из режима проверки
-                goto stop;
-            }
+    /// проанализировать результаты
+    if(codeADC < codeLimit) { /// напряжение меньше нормы (не норма)
+        if (QMessageBox::question(this, "Внимание - "+ui->rbOpenCircuitVoltageBattery->text(), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageBattery[0], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
+            bState = false; /// выходим из режима проверки
+            //goto stop;
         }
     }
+
 stop:
     if(ret == KDS_STOP) {
         ui->labelOpenCircuitVoltageBattery0->setText(sLabelText + " измерение прервано!");

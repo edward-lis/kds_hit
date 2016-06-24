@@ -202,7 +202,7 @@ void MainWindow::on_btnOpenCircuitVoltageGroup_clicked()
             /// установить флаг - цепь неисправна, запрет проверки цепи под нагрузкой
             battery[iBatteryIndex].b_flag_circuit[i] |= CIRCUIT_FAULT;
 
-            if (!bModeManual and QMessageBox::question(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltageGroup->text()), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
+            if (QMessageBox::question(this, tr("Внимание - %0").arg(ui->rbOpenCircuitVoltageGroup->text()), tr("%0 = %1 В. %2 Продолжить?").arg(sLabelText).arg(dArrayOpenCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), tr("Да"), tr("Нет"))) {
                 bState = false; /// выходим из режима проверки
                 break;
             }
