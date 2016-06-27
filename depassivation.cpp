@@ -48,10 +48,10 @@ void MainWindow::on_btnDepassivation_clicked()
                "            <td width=\"11%\">"\
                "                <p>&nbsp;<b>Время</b>&nbsp;</p>"\
                "            </td>"\
-               "            <td width=\"72%\">"\
+               "            <td width=\"54%\">"\
                "                <p>&nbsp;<b>Цепь</b>&nbsp;</p>"\
                "            </td>"\
-               "            <td width=\"17%\">"\
+               "            <td width=\"35%\">"\
                "                <p>&nbsp;<b>Результат</b>&nbsp;</p>"\
                "            </td>"\
                "        </tr>")
@@ -151,6 +151,18 @@ void MainWindow::on_btnDepassivation_clicked()
     // Пробежимся по списку цепей
     for(int i=1; i < modelDepassivation->rowCount(); i++)
     {
+        if(battery[iBatteryIndex].b_flag_circuit[i-1] == 5) {
+            /// заполняем массив проверок для отчета
+            dateTime = QDateTime::currentDateTime();
+            sHtml += tr("<tr>"\
+                        "    <td><p>&nbsp;%0&nbsp;</p></td>"\
+                        "    <td><p>&nbsp;%1&nbsp;</p></td>"\
+                        "    <td>&nbsp;НРЦг &lt; нормы, р-ция запр-на!&nbsp;</td>"\
+                        "</tr>")
+                        .arg(dateTime.toString("hh:mm:ss"))
+                        .arg(battery[iBatteryIndex].circuitgroup[i-1]);
+        }
+
         QStandardItem *sitm = modelDepassivation->item(i, 0);
         Qt::CheckState checkState = sitm->checkState();
         if (checkState != Qt::Checked) continue;

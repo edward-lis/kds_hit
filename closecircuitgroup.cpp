@@ -160,6 +160,18 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
     // Пробежимся по списку цепей
     for(i = iCurrentStep; i < iMaxSteps; i++)
     {
+        if(battery[iBatteryIndex].b_flag_circuit[i] == 5) {
+            /// заполняем массив проверок для отчета
+            dateTime = QDateTime::currentDateTime();
+            sHtml += tr("<tr>"\
+                        "    <td><p>&nbsp;%0&nbsp;</p></td>"\
+                        "    <td><p>&nbsp;%1&nbsp;</p></td>"\
+                        "    <td colspan=\"2\">&nbsp;НРЦг &lt; нормы, пр-ка запр-на!&nbsp;</td>"\
+                        "</tr>")
+                        .arg(dateTime.toString("hh:mm:ss"))
+                        .arg(battery[iBatteryIndex].circuitgroup[i]);
+        }
+
         if(bModeManual) // в ручном будем идти по чекбоксам
         {
             QStandardItem *sitm = modelClosedCircuitVoltageGroup->item(i+1, 0); // взять очередной номер
@@ -254,10 +266,10 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();
         sHtml += tr("<tr>"\
-                    "    <td><p>&nbsp;%0&nbsp;</td>"\
-                    "    <td><p>&nbsp;%1&nbsp;</td>"\
-                    "    <td><p>&nbsp;%2&nbsp;</td>"\
-                    "    <td><p>&nbsp;%3&nbsp;</td>"\
+                    "    <td><p>&nbsp;%0&nbsp;</p></td>"\
+                    "    <td><p>&nbsp;%1&nbsp;</p></td>"\
+                    "    <td><p>&nbsp;%2&nbsp;</p></td>"\
+                    "    <td><p>&nbsp;%3&nbsp;</p></td>"\
                     "</tr>")
                     .arg(dateTime.toString("hh:mm:ss"))
                     .arg(battery[iBatteryIndex].circuitgroup[i])
