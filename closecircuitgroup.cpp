@@ -166,7 +166,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             sHtml += tr("<tr>"\
                         "    <td><p>&nbsp;%0&nbsp;</p></td>"\
                         "    <td><p>&nbsp;%1&nbsp;</p></td>"\
-                        "    <td colspan=\"2\">&nbsp;НРЦг &lt; нормы, пр-ка запр-на!&nbsp;</td>"\
+                        "    <td colspan=\"2\">&nbsp;НРЦг &lt; нормы, пр-ка запр!&nbsp;</td>"\
                         "</tr>")
                         .arg(dateTime.toString("hh:mm:ss"))
                         .arg(battery[iBatteryIndex].circuitgroup[i]);

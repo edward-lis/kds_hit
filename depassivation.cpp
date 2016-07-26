@@ -201,6 +201,11 @@ void MainWindow::on_btnDepassivation_clicked()
                 if(ret) goto stop;
                 codeADC = getRecvData(baRecvArray); // напряжение в коде
                 fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
+
+                /// только для 1А
+                if (k == 2)
+                    fU = fU + settings.closecircuitgroup_loss; /// добавляем к результату потери на кабеле
+
                 // нарисуем график
                 if(firstMeasurement)
                 {

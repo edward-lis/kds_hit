@@ -25,6 +25,7 @@ void MainWindow::on_btnBuildReport_clicked()
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setPaperSize(QPrinter::A4);
     printer.setOutputFileName(fileName);
+    printer.setPageMargins(12, 16, 12, 20, QPrinter::Millimeter);
 
     /// шапка отчета
     sHtml = tr("<h1 style=\"text-align: center;\">Отчет проверки батареи: %0%1%2</h1>"\
@@ -62,8 +63,7 @@ void MainWindow::on_btnBuildReport_clicked()
                 "<br/><br/>"\
                 "<p align=\"left\">&nbsp;&nbsp;Ф.И.О _______________________ подпись _____________ "\
                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
-                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
-                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\
                 "Дата: %0</p><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>").arg(textDate);
 
     /// проходимя по массиву с гарфиками и выводим их
@@ -71,6 +71,11 @@ void MainWindow::on_btnBuildReport_clicked()
         imgArrayReportGraph[i].save(QDir::tempPath()+tr("img%0.png").arg(i));
         sHtml += tr("<p><img src=\"%0\"/><br/>%1</p>").arg(QDir::tempPath()+tr("img%0.png").arg(i)).arg(sArrayReportGraphDescription[i]);
     }
+
+
+    /*QSizeF paperSize;
+    paperSize.setWidth(printer.width());
+    paperSize.setHeight(printer.height());*/
 
     QTextDocument doc;
     doc.setHtml(sHtml);
