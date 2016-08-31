@@ -185,7 +185,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
                 continue;
         }
 
-        ui->progressBar->setMaximum(2); // установить кол-во ступеней прогресса !!! в зависимости от времени!
+        ui->progressBar->setMaximum(settings.time_closecircuitgroup + 2); // установить кол-во ступеней прогресса !!! в зависимости от времени!
         ui->progressBar->reset();
 
         // очистить массивы посылки/приёма
@@ -215,7 +215,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         timerSend->start(settings.delay_after_IDLE_before_other);
         ret=loop.exec();
         if(ret) goto stop;
-        ui->progressBar->setValue(ui->progressBar->value()+1);
+        //ui->progressBar->setValue(ui->progressBar->value()+1);
 
         starttime = QDateTime::currentDateTime(); // время начала измерения
         dt = QDateTime::currentDateTime(); // текущее время
@@ -232,6 +232,9 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             if(ret) goto stop;
             codeADC = getRecvData(baRecvArray); // напряжение в коде
             fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
+            label->setText(tr("%0 = <b>%1</b> В. идет измерение...").arg(sLabelText).arg(fU + settings.closecircuitgroup_loss, 0, 'f', 2));
+            ui->progressBar->setValue(ui->progressBar->value()+1);
+
             // нарисуем график
             if(bFirstPoll)
             {
@@ -243,6 +246,8 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
             ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x/1000, (double)fU);
             ui->widgetClosedCircuitVoltageGroup->replot();
+            /// если напряжение меньше 25В то прекратить проверку
+            if ((fU + settings.closecircuitgroup_loss) < 25) break;
         }
 
         dArrayClosedCircuitVoltageGroup[i] = fU + settings.closecircuitgroup_loss; /// добавляем к результату потери на кабеле
@@ -254,14 +259,18 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
         if (dArrayClosedCircuitVoltageGroup[i] < settings.closecircuitgroup_limit) {
             sResult = "Не норма!";
             color = "red";
-        }
-        else {
+        } else {
             sResult = "Норма";
             color = "green";
         }
         label->setText(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult));
         label->setStyleSheet("QLabel { color : "+color+"; }");
         Log(tr("%0 = <b>%1</b> В. %2").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2).arg(sResult), color);
+
+        /// если напряжение меньше 25 В то прекратить проверку
+        if (dArrayClosedCircuitVoltageGroup[i] < 25) {
+            label->setText(tr("%0 = <b>%1</b> В &lt; <b>25</b> В измерение прервано!").arg(sLabelText).arg(dArrayClosedCircuitVoltageGroup[i], 0, 'f', 2));
+        }
 
         /// заполняем массив проверок для отчета
         dateTime = QDateTime::currentDateTime();

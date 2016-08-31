@@ -1429,13 +1429,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup0">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1448,13 +1448,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup1">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1467,13 +1467,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup2">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1486,13 +1486,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup3">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1505,13 +1505,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup4">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1524,13 +1524,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup5">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1543,13 +1543,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup6">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1562,13 +1562,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup7">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1581,13 +1581,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup8">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1600,13 +1600,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup9">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1619,13 +1619,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup10">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1638,13 +1638,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup11">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1657,13 +1657,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup12">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1676,13 +1676,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup13">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1695,13 +1695,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup14">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1714,13 +1714,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup15">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1733,13 +1733,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup16">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1752,13 +1752,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup17">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1771,13 +1771,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup18">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1790,13 +1790,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup19">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1809,13 +1809,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup20">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1828,13 +1828,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup21">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1847,13 +1847,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup22">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1866,13 +1866,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup23">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1885,13 +1885,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup24">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1904,13 +1904,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup25">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1923,13 +1923,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup26">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1942,13 +1942,13 @@
            <widget class="QLabel" name="labelClosedCircuitVoltageGroup27">
             <property name="minimumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>280</width>
+              <width>340</width>
               <height>16777215</height>
              </size>
             </property>

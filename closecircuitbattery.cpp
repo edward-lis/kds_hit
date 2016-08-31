@@ -71,7 +71,7 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
     } else {                                        /// если в автоматическом режиме
         ui->cbParamsAutoMode->setCurrentIndex(5);   ///  переключаем режим комбокса на наш
     }
-    ui->progressBar->setMaximum(2); /// установим максимум прогресс бара
+    ui->progressBar->setMaximum(settings.time_closecircuitbattery + 4); /// установим максимум прогресс бара
     // откроем вкладку
     ui->tabWidget->addTab(ui->tabClosedCircuitVoltageBattery, ui->rbClosedCircuitVoltageBattery->text());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
@@ -186,6 +186,8 @@ void MainWindow::on_btnClosedCircuitVoltageBattery_clicked()
         if(ret) goto stop;
         codeADC = getRecvData(baRecvArray); // напряжение в коде
         fU = ((codeADC-settings.offsetADC1[settings.board_counter])*settings.coefADC1[settings.board_counter]); // напряжение в вольтах
+        ui->labelClosedCircuitVoltageBattery0->setText(tr("%0 = <b>%1</b> В. идет измерение...").arg(sLabelText).arg(fU + settings.closecircuitbattery_loss, 0, 'f', 2));
+        ui->progressBar->setValue(ui->progressBar->value()+1);
         // нарисуем график
         if(bFirstPoll)
         {
