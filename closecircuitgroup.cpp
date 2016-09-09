@@ -223,6 +223,7 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
 
         bFirstPoll=true;// после сбора режима первый опрос
 
+
         while(-dt.msecsTo(starttime) < cycleTimeSec*1000) // пока время цикла проверки не вышло, продолжим измерять
         {
             // опросить
@@ -246,8 +247,11 @@ void MainWindow::on_btnClosedCircuitVoltageGroup_clicked()
             ui->widgetClosedCircuitVoltageGroup->graph(0)->rescaleValueAxis(true); // для автоматического перерисовывания шкалы графика, если значения за пределами экрана
             ui->widgetClosedCircuitVoltageGroup->graph(0)->addData((double)x/1000, (double)fU);
             ui->widgetClosedCircuitVoltageGroup->replot();
-            /// если напряжение меньше 25В то прекратить проверку
-            if ((fU + settings.closecircuitgroup_loss) < 25) break;
+            /// если напряжение меньше 25В после 5 секунд проверки то прекратить проверку
+            if ( (-dt.secsTo(starttime) >= 5) and (fU + settings.closecircuitgroup_loss) < 25) {
+                break;
+            }
+
         }
 
         dArrayClosedCircuitVoltageGroup[i] = fU + settings.closecircuitgroup_loss; /// добавляем к результату потери на кабеле
