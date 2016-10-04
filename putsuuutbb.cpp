@@ -27,6 +27,8 @@ void MainWindow::on_actionPUTSUOn_triggered()
     if(loop.exec()) goto stop; // если ошибка - вывалиться из режима
 
     Log("[ПУ ТСУ]: включен.", "green");
+    ui->actionPUTSUOn->setDisabled(true);
+    ui->actionPUTSUOff->setEnabled(true);
 
 stop:
     timerPing->start(delay_timerPing); // запустить пинг по выходу из режима
@@ -42,7 +44,7 @@ stop:
 void MainWindow::on_actionPUTSUOff_triggered()
 {
     qDebug() << "PUTSU Send Idle#";
-    ui->statusBar->showMessage(tr("Выключение ПУ ТСУ ..."));
+    ui->statusBar->showMessage(tr("Отключение ПУ ТСУ ..."));
 
     if(loop.isRunning()){qDebug()<<"loop.isRunning()!"; return;} // если цикл уже работает - выйти обратно
     timerPing->stop(); // остановить пинг
@@ -50,6 +52,9 @@ void MainWindow::on_actionPUTSUOff_triggered()
     // сбросить коробочку
     baSendArray = (baSendCommand="IDLE")+"#"; // подготовить буфер для передачи
     sendSerialData(); // послать baSendArray в порт
+    Log("[ПУ ТСУ]: отключен.", "green");
+    ui->actionPUTSUOn->setEnabled(true);
+    ui->actionPUTSUOff->setDisabled(true);
     // ждём ответа. по сигналу о готовности принятых данных или по таймауту, вывалимся из цикла
     if(loop.exec()) goto stop; // если не ноль (ошибка таймаута) - вывалиться из режима. если 0, то приняли данные из порта
 
